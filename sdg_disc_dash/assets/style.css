@@ -1,0 +1,245 @@
+/* ════════════════════════════════════════
+   BASE
+   ════════════════════════════════════════ */
+body {
+    background-color: #0d1117 !important;
+    color: #e6edf3 !important;
+    font-family: Inter, system-ui, -apple-system, sans-serif;
+    margin: 0;
+}
+
+/* ════════════════════════════════════════
+   SCROLLBAR
+   ════════════════════════════════════════ */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #0d1117; }
+::-webkit-scrollbar-thumb { background: #30363d; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #8b949e; }
+
+
+/* ════════════════════════════════════════
+   ANIMATION 1 — Page entrance fade-slide
+   Applied to .stApp / body on load
+   ════════════════════════════════════════ */
+@keyframes pageEntrance {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+body {
+    animation: pageEntrance 0.55s ease-out both;
+}
+
+
+/* ════════════════════════════════════════
+   ANIMATION 2 — Tab content fade-slide
+   .tab-fade-in added to every tab Div
+   ════════════════════════════════════════ */
+@keyframes tabFadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+.tab-fade-in {
+    animation: tabFadeIn 0.35s ease-out both;
+}
+
+
+/* ════════════════════════════════════════
+   ANIMATION 3 — Metric card staggered entrance
+   Cards arrive 0 / 80 / 160 / 240 ms apart
+   ════════════════════════════════════════ */
+@keyframes cardSlideUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+/* Dash renders metric cards inside dbc.Col — target the inner div */
+.metric-hover {
+    animation: cardSlideUp 0.45s ease-out both;
+    transition: transform 0.22s ease, box-shadow 0.22s ease;
+}
+/* nth-child stagger via column position */
+.mb-4.g-3 .col:nth-child(1) .metric-hover { animation-delay: 0ms;   }
+.mb-4.g-3 .col:nth-child(2) .metric-hover { animation-delay: 80ms;  }
+.mb-4.g-3 .col:nth-child(3) .metric-hover { animation-delay: 160ms; }
+.mb-4.g-3 .col:nth-child(4) .metric-hover { animation-delay: 240ms; }
+
+/* ── Hover lift ── */
+.metric-hover:hover {
+    transform: translateY(-5px) !important;
+    box-shadow: 0 16px 38px rgba(0,0,0,0.55) !important;
+}
+
+
+/* ════════════════════════════════════════
+   ANIMATION 4 — Factor tiles staggered entrance
+   .factor-tile-0 through .factor-tile-3
+   ════════════════════════════════════════ */
+@keyframes tileAppear {
+    from { opacity: 0; transform: translateY(14px) scale(0.98); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.factor-tile   { animation: tileAppear 0.45s ease-out both; }
+.factor-tile-0 { animation-delay: 0ms;   }
+.factor-tile-1 { animation-delay: 90ms;  }
+.factor-tile-2 { animation-delay: 180ms; }
+.factor-tile-3 { animation-delay: 270ms; }
+/* Hover lift on factor tiles */
+.factor-tile:hover {
+    transform: translateY(-3px) !important;
+    box-shadow: 0 12px 28px rgba(0,0,0,0.45) !important;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+
+/* ════════════════════════════════════════
+   ANIMATION 5 — Ranking table row highlight flash
+   Rows flash accent colour briefly when table opens
+   ════════════════════════════════════════ */
+@keyframes rowFlash {
+    0%   { background-color: rgba(88,166,255,0.18); }
+    100% { background-color: transparent; }
+}
+.rank-row {
+    animation: rowFlash 0.7s ease-out both;
+}
+/* Stagger each row slightly */
+.rank-row:nth-child(1)  { animation-delay: 0ms;   }
+.rank-row:nth-child(2)  { animation-delay: 50ms;  }
+.rank-row:nth-child(3)  { animation-delay: 100ms; }
+.rank-row:nth-child(4)  { animation-delay: 150ms; }
+.rank-row:nth-child(5)  { animation-delay: 200ms; }
+.rank-row:nth-child(6)  { animation-delay: 250ms; }
+.rank-row:nth-child(7)  { animation-delay: 300ms; }
+.rank-row:nth-child(8)  { animation-delay: 350ms; }
+
+
+/* ════════════════════════════════════════
+   ANIMATION 6 — Sticky header shadow deepens on scroll
+   Implemented via a small class toggle; the CSS
+   transition handles the visual change
+   ════════════════════════════════════════ */
+.sticky-header {
+    transition: box-shadow 0.3s ease;
+}
+.sticky-header.scrolled {
+    box-shadow: 0 4px 32px rgba(0,0,0,0.7) !important;
+}
+
+
+/* ════════════════════════════════════════
+   ANIMATION 7 — Graph card subtle fade-in on render
+   ════════════════════════════════════════ */
+@keyframes graphFadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+/* Applied to the GRAPH_CARD wrapper divs */
+div[style*="border-radius: 12px"][style*="overflow: hidden"] {
+    animation: graphFadeIn 0.5s ease-out both;
+}
+
+
+/* ════════════════════════════════════════
+   REVERSED DROPDOWN — light bg, dark text
+   ════════════════════════════════════════ */
+.Select-control,
+div[class*="control"] {
+    background-color: #e6edf3 !important;
+    border-color: #30363d !important;
+    color: #0d1117 !important;
+    border-radius: 8px !important;
+}
+.Select-value-label,
+div[class*="singleValue"],
+div[class*="placeholder"] {
+    color: #0d1117 !important;
+    font-size: 13px !important;
+}
+.Select-arrow { border-top-color: #0d1117 !important; }
+
+/* Open menu — dark */
+.Select-menu-outer,
+div[class*="menu"],
+div[class*="MenuList"] {
+    background-color: #161b22 !important;
+    border: 1px solid #30363d !important;
+    border-radius: 8px !important;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.6) !important;
+}
+.Select-option,
+div[class*="option"] {
+    background-color: #161b22 !important;
+    color: #e6edf3 !important;
+    font-size: 13px;
+    padding: 8px 12px;
+}
+.Select-option:hover,
+div[class*="option"]:hover {
+    background-color: #1c2333 !important;
+    color: #58a6ff !important;
+}
+.Select-value, span[class*="multiValue"] {
+    background-color: #1c2333 !important;
+    border: 1px solid #30363d !important;
+    border-radius: 6px !important;
+    color: #e6edf3 !important;
+}
+.Select-value-icon,
+div[class*="multiValueRemove"] { color: #8b949e !important; }
+.Select-value-icon:hover,
+div[class*="multiValueRemove"]:hover { color: #e6edf3 !important; }
+.Select-input input,
+input[class*="Input"] {
+    color: #0d1117 !important;
+    background: transparent !important;
+}
+
+
+/* ════════════════════════════════════════
+   TABS
+   ════════════════════════════════════════ */
+.nav-tabs { border-bottom: 1px solid #30363d !important; }
+.nav-tabs .nav-link {
+    color: #8b949e !important;
+    border: none !important;
+    background: transparent !important;
+    font-size: 13px; font-weight: 600;
+    padding: 10px 18px;
+    transition: color 0.15s;
+}
+.nav-tabs .nav-link:hover { color: #e6edf3 !important; }
+.nav-tabs .nav-link.active {
+    color: #58a6ff !important;
+    border-bottom: 2px solid #58a6ff !important;
+    background: transparent !important;
+}
+
+
+/* ════════════════════════════════════════
+   INTERACTIVE ELEMENTS
+   ════════════════════════════════════════ */
+#rank-toggle:hover { color: #e6edf3 !important; }
+#btn-csv:hover, #btn-json:hover {
+    background-color: #1c2333 !important;
+    border-color: #58a6ff !important;
+    color: #58a6ff !important;
+    transition: all 0.18s ease;
+}
+#upload-pdfs:hover {
+    border-color: #58a6ff !important;
+    color: #58a6ff !important;
+}
+
+
+/* ════════════════════════════════════════
+   ALERTS
+   ════════════════════════════════════════ */
+.alert-warning {
+    background-color: #2d2300 !important;
+    border-color: #d29922 !important;
+    color: #e6edf3 !important;
+}
+.alert-danger {
+    background-color: #2d0f0f !important;
+    border-color: #f85149 !important;
+    color: #e6edf3 !important;
+}
