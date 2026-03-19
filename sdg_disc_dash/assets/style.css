@@ -322,9 +322,34 @@ label[class*="Label"],
 }
 hr { border-color: var(--border) !important; }
 
-/* ════════════════════════════════════════════════════════
-   RANKING TABLE
-   ════════════════════════════════════════════════════════ */
+/* ── Tile and card text — always follows theme ── */
+body[data-theme="light"] .metric-hover *,
+body[data-theme="light"] .factor-tile *,
+body[data-theme="light"] [class*="card"] * {
+    color: var(--text) !important;
+    border-color: var(--border) !important;
+}
+/* Restore DISC factor letter colours so they stay coloured */
+body[data-theme="light"] .metric-hover [style*="color: #ef4444"],
+body[data-theme="light"] .factor-tile  [style*="color: #ef4444"] { color: #ef4444 !important; }
+body[data-theme="light"] .metric-hover [style*="color: #facc15"],
+body[data-theme="light"] .factor-tile  [style*="color: #facc15"] { color: #d29922 !important; }
+body[data-theme="light"] .metric-hover [style*="color: #22c55e"],
+body[data-theme="light"] .factor-tile  [style*="color: #22c55e"] { color: #1a7f37 !important; }
+body[data-theme="light"] .metric-hover [style*="color: #3b82f6"],
+body[data-theme="light"] .factor-tile  [style*="color: #3b82f6"] { color: #0969da !important; }
+/* Large score numbers — black in light mode */
+body[data-theme="light"] .metric-hover [style*="font-size: 34px"],
+body[data-theme="light"] .metric-hover [style*="fontSize: 34px"] {
+    color: #1f2328 !important;
+}
+/* Muted sub-labels — dark grey in light mode */
+body[data-theme="light"] [style*="color: rgb(139, 148, 158)"],
+body[data-theme="light"] [style*="color: #8b949e"] {
+    color: #57606a !important;
+}
+
+
 body[data-theme="light"] .rank-row td {
     background-color: var(--surface) !important;
     color: var(--text) !important;

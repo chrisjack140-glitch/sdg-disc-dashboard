@@ -83,17 +83,39 @@ LABEL_STYLE = {
 }
 
 # ─────────────────────────────────────────
-# Chart helpers
+# Chart helpers — theme-aware
 # ─────────────────────────────────────────
 
-def _base_layout(title: str, height: int = 380, extra: dict = None) -> dict:
+# Light theme palette
+LIGHT = {
+    "bg":      "#ffffff",
+    "surface": "#f3f4f6",
+    "border":  "#d0d7de",
+    "text":    "#1f2328",
+    "muted":   "#57606a",
+}
+DARK = {
+    "bg":      "#0d1117",
+    "surface": "#161b22",
+    "border":  "#30363d",
+    "text":    "#e6edf3",
+    "muted":   "#8b949e",
+}
+
+def _theme_colors(theme: str) -> dict:
+    return LIGHT if theme == "light" else DARK
+
+
+def _base_layout(title: str, height: int = 380,
+                 extra: dict = None, theme: str = "dark") -> dict:
+    c = _theme_colors(theme)
     layout = dict(
-        paper_bgcolor=SURFACE,
-        plot_bgcolor=SURFACE,
-        font=dict(color=TEXT, family="Inter, system-ui, sans-serif"),
-        title=dict(text=title, font=dict(color=MUTED, size=12,
+        paper_bgcolor=c["surface"],
+        plot_bgcolor=c["surface"],
+        font=dict(color=c["text"], family="Inter, system-ui, sans-serif"),
+        title=dict(text=title, font=dict(color=c["muted"], size=12,
                    family="Inter, system-ui"), x=0.01, xanchor="left"),
-        legend=dict(bgcolor="rgba(0,0,0,0)", font=dict(color=MUTED, size=11),
+        legend=dict(bgcolor="rgba(0,0,0,0)", font=dict(color=c["muted"], size=11),
                     orientation="h", yanchor="bottom", y=1.02,
                     xanchor="right", x=1),
         height=height,
@@ -106,13 +128,14 @@ def _base_layout(title: str, height: int = 380, extra: dict = None) -> dict:
 
 
 def _axis(title_text: str = "", show_grid: bool = True,
-          fixed_range: list = None) -> dict:
+          fixed_range: list = None, theme: str = "dark") -> dict:
+    c = _theme_colors(theme)
     d = dict(
-        title=dict(text=title_text, font=dict(color=MUTED, size=10)),
-        tickfont=dict(color=MUTED, size=10),
+        title=dict(text=title_text, font=dict(color=c["muted"], size=10)),
+        tickfont=dict(color=c["muted"], size=10),
         showgrid=show_grid,
-        gridcolor=BORDER if show_grid else None,
-        linecolor=BORDER,
+        gridcolor=c["border"] if show_grid else None,
+        linecolor=c["border"],
         zeroline=False,
     )
     if fixed_range:
@@ -120,188 +143,120 @@ def _axis(title_text: str = "", show_grid: bool = True,
     return d
 
 
-def build_anchor_comparison_chart(df: pd.DataFrame, anchor_graph: str) -> go.Figure:
+def build_anchor_comparison_chart(df, anchor_graph, theme="dark"):
+    c = _theme_colors(theme)
     fig = go.Figure()
     for f in FACTORS:
         fig.add_trace(go.Bar(
-            x=df["participant_name"],
-            y=df[f"{anchor_graph}_{f}"],
-            name=f,
-            marker_color=FACTOR_COLORS[f],
-            marker_line_width=0,
-            opacity=0.9,
+            x=df["participant_name"], y=df[f"{anchor_graph}_{f}"],
+            name=f, marker_color=FACTOR_COLORS[f], marker_line_width=0, opacity=0.9,
             hovertemplate="<b>%{x}</b><br>" + f + ": %{y:.2f}<extra></extra>",
         ))
     fig.update_layout(**_base_layout(
-        f"Anchor Score Comparison — {anchor_graph.title()}",
-        height=340,
-        extra=dict(
-            barmode="group",
-            xaxis=_axis(show_grid=False),
-            yaxis=_axis("Score"),
-            bargap=0.18, bargroupgap=0.04,
-        ),
+        f"Anchor Score Comparison — {anchor_graph.title()}", height=340, theme=theme,
+        extra=dict(barmode="group", xaxis=_axis(show_grid=False, theme=theme),
+                   yaxis=_axis("Score", theme=theme), bargap=0.18, bargroupgap=0.04),
     ))
     return fig
 
 
-def build_heatmap(df: pd.DataFrame, anchor_graph: str) -> go.Figure:
+def build_heatmap(df, anchor_graph, theme="dark"):
+    c = _theme_colors(theme)
     z = df[[f"{anchor_graph}_{f}" for f in FACTORS]].values
-    colorscale = [
-        [0.00, "#1e3a8a"],
-        [0.30, "#3b82f6"],
-        [0.50, "#f9fafb"],
-        [0.70, "#ef4444"],
-        [1.00, "#7f1d1d"],
-    ]
+    colorscale = [[0.00,"#1e3a8a"],[0.30,"#3b82f6"],[0.50,"#f9fafb"],[0.70,"#ef4444"],[1.00,"#7f1d1d"]]
     fig = go.Figure(data=go.Heatmap(
-        z=z, x=FACTORS, y=df["participant_name"],
-        colorscale=colorscale,
-        hovertemplate="<b>%{y}</b><br>%{x}: %{z:.2f}<extra></extra>",
-        # Smaller gap = thinner black outline between cells
-        xgap=1, ygap=1,
+        z=z, x=FACTORS, y=df["participant_name"], colorscale=colorscale,
+        hovertemplate="<b>%{y}</b><br>%{x}: %{z:.2f}<extra></extra>", xgap=1, ygap=1,
     ))
     fig.update_layout(**_base_layout(
-        f"Score Heatmap — {anchor_graph.title()}",
-        height=max(280, 56 * len(df)),
-        extra=dict(
-            xaxis=_axis(show_grid=False),
-            yaxis=_axis(show_grid=False),
-            plot_bgcolor="#000000",
-            paper_bgcolor=SURFACE,
-        ),
+        f"Score Heatmap — {anchor_graph.title()}", height=max(280, 56*len(df)), theme=theme,
+        extra=dict(xaxis=_axis(show_grid=False, theme=theme),
+                   yaxis=_axis(show_grid=False, theme=theme),
+                   plot_bgcolor="#000000", paper_bgcolor=c["surface"]),
     ))
     return fig
 
 
-def build_disc_type_chart(profiles: list) -> go.Figure:
-    """Bar chart using style_type pulled from page 1 Style: field."""
+def build_disc_type_chart(profiles, theme="dark"):
+    c = _theme_colors(theme)
     type_counts = Counter(p.get("style_type", "—") for p in profiles)
-    labels  = sorted(type_counts.keys(), key=lambda k: -type_counts[k])
-    counts  = [type_counts[k] for k in labels]
-
-    palette = [
-        FACTOR_COLORS["D"], FACTOR_COLORS["C"],
-        FACTOR_COLORS["S"], FACTOR_COLORS["I"],
-        PURPLE, CYAN, "#f97316", "#a78bfa",
-    ]
+    labels = sorted(type_counts.keys(), key=lambda k: -type_counts[k])
+    counts = [type_counts[k] for k in labels]
+    palette = [FACTOR_COLORS["D"], FACTOR_COLORS["C"], FACTOR_COLORS["S"], FACTOR_COLORS["I"],
+               PURPLE, CYAN, "#f97316", "#a78bfa"]
     bar_colors = [palette[i % len(palette)] for i in range(len(labels))]
-
     fig = go.Figure(go.Bar(
-        x=labels, y=counts,
-        marker_color=bar_colors,
-        marker_line_width=0,
-        opacity=0.85,
+        x=labels, y=counts, marker_color=bar_colors, marker_line_width=0, opacity=0.85,
         hovertemplate="<b>%{x}</b><br>Count: %{y}<extra></extra>",
-        text=counts,
-        textposition="outside",
-        textfont=dict(color=MUTED, size=11),
+        text=counts, textposition="outside", textfont=dict(color=c["muted"], size=11),
     ))
     fig.update_layout(**_base_layout(
-        "DISC Type Distribution (from PDF)",
-        height=340,
-        extra=dict(
-            xaxis=_axis("Type", show_grid=False),
-            yaxis=_axis("Count", fixed_range=[0, max(counts) + 1.5]),
-            showlegend=False,
-        ),
+        "DISC Type Distribution (from PDF)", height=340, theme=theme,
+        extra=dict(xaxis=_axis("Type", show_grid=False, theme=theme),
+                   yaxis=_axis("Count", fixed_range=[0, max(counts)+1.5], theme=theme),
+                   showlegend=False),
     ))
     return fig
 
 
-def build_multi_radar_chart(selected_profiles: list, graph_name: str) -> go.Figure:
-    categories = ["DI", "I", "IS", "S", "SC", "C", "CD", "D"]
-    palette = [
-        FACTOR_COLORS["D"], FACTOR_COLORS["I"],
-        FACTOR_COLORS["S"], FACTOR_COLORS["C"],
-        PURPLE, CYAN, "#fb7185", "#f97316",
-    ]
+def build_multi_radar_chart(selected_profiles, graph_name, theme="dark"):
+    categories = ["DI","I","IS","S","SC","C","CD","D"]
+    palette = [FACTOR_COLORS["D"], FACTOR_COLORS["I"], FACTOR_COLORS["S"], FACTOR_COLORS["C"],
+               PURPLE, CYAN, "#fb7185", "#f97316"]
+    c = _theme_colors(theme)
     fig = go.Figure()
     for idx, profile in enumerate(selected_profiles):
         g = profile["graphs"][graph_name]
-        d, i, s, c = g["D"], g["I"], g["S"], g["C"]
-        vals = [(d+i)/2, i, (i+s)/2, s, (s+c)/2, c, (c+d)/2, d]
+        d, i, s, cv = g["D"], g["I"], g["S"], g["C"]
+        vals = [(d+i)/2, i, (i+s)/2, s, (s+cv)/2, cv, (cv+d)/2, d]
         fig.add_trace(go.Scatterpolar(
-            r=vals + [vals[0]],
-            theta=categories + [categories[0]],
-            fill="none",
+            r=vals+[vals[0]], theta=categories+[categories[0]], fill="none",
             name=profile["participant_name"],
-            line=dict(color=palette[idx % len(palette)], width=2),
-            opacity=0.9,
+            line=dict(color=palette[idx % len(palette)], width=2), opacity=0.9,
             hovertemplate="<b>%{fullData.name}</b><br>%{theta}: %{r:.2f}<extra></extra>",
         ))
     fig.update_layout(**_base_layout(
-        f"Radar Comparison — {graph_name.title()}",
-        height=520,
+        f"Radar Comparison — {graph_name.title()}", height=520, theme=theme,
         extra=dict(polar=dict(
-            bgcolor=SURFACE2,
-            angularaxis=dict(
-                categoryorder="array", categoryarray=categories,
-                direction="clockwise", rotation=90,
-                gridcolor=BORDER, linecolor=BORDER,
-                tickfont=dict(color=TEXT, size=11),
-            ),
-            radialaxis=dict(
-                visible=True, range=[-8, 8],
-                tickmode="array", tickvals=[-8, -4, 0, 4, 8],
-                ticktext=["-8", "-4", "0", "4", "8"],
-                angle=0, tickangle=-90,
-                gridcolor=BORDER, linecolor=BORDER,
-                tickfont=dict(color=MUTED, size=9),
-            ),
+            bgcolor=c["surface"],
+            angularaxis=dict(categoryorder="array", categoryarray=categories,
+                             direction="clockwise", rotation=90,
+                             gridcolor=c["border"], linecolor=c["border"],
+                             tickfont=dict(color=c["text"], size=11)),
+            radialaxis=dict(visible=True, range=[-8,8], tickmode="array",
+                            tickvals=[-8,-4,0,4,8], ticktext=["-8","-4","0","4","8"],
+                            angle=0, tickangle=-90,
+                            gridcolor=c["border"], linecolor=c["border"],
+                            tickfont=dict(color=c["muted"], size=9)),
         )),
     ))
     return fig
 
 
-def build_letter_mean_combo(df: pd.DataFrame, letter: str, anchor_graph: str) -> go.Figure:
-    """
-    Per-factor chart sorted greatest to least (positives first, negatives last).
-    Y axis fixed -8 to 8. Zero centre line.
-    """
+def build_letter_mean_combo(df, letter, anchor_graph, theme="dark"):
     col = f"{anchor_graph}_{letter}"
-    # Sort descending by actual value (not absolute) — positive high → negative low
-    sorted_df = df[["participant_name", col]].copy()
-    sorted_df = sorted_df.sort_values(col, ascending=False)
-    names    = sorted_df["participant_name"].tolist()
-    scores   = sorted_df[col].tolist()
+    sorted_df = df[["participant_name", col]].copy().sort_values(col, ascending=False)
+    names = sorted_df["participant_name"].tolist()
+    scores = sorted_df[col].tolist()
     mean_val = float(df[col].mean())
-    color    = FACTOR_COLORS[letter]
-
+    color = FACTOR_COLORS[letter]
+    c = _theme_colors(theme)
     fig = go.Figure()
-    fig.add_trace(go.Bar(
-        x=names, y=scores,
-        name=f"{letter} Score",
-        marker_color=color,
-        marker_line_width=0,
-        opacity=0.85,
-        hovertemplate="<b>%{x}</b><br>Score: %{y:.2f}<extra></extra>",
-    ))
-    fig.add_trace(go.Scatter(
-        x=names, y=[mean_val] * len(names),
-        mode="lines", name=f"Mean ({mean_val:+.2f})",
-        line=dict(color=TEXT, width=1.5, dash="dash"),
-        hovertemplate=f"Team Mean: {mean_val:+.2f}<extra></extra>",
-    ))
-    fig.add_shape(
-        type="line",
-        x0=-0.5, x1=len(names) - 0.5,
-        y0=0, y1=0,
-        line=dict(color=BORDER, width=1.5),
-    )
+    fig.add_trace(go.Bar(x=names, y=scores, name=f"{letter} Score",
+        marker_color=color, marker_line_width=0, opacity=0.85,
+        hovertemplate="<b>%{x}</b><br>Score: %{y:.2f}<extra></extra>"))
+    fig.add_trace(go.Scatter(x=names, y=[mean_val]*len(names), mode="lines",
+        name=f"Mean ({mean_val:+.2f})", line=dict(color=c["text"], width=1.5, dash="dash"),
+        hovertemplate=f"Team Mean: {mean_val:+.2f}<extra></extra>"))
+    fig.add_shape(type="line", x0=-0.5, x1=len(names)-0.5, y0=0, y1=0,
+        line=dict(color=c["border"], width=1.5))
     fig.update_layout(**_base_layout(
-        f"{letter}  —  Scores (Greatest to Least)",
-        height=360,
-        extra=dict(
-            xaxis=_axis(show_grid=False),
-            yaxis=_axis("Score", fixed_range=[-8, 8]),
-        ),
+        f"{letter}  —  Scores (Greatest to Least)", height=360, theme=theme,
+        extra=dict(xaxis=_axis(show_grid=False, theme=theme),
+                   yaxis=_axis("Score", fixed_range=[-8,8], theme=theme)),
     ))
     return fig
 
-# ─────────────────────────────────────────
-# Component helpers
-# ─────────────────────────────────────────
 
 def shift_badge(value: float) -> html.Span:
     if abs(value) <= 0.15:
@@ -917,8 +872,10 @@ def toggle_ranking(n, is_open):
     Input("df-store", "data"),
     Input("profiles-store", "data"),
     Input("anchor-graph", "value"),
+    Input("theme-store", "data"),
 )
-def render_tab(active_tab, df_json, profiles_json, anchor_graph):
+def render_tab(active_tab, df_json, profiles_json, anchor_graph, theme):
+    theme = theme or "dark"
     if not df_json:
         return None
     df        = pd.read_json(io.StringIO(df_json), orient="records")
@@ -929,16 +886,16 @@ def render_tab(active_tab, df_json, profiles_json, anchor_graph):
         return html.Div([
             dbc.Row([
                 dbc.Col(_graph_card(
-                    dcc.Graph(figure=build_anchor_comparison_chart(df, anchor_graph),
+                    dcc.Graph(figure=build_anchor_comparison_chart(df, anchor_graph, theme),
                               config={"displayModeBar": False}),
                 ), width=8),
                 dbc.Col(_graph_card(
-                    dcc.Graph(figure=build_disc_type_chart(profiles),
+                    dcc.Graph(figure=build_disc_type_chart(profiles, theme),
                               config={"displayModeBar": False}),
                 ), width=4),
             ], className="g-3 mb-3"),
-            _graph_card(dcc.Graph(figure=build_heatmap(df, anchor_graph),
-                                  config={"displayModeBar": False})),
+            _graph_card(dcc.Graph(figure=build_heatmap(df, anchor_graph, theme),
+                                  config={"displayModeBar": True, "scrollZoom": True})),
             html.Div(style={"marginTop": "20px"}),
             html.Div("Per-Factor Mean Charts", style={
                 "color": MUTED, "fontSize": "11px", "fontWeight": 700,
@@ -1016,14 +973,16 @@ def render_tab(active_tab, df_json, profiles_json, anchor_graph):
     Input("letter-tabs", "active_tab"),
     Input("df-store", "data"),
     Input("anchor-graph", "value"),
+    Input("theme-store", "data"),
 )
-def update_letter_chart(letter, df_json, anchor_graph):
+def update_letter_chart(letter, df_json, anchor_graph, theme):
+    theme = theme or "dark"
     if not df_json or not letter:
         return None
     df = pd.read_json(io.StringIO(df_json), orient="records")
     return _graph_card(
-        dcc.Graph(figure=build_letter_mean_combo(df, letter, anchor_graph),
-                  config={"displayModeBar": False}),
+        dcc.Graph(figure=build_letter_mean_combo(df, letter, anchor_graph, theme),
+                  config={"displayModeBar": True, "scrollZoom": True}),
     )
 
 
@@ -1047,15 +1006,19 @@ def update_participant_card(name, profiles_json):
     Input("radar-participants", "value"),
     Input("radar-graph-choice", "value"),
     State("profiles-store", "data"),
+    State("theme-store", "data"),
 )
-def update_radar(selected_names, graph_choice, profiles_json):
+def update_radar(selected_names, graph_choice, profiles_json, theme):
+    theme = theme or "dark"
+    c = _theme_colors(theme)
     if not selected_names or not profiles_json:
-        return go.Figure(layout=dict(paper_bgcolor=SURFACE, plot_bgcolor=SURFACE,
-                                     font=dict(color=TEXT)))
+        return go.Figure(layout=dict(paper_bgcolor=c["surface"],
+                                     plot_bgcolor=c["surface"],
+                                     font=dict(color=c["text"])))
     profiles       = json.loads(profiles_json)
     profile_lookup = {p["participant_name"]: p for p in profiles}
     selected       = [profile_lookup[n] for n in selected_names if n in profile_lookup]
-    return build_multi_radar_chart(selected, graph_choice) if selected else go.Figure()
+    return build_multi_radar_chart(selected, graph_choice, theme) if selected else go.Figure()
 
 
 # 9 — Comparison cards
@@ -1109,44 +1072,6 @@ def download_json(n_clicks, profiles_json):
     )
 
 
-# ── Update Plotly graph backgrounds when theme changes ──────────────
-app.clientside_callback(
-    """
-    function(theme) {
-        var isLight = (theme === 'light');
-        var bg      = isLight ? '#f3f4f6' : '#161b22';
-        var plotBg  = isLight ? '#f3f4f6' : '#161b22';
-        var font    = isLight ? '#1f2328'  : '#e6edf3';
-        var grid    = isLight ? '#d0d7de'  : '#30363d';
-
-        // Find every Plotly graph on the page and relayout it
-        setTimeout(function() {
-            var graphs = document.querySelectorAll('.js-plotly-plot');
-            graphs.forEach(function(g) {
-                try {
-                    Plotly.relayout(g, {
-                        paper_bgcolor: bg,
-                        plot_bgcolor:  plotBg,
-                        'font.color':  font,
-                        'xaxis.gridcolor':  grid,
-                        'yaxis.gridcolor':  grid,
-                        'xaxis.linecolor':  grid,
-                        'yaxis.linecolor':  grid,
-                        'polar.bgcolor':    plotBg,
-                        'polar.angularaxis.gridcolor': grid,
-                        'polar.radialaxis.gridcolor':  grid,
-                    });
-                } catch(e) {}
-            });
-        }, 50);
-
-        return window.dash_clientside.no_update;
-    }
-    """,
-    Output("theme-store", "data", allow_duplicate=True),
-    Input("theme-store",  "data"),
-    prevent_initial_call=True,
-)
 
 # ── Theme toggle — clientside for instant response ──────────────────
 app.clientside_callback(
