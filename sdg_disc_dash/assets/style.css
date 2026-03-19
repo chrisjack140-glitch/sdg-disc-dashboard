@@ -1,6 +1,186 @@
 /* ════════════════════════════════════════
-   BASE
+   CSS CUSTOM PROPERTIES — THEME SYSTEM
+   Swapped instantly by data-theme on body
    ════════════════════════════════════════ */
+
+/* ── Dark theme (default) ── */
+:root,
+body[data-theme="dark"],
+body:not([data-theme]) {
+    --bg:        #0d1117;
+    --surface:   #161b22;
+    --surface2:  #1c2333;
+    --border:    #30363d;
+    --text:      #e6edf3;
+    --muted:     #8b949e;
+    --accent:    #58a6ff;
+    --shadow:    rgba(0,0,0,0.45);
+    --shadow-lg: rgba(0,0,0,0.65);
+    --card-bg:   #161b22;
+    --input-bg:  #1c2333;
+    --header-bg: #161b22;
+}
+
+/* ── Light theme ── */
+body[data-theme="light"] {
+    --bg:        #f0f4f8;
+    --surface:   #ffffff;
+    --surface2:  #f0f4f8;
+    --border:    #d0d7de;
+    --text:      #1f2328;
+    --muted:     #57606a;
+    --accent:    #0969da;
+    --shadow:    rgba(0,0,0,0.08);
+    --shadow-lg: rgba(0,0,0,0.14);
+    --card-bg:   #ffffff;
+    --input-bg:  #f6f8fa;
+    --header-bg: #ffffff;
+}
+
+/* ── Apply variables to page ── */
+body {
+    background-color: var(--bg) !important;
+    color: var(--text) !important;
+    transition: background-color 0.35s ease, color 0.35s ease;
+}
+
+/* ── Cards ── */
+.sdg-card-theme,
+[class*="card"],
+.metric-hover,
+.factor-tile,
+.sticky-header {
+    background-color: var(--surface) !important;
+    border-color: var(--border) !important;
+    color: var(--text) !important;
+    transition: background-color 0.35s ease, border-color 0.35s ease,
+                color 0.35s ease, box-shadow 0.35s ease;
+}
+
+/* ── Sticky header ── */
+.sticky-header {
+    background-color: var(--header-bg) !important;
+    border-bottom: 1px solid var(--border) !important;
+}
+
+/* ── Tab bar ── */
+.nav-tabs {
+    border-bottom: 1px solid var(--border) !important;
+    background-color: var(--header-bg) !important;
+}
+.nav-tabs .nav-link       { color: var(--muted) !important; }
+.nav-tabs .nav-link:hover { color: var(--text)  !important; }
+.nav-tabs .nav-link.active {
+    color: var(--accent) !important;
+    border-bottom: 2px solid var(--accent) !important;
+}
+
+/* ── Labels ── */
+label, .dash-label {
+    color: var(--muted) !important;
+    transition: color 0.35s ease;
+}
+
+/* ── Dropdown — follows theme ── */
+.Select-control,
+div[class*="control"] {
+    background-color: var(--input-bg) !important;
+    border-color: var(--border) !important;
+    color: var(--text) !important;
+    transition: background-color 0.35s ease, border-color 0.35s ease;
+}
+.Select-value-label,
+div[class*="singleValue"],
+div[class*="placeholder"],
+div[class*="ValueContainer"] * {
+    color: var(--text) !important;
+}
+div[class*="indicatorContainer"] svg,
+div[class*="indicatorsContainer"] svg {
+    color: var(--text) !important;
+    fill:  var(--text) !important;
+}
+.Select-menu-outer,
+div[class*="menu"],
+div[class*="MenuList"] {
+    background-color: var(--surface) !important;
+    border: 1px solid var(--border) !important;
+}
+.Select-option,
+div[class*="option"] {
+    background-color: var(--surface) !important;
+    color: var(--text) !important;
+}
+.Select-option:hover,
+div[class*="option"]:hover {
+    background-color: var(--surface2) !important;
+    color: var(--accent) !important;
+}
+.Select-input input,
+input[class*="Input"],
+div[class*="Input"] input {
+    color: var(--text) !important;
+    caret-color: var(--text) !important;
+}
+
+/* ── Upload box ── */
+#upload-pdfs {
+    background-color: var(--surface) !important;
+    border-color: var(--border) !important;
+    color: var(--muted) !important;
+    transition: all 0.35s ease;
+}
+#upload-pdfs:hover {
+    border-color: var(--accent) !important;
+    color: var(--accent) !important;
+}
+
+/* ── Buttons ── */
+#btn-csv, #btn-json {
+    background-color: var(--surface) !important;
+    color: var(--text) !important;
+    border-color: var(--border) !important;
+    transition: all 0.25s ease;
+}
+#btn-csv:hover, #btn-json:hover {
+    background-color: var(--surface2) !important;
+    border-color: var(--accent) !important;
+    color: var(--accent) !important;
+}
+
+/* ── HR dividers ── */
+hr { border-color: var(--border) !important; }
+
+/* ── Alerts in light mode ── */
+body[data-theme="light"] .alert-warning {
+    background-color: #fff8c5 !important;
+    border-color: #d4a72c !important;
+    color: #3b2300 !important;
+}
+body[data-theme="light"] .alert-danger {
+    background-color: #ffebe9 !important;
+    border-color: #cf222e !important;
+    color: #3b0000 !important;
+}
+
+/* ── Scan status banner follows theme ── */
+body[data-theme="light"] #scan-status > div {
+    background-color: #f0f4f8 !important;
+    border-color: #d0d7de !important;
+    border-left-color: #0969da !important;
+    color: #1f2328 !important;
+}
+
+/* ── Ranking table rows in light mode ── */
+body[data-theme="light"] .rank-row td {
+    background-color: var(--surface) !important;
+    color: var(--text) !important;
+}
+
+/* ────────────────────────────────────────
+   BASE (kept below variables so they apply
+   on initial load before any theme toggle)
+   ──────────────────────────────────────── */
 body {
     background-color: #0d1117 !important;
     color: #e6edf3 !important;

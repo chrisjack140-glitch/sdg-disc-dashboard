@@ -625,6 +625,7 @@ app.layout = html.Div(
 
         dcc.Store(id="profiles-store"),
         dcc.Store(id="df-store"),
+        dcc.Store(id="theme-store", data="dark"),   # persists current theme
         dcc.Download(id="download-csv"),
         dcc.Download(id="download-json"),
 
@@ -658,6 +659,40 @@ app.layout = html.Div(
                         style={"display": "flex", "alignItems": "flex-end",
                                "justifyContent": "flex-end"},
                     ),
+                    # ── Light switch ──
+                    dbc.Col([
+                        html.Div([
+                            html.Span("☀", id="theme-icon-sun",
+                                      style={"fontSize": "13px", "color": MUTED,
+                                             "transition": "color 0.3s"}),
+                            html.Div(
+                                html.Div(id="theme-knob", style={
+                                    "width": "18px", "height": "18px",
+                                    "borderRadius": "50%",
+                                    "backgroundColor": "#e6edf3",
+                                    "position": "absolute",
+                                    "top": "3px", "left": "3px",
+                                    "transition": "transform 0.3s ease, background-color 0.3s",
+                                }),
+                                id="theme-toggle",
+                                n_clicks=0,
+                                style={
+                                    "width": "44px", "height": "24px",
+                                    "backgroundColor": "#30363d",
+                                    "borderRadius": "12px",
+                                    "position": "relative",
+                                    "cursor": "pointer",
+                                    "margin": "0 8px",
+                                    "transition": "background-color 0.3s",
+                                    "flexShrink": "0",
+                                },
+                            ),
+                            html.Span("🌙", id="theme-icon-moon",
+                                      style={"fontSize": "13px", "color": ACCENT,
+                                             "transition": "color 0.3s"}),
+                        ], style={"display": "flex", "alignItems": "center",
+                                  "gap": "4px"}),
+                    ], width="auto"),
                 ], align="center", justify="between"),
             ], fluid=True),
         ], style={
@@ -1073,6 +1108,58 @@ def download_json(n_clicks, profiles_json):
         filename="sdg_disc_profiles.json",
     )
 
+
+# ── Theme toggle — clientside for instant response ──────────────────
+app.clientside_callback(
+    """
+    function(n_clicks, current_theme) {
+        if (!n_clicks) return [window.dash_clientside.no_update,
+                               window.dash_clientside.no_update,
+                               window.dash_clientside.no_update,
+                               window.dash_clientside.no_update];
+
+        var isLight = (current_theme === 'light');
+        var newTheme = isLight ? 'dark' : 'light';
+
+        // Swap the data-theme attribute on body — triggers all CSS variables
+        document.body.setAttribute('data-theme', newTheme);
+
+        // Knob: slide right = dark, left = light
+        var knobStyle = {
+            width: '18px', height: '18px', borderRadius: '50%',
+            position: 'absolute', top: '3px',
+            transform:       isLight ? 'translateX(0px)'  : 'translateX(20px)',
+            backgroundColor: isLight ? '#e6edf3'          : '#0d1117',
+            transition: 'transform 0.3s ease, background-color 0.3s'
+        };
+
+        // Track
+        var trackStyle = {
+            width: '44px', height: '24px', borderRadius: '12px',
+            position: 'relative', cursor: 'pointer',
+            margin: '0 8px', flexShrink: '0',
+            transition: 'background-color 0.3s',
+            backgroundColor: isLight ? '#30363d' : '#58a6ff'
+        };
+
+        // Moon icon colour
+        var moonStyle = {
+            fontSize: '13px',
+            transition: 'color 0.3s',
+            color: isLight ? '#8b949e' : '#58a6ff'
+        };
+
+        return [newTheme, knobStyle, trackStyle, moonStyle];
+    }
+    """,
+    Output("theme-store",    "data"),
+    Output("theme-knob",     "style"),
+    Output("theme-toggle",   "style"),
+    Output("theme-icon-moon","style"),
+    Input("theme-toggle",    "n_clicks"),
+    State("theme-store",     "data"),
+    prevent_initial_call=True,
+)
 
 # Clientside callback — fires the instant files are picked,
 # before the server round-trip begins, so the banner appears immediately.
