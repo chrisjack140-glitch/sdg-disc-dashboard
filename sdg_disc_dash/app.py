@@ -38,7 +38,6 @@ app = dash.Dash(
     suppress_callback_exceptions=True,
 )
 server = app.server
-application = server
 
 # ─────────────────────────────────────────
 # Style dicts
@@ -66,10 +65,10 @@ GRAPH_CARD = {
     "boxShadow": "0 4px 24px rgba(0,0,0,0.45)",
     "marginBottom": "0",
 }
-# Reversed dropdown: light bg, dark text
+# Dark dropdown with white text
 DROPDOWN_STYLE = {
-    "backgroundColor": TEXT,
-    "color": BG,
+    "backgroundColor": SURFACE2,
+    "color": TEXT,
     "border": f"1px solid {BORDER}",
     "borderRadius": "8px",
 }
@@ -225,10 +224,10 @@ def build_multi_radar_chart(selected_profiles: list, graph_name: str) -> go.Figu
         fig.add_trace(go.Scatterpolar(
             r=vals + [vals[0]],
             theta=categories + [categories[0]],
-            fill="toself",
+            fill="none",
             name=profile["participant_name"],
             line=dict(color=palette[idx % len(palette)], width=2),
-            opacity=0.55,
+            opacity=0.9,
             hovertemplate="<b>%{fullData.name}</b><br>%{theta}: %{r:.2f}<extra></extra>",
         ))
     fig.update_layout(**_base_layout(
