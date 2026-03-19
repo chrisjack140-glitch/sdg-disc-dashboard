@@ -1109,6 +1109,45 @@ def download_json(n_clicks, profiles_json):
     )
 
 
+# ── Update Plotly graph backgrounds when theme changes ──────────────
+app.clientside_callback(
+    """
+    function(theme) {
+        var isLight = (theme === 'light');
+        var bg      = isLight ? '#f3f4f6' : '#161b22';
+        var plotBg  = isLight ? '#f3f4f6' : '#161b22';
+        var font    = isLight ? '#1f2328'  : '#e6edf3';
+        var grid    = isLight ? '#d0d7de'  : '#30363d';
+
+        // Find every Plotly graph on the page and relayout it
+        setTimeout(function() {
+            var graphs = document.querySelectorAll('.js-plotly-plot');
+            graphs.forEach(function(g) {
+                try {
+                    Plotly.relayout(g, {
+                        paper_bgcolor: bg,
+                        plot_bgcolor:  plotBg,
+                        'font.color':  font,
+                        'xaxis.gridcolor':  grid,
+                        'yaxis.gridcolor':  grid,
+                        'xaxis.linecolor':  grid,
+                        'yaxis.linecolor':  grid,
+                        'polar.bgcolor':    plotBg,
+                        'polar.angularaxis.gridcolor': grid,
+                        'polar.radialaxis.gridcolor':  grid,
+                    });
+                } catch(e) {}
+            });
+        }, 50);
+
+        return window.dash_clientside.no_update;
+    }
+    """,
+    Output("theme-store", "data", allow_duplicate=True),
+    Input("theme-store",  "data"),
+    prevent_initial_call=True,
+)
+
 # ── Theme toggle — clientside for instant response ──────────────────
 app.clientside_callback(
     """

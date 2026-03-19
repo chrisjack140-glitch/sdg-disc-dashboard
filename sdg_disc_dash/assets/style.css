@@ -1,157 +1,357 @@
-/* ════════════════════════════════════════
+/* ════════════════════════════════════════════════════════
    CSS CUSTOM PROPERTIES — THEME SYSTEM
-   Swapped instantly by data-theme on body
-   ════════════════════════════════════════ */
+   All colours defined here. Light mode flips them all at once.
+   ════════════════════════════════════════════════════════ */
 
-/* ── Dark theme (default) ── */
+/* ── Dark (default) ── */
 :root,
 body[data-theme="dark"],
 body:not([data-theme]) {
-    --bg:        #0d1117;
-    --surface:   #161b22;
-    --surface2:  #1c2333;
-    --border:    #30363d;
-    --text:      #e6edf3;
-    --muted:     #8b949e;
-    --accent:    #58a6ff;
-    --shadow:    rgba(0,0,0,0.45);
-    --shadow-lg: rgba(0,0,0,0.65);
-    --card-bg:   #161b22;
-    --input-bg:  #1c2333;
-    --header-bg: #161b22;
+    --bg:           #0d1117;
+    --surface:      #161b22;
+    --surface2:     #1c2333;
+    --border:       #30363d;
+    --text:         #e6edf3;
+    --muted:        #8b949e;
+    --accent:       #58a6ff;
+    --green:        #3fb950;
+    --red:          #f85149;
+    --shadow:       rgba(0,0,0,0.45);
+    --header-bg:    #161b22;
+    --input-bg:     #1c2333;
+    --graph-bg:     #161b22;
+    --plot-bg:      #161b22;
+    --row-alt:      #1c2333;
+    --scrollbar:    #30363d;
 }
 
-/* ── Light theme ── */
+/* ── Light ── */
 body[data-theme="light"] {
-    --bg:        #ffffff;
-    --surface:   #f3f4f6;
-    --surface2:  #e9eaec;
-    --border:    #d0d7de;
-    --text:      #1f2328;
-    --muted:     #57606a;
-    --accent:    #0969da;
-    --shadow:    rgba(0,0,0,0.06);
-    --shadow-lg: rgba(0,0,0,0.12);
-    --card-bg:   #f3f4f6;
-    --input-bg:  #ffffff;
-    --header-bg: #ffffff;
+    --bg:           #ffffff;
+    --surface:      #f3f4f6;
+    --surface2:     #e5e7eb;
+    --border:       #d0d7de;
+    --text:         #1f2328;
+    --muted:        #57606a;
+    --accent:       #0969da;
+    --green:        #1a7f37;
+    --red:          #cf222e;
+    --shadow:       rgba(0,0,0,0.07);
+    --header-bg:    #ffffff;
+    --input-bg:     #ffffff;
+    --graph-bg:     #f3f4f6;
+    --plot-bg:      #f3f4f6;
+    --row-alt:      #e5e7eb;
+    --scrollbar:    #d0d7de;
 }
 
-/* ── Apply variables to page ── */
+/* ════════════════════════════════════════════════════════
+   BASE
+   ════════════════════════════════════════════════════════ */
 body {
     background-color: var(--bg) !important;
     color: var(--text) !important;
-    transition: background-color 0.35s ease, color 0.35s ease;
+    font-family: Inter, system-ui, -apple-system, sans-serif;
+    margin: 0;
+    animation: pageEntrance 0.55s ease-out both;
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* ── Cards ── */
-.sdg-card-theme,
-[class*="card"],
-.metric-hover,
-.factor-tile,
+/* ════════════════════════════════════════════════════════
+   SCROLLBAR
+   ════════════════════════════════════════════════════════ */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--scrollbar); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+/* ════════════════════════════════════════════════════════
+   STICKY HEADER
+   ════════════════════════════════════════════════════════ */
 .sticky-header {
+    background-color: var(--header-bg) !important;
+    border-bottom: 1px solid var(--border) !important;
+    box-shadow: 0 2px 20px var(--shadow) !important;
+    transition: background-color 0.3s ease, border-color 0.3s ease,
+                box-shadow 0.3s ease;
+}
+.sticky-header.scrolled {
+    box-shadow: 0 4px 32px var(--shadow) !important;
+}
+
+/* ════════════════════════════════════════════════════════
+   ALL DIVS WITH INLINE BACKGROUND — light mode override
+   Targets the Python-generated inline style cards/panels
+   ════════════════════════════════════════════════════════ */
+
+/* Page wrapper */
+body[data-theme="light"] > div {
+    background-color: var(--bg) !important;
+}
+
+/* Every card-like div with a dark hardcoded background */
+body[data-theme="light"] div[style*="background-color: rgb(22, 27, 34)"],
+body[data-theme="light"] div[style*="background-color: rgb(28, 35, 51)"],
+body[data-theme="light"] div[style*="background-color: rgb(13, 17, 23)"],
+body[data-theme="light"] div[style*="backgroundColor: #161b22"],
+body[data-theme="light"] div[style*="backgroundColor: #1c2333"],
+body[data-theme="light"] div[style*="backgroundColor: #0d1117"] {
     background-color: var(--surface) !important;
     border-color: var(--border) !important;
     color: var(--text) !important;
-    transition: background-color 0.35s ease, border-color 0.35s ease,
-                color 0.35s ease, box-shadow 0.35s ease;
 }
 
-/* ── Sticky header ── */
-.sticky-header {
-    background-color: var(--header-bg) !important;
-    border-bottom: 1px solid var(--border) !important;
+/* Metric cards and factor tiles */
+body[data-theme="light"] .metric-hover,
+body[data-theme="light"] .factor-tile {
+    background-color: var(--surface) !important;
+    border-color: var(--border) !important;
+    color: var(--text) !important;
+    box-shadow: 0 2px 12px var(--shadow) !important;
 }
 
-/* ── Tab bar ── */
+/* Section boxes and card wrappers */
+body[data-theme="light"] .dbc-card,
+body[data-theme="light"] [class*="card"],
+body[data-theme="light"] [class*="Card"] {
+    background-color: var(--surface) !important;
+    border-color: var(--border) !important;
+    color: var(--text) !important;
+}
+
+/* Graph card wrappers */
+body[data-theme="light"] div[style*="overflow: hidden"][style*="border-radius"],
+body[data-theme="light"] div[style*="overflow:hidden"][style*="border-radius"] {
+    background-color: var(--surface) !important;
+    border-color: var(--border) !important;
+}
+
+/* Inner dark panels (SURFACE2) */
+body[data-theme="light"] div[style*="#111827"],
+body[data-theme="light"] div[style*="rgb(17, 24, 39)"] {
+    background-color: var(--surface2) !important;
+    color: var(--text) !important;
+}
+
+/* All text inherits theme colour */
+body[data-theme="light"] p,
+body[data-theme="light"] span,
+body[data-theme="light"] div,
+body[data-theme="light"] li,
+body[data-theme="light"] td,
+body[data-theme="light"] th {
+    color: var(--text);
+    border-color: var(--border);
+    transition: color 0.3s ease, background-color 0.3s ease;
+}
+
+/* ════════════════════════════════════════════════════════
+   PLOTLY GRAPHS — light mode backgrounds
+   ════════════════════════════════════════════════════════ */
+body[data-theme="light"] .js-plotly-plot .plotly,
+body[data-theme="light"] .js-plotly-plot .plotly .main-svg,
+body[data-theme="light"] .js-plotly-plot .bg {
+    fill: var(--graph-bg) !important;
+    background: var(--graph-bg) !important;
+}
+body[data-theme="light"] .js-plotly-plot .svg-container {
+    background-color: var(--graph-bg) !important;
+}
+/* Override the paper and plot backgrounds Plotly sets inline */
+body[data-theme="light"] .js-plotly-plot .bg rect {
+    fill: var(--graph-bg) !important;
+}
+
+/* ════════════════════════════════════════════════════════
+   TABS
+   ════════════════════════════════════════════════════════ */
 .nav-tabs {
     border-bottom: 1px solid var(--border) !important;
-    background-color: var(--header-bg) !important;
+    background-color: transparent !important;
+    transition: border-color 0.3s ease;
 }
-.nav-tabs .nav-link       { color: var(--muted) !important; }
-.nav-tabs .nav-link:hover { color: var(--text)  !important; }
+.nav-tabs .nav-link {
+    color: var(--muted) !important;
+    border: none !important;
+    background: transparent !important;
+    font-size: 13px; font-weight: 600;
+    padding: 10px 18px;
+    transition: color 0.2s ease;
+}
+.nav-tabs .nav-link:hover { color: var(--text) !important; }
 .nav-tabs .nav-link.active {
     color: var(--accent) !important;
     border-bottom: 2px solid var(--accent) !important;
+    background: transparent !important;
 }
 
-/* ── Labels ── */
+/* ════════════════════════════════════════════════════════
+   LABELS
+   ════════════════════════════════════════════════════════ */
 label, .dash-label {
     color: var(--muted) !important;
-    transition: color 0.35s ease;
+    transition: color 0.3s ease;
 }
 
-/* ── Dropdown — follows theme ── */
+/* ════════════════════════════════════════════════════════
+   DROPDOWNS — full variable system, no hardcoded hex
+   ════════════════════════════════════════════════════════ */
 .Select-control,
 div[class*="control"] {
     background-color: var(--input-bg) !important;
     border-color: var(--border) !important;
     color: var(--text) !important;
-    transition: background-color 0.35s ease, border-color 0.35s ease;
+    border-radius: 8px !important;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 .Select-value-label,
 div[class*="singleValue"],
 div[class*="placeholder"],
+div[class*="ValueContainer"],
 div[class*="ValueContainer"] * {
     color: var(--text) !important;
+    font-size: 13px !important;
 }
+.Select-arrow,
 div[class*="indicatorContainer"] svg,
 div[class*="indicatorsContainer"] svg {
+    border-top-color: var(--text) !important;
     color: var(--text) !important;
-    fill:  var(--text) !important;
+    fill: var(--text) !important;
+}
+div[class*="indicatorSeparator"] {
+    background-color: var(--border) !important;
 }
 .Select-menu-outer,
 div[class*="menu"],
 div[class*="MenuList"] {
     background-color: var(--surface) !important;
     border: 1px solid var(--border) !important;
+    border-radius: 8px !important;
+    box-shadow: 0 8px 30px var(--shadow) !important;
 }
 .Select-option,
 div[class*="option"] {
     background-color: var(--surface) !important;
     color: var(--text) !important;
+    font-size: 13px;
+    padding: 8px 12px;
 }
 .Select-option:hover,
-div[class*="option"]:hover {
+div[class*="option"]:hover,
+div[class*="option"]:focus {
     background-color: var(--surface2) !important;
     color: var(--accent) !important;
+}
+div[class*="option"][aria-selected="true"] {
+    background-color: var(--surface2) !important;
+    color: var(--accent) !important;
+}
+.Select-value,
+span[class*="multiValue"],
+div[class*="multiValue"] {
+    background-color: var(--surface2) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 6px !important;
+    color: var(--text) !important;
+}
+div[class*="multiValue"] > div,
+div[class*="multiValue"] span { color: var(--text) !important; }
+.Select-value-icon,
+div[class*="multiValueRemove"] {
+    color: var(--muted) !important;
+    background: transparent !important;
+}
+.Select-value-icon:hover,
+div[class*="multiValueRemove"]:hover {
+    color: var(--text) !important;
+    background-color: var(--border) !important;
 }
 .Select-input input,
 input[class*="Input"],
 div[class*="Input"] input {
     color: var(--text) !important;
     caret-color: var(--text) !important;
+    background: transparent !important;
 }
-
-/* ── Upload box ── */
-#upload-pdfs {
-    background-color: var(--surface) !important;
-    border-color: var(--border) !important;
-    color: var(--muted) !important;
-    transition: all 0.35s ease;
-}
-#upload-pdfs:hover {
+div[class*="Input"] { color: var(--text) !important; }
+div[class*="control"]:focus-within {
     border-color: var(--accent) !important;
-    color: var(--accent) !important;
+    box-shadow: 0 0 0 1px var(--accent) !important;
 }
 
-/* ── Buttons ── */
+/* ════════════════════════════════════════════════════════
+   CHECKBOXES / RADIO
+   ════════════════════════════════════════════════════════ */
+input[type="checkbox"],
+input[type="radio"] {
+    accent-color: var(--accent);
+}
+.form-check-label,
+label[class*="Label"],
+.dash-checklist label,
+.dash-radioitems label {
+    color: var(--text) !important;
+}
+
+/* ════════════════════════════════════════════════════════
+   BUTTONS & INTERACTIVE
+   ════════════════════════════════════════════════════════ */
 #btn-csv, #btn-json {
     background-color: var(--surface) !important;
     color: var(--text) !important;
     border-color: var(--border) !important;
-    transition: all 0.25s ease;
+    transition: all 0.2s ease;
 }
 #btn-csv:hover, #btn-json:hover {
     background-color: var(--surface2) !important;
     border-color: var(--accent) !important;
     color: var(--accent) !important;
 }
-
-/* ── HR dividers ── */
+#rank-toggle { color: var(--muted) !important; }
+#rank-toggle:hover { color: var(--text) !important; }
+#upload-pdfs {
+    background-color: var(--surface) !important;
+    border-color: var(--border) !important;
+    color: var(--muted) !important;
+    transition: all 0.3s ease;
+}
+#upload-pdfs:hover {
+    border-color: var(--accent) !important;
+    color: var(--accent) !important;
+}
 hr { border-color: var(--border) !important; }
 
-/* ── Alerts in light mode ── */
+/* ════════════════════════════════════════════════════════
+   RANKING TABLE
+   ════════════════════════════════════════════════════════ */
+body[data-theme="light"] .rank-row td {
+    background-color: var(--surface) !important;
+    color: var(--text) !important;
+    border-color: var(--border) !important;
+}
+body[data-theme="light"] .rank-row:nth-child(odd) td {
+    background-color: var(--surface2) !important;
+}
+body[data-theme="light"] thead tr th {
+    background-color: var(--bg) !important;
+    color: var(--muted) !important;
+    border-color: var(--border) !important;
+}
+
+/* ════════════════════════════════════════════════════════
+   ALERTS
+   ════════════════════════════════════════════════════════ */
+.alert-warning {
+    background-color: #2d2300 !important;
+    border-color: #d29922 !important;
+    color: #e6edf3 !important;
+}
+.alert-danger {
+    background-color: #2d0f0f !important;
+    border-color: #f85149 !important;
+    color: #e6edf3 !important;
+}
 body[data-theme="light"] .alert-warning {
     background-color: #fff8c5 !important;
     border-color: #d4a72c !important;
@@ -163,96 +363,53 @@ body[data-theme="light"] .alert-danger {
     color: #3b0000 !important;
 }
 
-/* ── Scan status banner follows theme ── */
-body[data-theme="light"] #scan-status > div {
-    background-color: #f0f4f8 !important;
-    border-color: #d0d7de !important;
-    border-left-color: #0969da !important;
-    color: #1f2328 !important;
+/* ════════════════════════════════════════════════════════
+   SCAN BANNER
+   ════════════════════════════════════════════════════════ */
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
 }
+.scan-spinner { animation: spin 0.8s linear infinite; }
 
-/* ── Ranking table rows in light mode ── */
-body[data-theme="light"] .rank-row td {
+body[data-theme="light"] #scan-status > div {
     background-color: var(--surface) !important;
+    border-color: var(--border) !important;
+    border-left-color: var(--accent) !important;
     color: var(--text) !important;
 }
 
-/* ────────────────────────────────────────
-   BASE (kept below variables so they apply
-   on initial load before any theme toggle)
-   ──────────────────────────────────────── */
-body {
-    background-color: #0d1117 !important;
-    color: #e6edf3 !important;
-    font-family: Inter, system-ui, -apple-system, sans-serif;
-    margin: 0;
-}
-
-/* ════════════════════════════════════════
-   SCROLLBAR
-   ════════════════════════════════════════ */
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: #0d1117; }
-::-webkit-scrollbar-thumb { background: #30363d; border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: #8b949e; }
-
-
-/* ════════════════════════════════════════
-   ANIMATION 1 — Page entrance fade-slide
-   Applied to .stApp / body on load
-   ════════════════════════════════════════ */
+/* ════════════════════════════════════════════════════════
+   ANIMATIONS
+   ════════════════════════════════════════════════════════ */
 @keyframes pageEntrance {
     from { opacity: 0; transform: translateY(12px); }
     to   { opacity: 1; transform: translateY(0); }
 }
-body {
-    animation: pageEntrance 0.55s ease-out both;
-}
-
-
-/* ════════════════════════════════════════
-   ANIMATION 2 — Tab content fade-slide
-   .tab-fade-in added to every tab Div
-   ════════════════════════════════════════ */
 @keyframes tabFadeIn {
     from { opacity: 0; transform: translateY(10px); }
     to   { opacity: 1; transform: translateY(0); }
 }
-.tab-fade-in {
-    animation: tabFadeIn 0.35s ease-out both;
-}
+.tab-fade-in { animation: tabFadeIn 0.35s ease-out both; }
 
-
-/* ════════════════════════════════════════
-   ANIMATION 3 — Metric card staggered entrance
-   Cards arrive 0 / 80 / 160 / 240 ms apart
-   ════════════════════════════════════════ */
 @keyframes cardSlideUp {
     from { opacity: 0; transform: translateY(16px); }
     to   { opacity: 1; transform: translateY(0); }
 }
-/* Dash renders metric cards inside dbc.Col — target the inner div */
 .metric-hover {
     animation: cardSlideUp 0.45s ease-out both;
-    transition: transform 0.22s ease, box-shadow 0.22s ease;
+    transition: transform 0.22s ease, box-shadow 0.22s ease,
+                background-color 0.3s ease, border-color 0.3s ease;
 }
-/* nth-child stagger via column position */
 .mb-4.g-3 .col:nth-child(1) .metric-hover { animation-delay: 0ms;   }
 .mb-4.g-3 .col:nth-child(2) .metric-hover { animation-delay: 80ms;  }
 .mb-4.g-3 .col:nth-child(3) .metric-hover { animation-delay: 160ms; }
 .mb-4.g-3 .col:nth-child(4) .metric-hover { animation-delay: 240ms; }
-
-/* ── Hover lift ── */
 .metric-hover:hover {
     transform: translateY(-5px) !important;
-    box-shadow: 0 16px 38px rgba(0,0,0,0.55) !important;
+    box-shadow: 0 16px 38px var(--shadow) !important;
 }
 
-
-/* ════════════════════════════════════════
-   ANIMATION 4 — Factor tiles staggered entrance
-   .factor-tile-0 through .factor-tile-3
-   ════════════════════════════════════════ */
 @keyframes tileAppear {
     from { opacity: 0; transform: translateY(14px) scale(0.98); }
     to   { opacity: 1; transform: translateY(0) scale(1); }
@@ -262,26 +419,17 @@ body {
 .factor-tile-1 { animation-delay: 90ms;  }
 .factor-tile-2 { animation-delay: 180ms; }
 .factor-tile-3 { animation-delay: 270ms; }
-/* Hover lift on factor tiles */
 .factor-tile:hover {
     transform: translateY(-3px) !important;
-    box-shadow: 0 12px 28px rgba(0,0,0,0.45) !important;
+    box-shadow: 0 12px 28px var(--shadow) !important;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-
-/* ════════════════════════════════════════
-   ANIMATION 5 — Ranking table row highlight flash
-   Rows flash accent colour briefly when table opens
-   ════════════════════════════════════════ */
 @keyframes rowFlash {
     0%   { background-color: rgba(88,166,255,0.18); }
     100% { background-color: transparent; }
 }
-.rank-row {
-    animation: rowFlash 0.7s ease-out both;
-}
-/* Stagger each row slightly */
+.rank-row { animation: rowFlash 0.7s ease-out both; }
 .rank-row:nth-child(1)  { animation-delay: 0ms;   }
 .rank-row:nth-child(2)  { animation-delay: 50ms;  }
 .rank-row:nth-child(3)  { animation-delay: 100ms; }
@@ -291,213 +439,11 @@ body {
 .rank-row:nth-child(7)  { animation-delay: 300ms; }
 .rank-row:nth-child(8)  { animation-delay: 350ms; }
 
-
-/* ════════════════════════════════════════
-   ANIMATION 6 — Sticky header shadow deepens on scroll
-   Implemented via a small class toggle; the CSS
-   transition handles the visual change
-   ════════════════════════════════════════ */
-.sticky-header {
-    transition: box-shadow 0.3s ease;
-}
-.sticky-header.scrolled {
-    box-shadow: 0 4px 32px rgba(0,0,0,0.7) !important;
-}
-
-
-/* ════════════════════════════════════════
-   ANIMATION 7 — Graph card subtle fade-in on render
-   ════════════════════════════════════════ */
 @keyframes graphFadeIn {
     from { opacity: 0; }
     to   { opacity: 1; }
 }
-/* Applied to the GRAPH_CARD wrapper divs */
 div[style*="border-radius: 12px"][style*="overflow: hidden"] {
     animation: graphFadeIn 0.5s ease-out both;
-}
-
-
-/* ════════════════════════════════════════
-   DROPDOWN — dark bg, white text throughout
-   ════════════════════════════════════════ */
-
-/* ── Collapsed state (the pill you see when closed) ── */
-.Select-control,
-div[class*="control"] {
-    background-color: #1c2333 !important;
-    border-color: #30363d !important;
-    color: #e6edf3 !important;
-    border-radius: 8px !important;
-}
-
-/* ── Selected value, placeholder, single value — all white ── */
-.Select-value-label,
-div[class*="singleValue"],
-div[class*="placeholder"],
-div[class*="ValueContainer"],
-div[class*="ValueContainer"] * {
-    color: #e6edf3 !important;
-    font-size: 13px !important;
-}
-
-/* ── Dropdown chevron arrow — white ── */
-.Select-arrow,
-div[class*="indicatorContainer"] svg,
-div[class*="indicatorsContainer"] svg {
-    border-top-color: #e6edf3 !important;
-    color: #e6edf3 !important;
-    fill: #e6edf3 !important;
-}
-
-/* ── Separator line between value and arrow — hidden ── */
-div[class*="indicatorSeparator"] {
-    background-color: #30363d !important;
-}
-
-/* ── Open menu list — dark ── */
-.Select-menu-outer,
-div[class*="menu"],
-div[class*="MenuList"] {
-    background-color: #161b22 !important;
-    border: 1px solid #30363d !important;
-    border-radius: 8px !important;
-    box-shadow: 0 8px 30px rgba(0,0,0,0.6) !important;
-}
-.Select-option,
-div[class*="option"] {
-    background-color: #161b22 !important;
-    color: #e6edf3 !important;
-    font-size: 13px;
-    padding: 8px 12px;
-}
-.Select-option:hover,
-div[class*="option"]:hover,
-div[class*="option"]:focus {
-    background-color: #1c2333 !important;
-    color: #58a6ff !important;
-}
-
-/* ── Multi-select selected tags ── */
-.Select-value,
-span[class*="multiValue"],
-div[class*="multiValue"] {
-    background-color: #30363d !important;
-    border: 1px solid #8b949e !important;
-    border-radius: 6px !important;
-    color: #e6edf3 !important;
-}
-div[class*="multiValue"] > div,
-div[class*="multiValue"] span {
-    color: #e6edf3 !important;
-}
-.Select-value-icon,
-div[class*="multiValueRemove"] {
-    color: #8b949e !important;
-    background: transparent !important;
-}
-.Select-value-icon:hover,
-div[class*="multiValueRemove"]:hover {
-    color: #e6edf3 !important;
-    background-color: #374151 !important;
-}
-
-/* ── Search / type-to-filter input — white text ── */
-.Select-input input,
-input[class*="Input"],
-div[class*="Input"] input {
-    color: #e6edf3 !important;
-    caret-color: #e6edf3 !important;
-    background: transparent !important;
-}
-div[class*="Input"] { color: #e6edf3 !important; }
-
-/* ── Checkboxes and radio buttons — white ── */
-input[type="checkbox"],
-input[type="radio"] {
-    accent-color: #e6edf3;
-    filter: brightness(1.5);
-}
-
-/* ── dcc.Checklist and dcc.RadioItems labels — white ── */
-.form-check-label,
-label[class*="Label"],
-.dash-checklist label,
-.dash-radioitems label {
-    color: #e6edf3 !important;
-}
-
-/* ── Selected option highlight in open list ── */
-div[class*="option"][aria-selected="true"] {
-    background-color: #1c2333 !important;
-    color: #58a6ff !important;
-}
-
-/* ── Focused dropdown outline ── */
-div[class*="control"]:focus-within {
-    border-color: #58a6ff !important;
-    box-shadow: 0 0 0 1px #58a6ff !important;
-}
-
-
-/* ════════════════════════════════════════
-   TABS
-   ════════════════════════════════════════ */
-.nav-tabs { border-bottom: 1px solid #30363d !important; }
-.nav-tabs .nav-link {
-    color: #8b949e !important;
-    border: none !important;
-    background: transparent !important;
-    font-size: 13px; font-weight: 600;
-    padding: 10px 18px;
-    transition: color 0.15s;
-}
-.nav-tabs .nav-link:hover { color: #e6edf3 !important; }
-.nav-tabs .nav-link.active {
-    color: #58a6ff !important;
-    border-bottom: 2px solid #58a6ff !important;
-    background: transparent !important;
-}
-
-
-/* ════════════════════════════════════════
-   INTERACTIVE ELEMENTS
-   ════════════════════════════════════════ */
-#rank-toggle:hover { color: #e6edf3 !important; }
-#btn-csv:hover, #btn-json:hover {
-    background-color: #1c2333 !important;
-    border-color: #58a6ff !important;
-    color: #58a6ff !important;
-    transition: all 0.18s ease;
-}
-#upload-pdfs:hover {
-    border-color: #58a6ff !important;
-    color: #58a6ff !important;
-}
-
-
-/* ════════════════════════════════════════
-   PDF SCAN STATUS BANNER SPINNER
-   ════════════════════════════════════════ */
-@keyframes spin {
-    from { transform: rotate(0deg); }
-    to   { transform: rotate(360deg); }
-}
-.scan-spinner {
-    animation: spin 0.8s linear infinite;
-}
-
-
-/* ════════════════════════════════════════
-   ALERTS
-   ════════════════════════════════════════ */
-.alert-warning {
-    background-color: #2d2300 !important;
-    border-color: #d29922 !important;
-    color: #e6edf3 !important;
-}
-.alert-danger {
-    background-color: #2d0f0f !important;
-    border-color: #f85149 !important;
-    color: #e6edf3 !important;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
 }
