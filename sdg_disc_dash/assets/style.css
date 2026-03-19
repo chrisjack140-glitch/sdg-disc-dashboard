@@ -23,17 +23,17 @@ body:not([data-theme]) {
 
 /* ── Light theme ── */
 body[data-theme="light"] {
-    --bg:        #f0f4f8;
-    --surface:   #ffffff;
-    --surface2:  #f0f4f8;
+    --bg:        #ffffff;
+    --surface:   #f3f4f6;
+    --surface2:  #e9eaec;
     --border:    #d0d7de;
     --text:      #1f2328;
     --muted:     #57606a;
     --accent:    #0969da;
-    --shadow:    rgba(0,0,0,0.08);
-    --shadow-lg: rgba(0,0,0,0.14);
-    --card-bg:   #ffffff;
-    --input-bg:  #f6f8fa;
+    --shadow:    rgba(0,0,0,0.06);
+    --shadow-lg: rgba(0,0,0,0.12);
+    --card-bg:   #f3f4f6;
+    --input-bg:  #ffffff;
     --header-bg: #ffffff;
 }
 

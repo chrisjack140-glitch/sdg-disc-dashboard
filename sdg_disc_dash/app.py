@@ -662,8 +662,8 @@ app.layout = html.Div(
                     # ── Light switch ──
                     dbc.Col([
                         html.Div([
-                            html.Span("☀", id="theme-icon-sun",
-                                      style={"fontSize": "13px", "color": MUTED,
+                            html.Span("🌙", id="theme-icon-moon",
+                                      style={"fontSize": "13px", "color": ACCENT,
                                              "transition": "color 0.3s"}),
                             html.Div(
                                 html.Div(id="theme-knob", style={
@@ -687,8 +687,8 @@ app.layout = html.Div(
                                     "flexShrink": "0",
                                 },
                             ),
-                            html.Span("🌙", id="theme-icon-moon",
-                                      style={"fontSize": "13px", "color": ACCENT,
+                            html.Span("☀", id="theme-icon-sun",
+                                      style={"fontSize": "13px", "color": MUTED,
                                              "transition": "color 0.3s"}),
                         ], style={"display": "flex", "alignItems": "center",
                                   "gap": "4px"}),
@@ -1116,46 +1116,53 @@ app.clientside_callback(
         if (!n_clicks) return [window.dash_clientside.no_update,
                                window.dash_clientside.no_update,
                                window.dash_clientside.no_update,
+                               window.dash_clientside.no_update,
                                window.dash_clientside.no_update];
 
         var isLight = (current_theme === 'light');
         var newTheme = isLight ? 'dark' : 'light';
 
-        // Swap the data-theme attribute on body — triggers all CSS variables
+        // Swap data-theme on body — triggers all CSS variables instantly
         document.body.setAttribute('data-theme', newTheme);
 
-        // Knob: slide right = dark, left = light
+        // Knob: left = dark mode, right = light mode
         var knobStyle = {
             width: '18px', height: '18px', borderRadius: '50%',
-            position: 'absolute', top: '3px',
+            position: 'absolute', top: '3px', left: '3px',
             transform:       isLight ? 'translateX(0px)'  : 'translateX(20px)',
-            backgroundColor: isLight ? '#e6edf3'          : '#0d1117',
+            backgroundColor: isLight ? '#e6edf3'          : '#facc15',
             transition: 'transform 0.3s ease, background-color 0.3s'
         };
 
-        // Track
+        // Track: dark grey in dark mode, amber/yellow in light mode
         var trackStyle = {
             width: '44px', height: '24px', borderRadius: '12px',
             position: 'relative', cursor: 'pointer',
             margin: '0 8px', flexShrink: '0',
             transition: 'background-color 0.3s',
-            backgroundColor: isLight ? '#30363d' : '#58a6ff'
+            backgroundColor: isLight ? '#30363d' : '#ca8a04'
         };
 
-        // Moon icon colour
+        // Moon icon: bright in dark mode (currently active), dim in light
         var moonStyle = {
-            fontSize: '13px',
-            transition: 'color 0.3s',
+            fontSize: '13px', transition: 'color 0.3s',
             color: isLight ? '#8b949e' : '#58a6ff'
         };
 
-        return [newTheme, knobStyle, trackStyle, moonStyle];
+        // Sun icon: bright in light mode (currently active), dim in dark
+        var sunStyle = {
+            fontSize: '13px', transition: 'color 0.3s',
+            color: isLight ? '#8b949e' : '#d29922'
+        };
+
+        return [newTheme, knobStyle, trackStyle, moonStyle, sunStyle];
     }
     """,
     Output("theme-store",    "data"),
     Output("theme-knob",     "style"),
     Output("theme-toggle",   "style"),
     Output("theme-icon-moon","style"),
+    Output("theme-icon-sun", "style"),
     Input("theme-toggle",    "n_clicks"),
     State("theme-store",     "data"),
     prevent_initial_call=True,
