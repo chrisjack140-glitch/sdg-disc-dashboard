@@ -684,43 +684,34 @@ app.layout = html.Div(
                 ], width=2),
                 dbc.Col([
                     html.Label("Upload Maxwell DISC PDFs", style=LABEL_STYLE),
-                    dcc.Loading(
-                        type="dot",
-                        color=ACCENT,
-                        children=dcc.Upload(
-                            id="upload-pdfs",
-                            children=html.Div([
-                                "Drag & drop or ",
-                                html.A("browse", style={"color": ACCENT, "cursor": "pointer",
-                                                        "fontWeight": 600}),
-                            ], style={"fontSize": "12px"}),
-                            style={
-                                "width": "100%", "height": "38px", "lineHeight": "38px",
-                                "borderWidth": "1px", "borderStyle": "dashed",
-                                "borderRadius": "8px", "textAlign": "center",
-                                "borderColor": BORDER, "color": MUTED,
-                                "backgroundColor": SURFACE,
-                            },
-                            multiple=True,
-                        ),
+                    dcc.Upload(
+                        id="upload-pdfs",
+                        children=html.Div([
+                            "Drag & drop or ",
+                            html.A("browse", style={"color": ACCENT, "cursor": "pointer",
+                                                    "fontWeight": 600}),
+                        ], style={"fontSize": "12px"}),
+                        style={
+                            "width": "100%", "height": "38px", "lineHeight": "38px",
+                            "borderWidth": "1px", "borderStyle": "dashed",
+                            "borderRadius": "8px", "textAlign": "center",
+                            "borderColor": BORDER, "color": MUTED,
+                            "backgroundColor": SURFACE,
+                        },
+                        multiple=True,
                     ),
                 ], width=4),
             ], className="mb-4 g-3", style={"paddingTop": "24px"}),
 
             html.Div(id="upload-errors"),
 
-            # Loading wrapper — shows spinner while PDFs are being processed
-            dcc.Loading(
-                id="loading-upload",
-                type="circle",
-                color=ACCENT,
-                fullscreen=False,
-                style={"paddingTop": "40px"},
-                children=[
-                    # Metric cards
-                    html.Div(id="metric-cards"),
+            # PDF scan status banner — visible only while processing
+            html.Div(id="scan-status"),
 
-                    # Collapsible ranking — DISC filter buttons
+            # Metric cards
+            html.Div(id="metric-cards"),
+
+            # Collapsible ranking — DISC filter buttons
             html.Div([
                 dbc.Row([
                     dbc.Col(
@@ -760,9 +751,6 @@ app.layout = html.Div(
 
             html.Div(id="tab-content"),
 
-                ] # close dcc.Loading children
-            ),  # close dcc.Loading
-
             # Downloads
             html.Hr(style={"borderColor": BORDER, "marginTop": "32px",
                             "marginBottom": "20px"}),
@@ -798,6 +786,7 @@ app.layout = html.Div(
     Output("profiles-store", "data"),
     Output("df-store", "data"),
     Output("upload-errors", "children"),
+    Output("scan-status", "children"),
     Input("upload-pdfs", "contents"),
     State("upload-pdfs", "filename"),
     State("anchor-graph", "value"),
@@ -805,7 +794,7 @@ app.layout = html.Div(
 )
 def process_uploads(contents_list, filenames, anchor_graph):
     if not contents_list:
-        return None, None, None
+        return None, None, None, None
     files_data = [decode_upload(c, f) for c, f in zip(contents_list, filenames)]
     profiles, df, errors = process_uploaded_files(files_data, anchor_graph)
     error_banner = None
@@ -818,8 +807,9 @@ def process_uploads(contents_list, filenames, anchor_graph):
             style={"fontSize": "12px", "marginBottom": "12px"},
         )
     if df.empty:
-        return None, None, dbc.Alert("No valid profiles found.", color="danger")
-    return json.dumps(profiles), df.to_json(orient="records"), error_banner
+        return None, None, dbc.Alert("No valid profiles found.", color="danger"), None
+    # Processing complete — clear the scan banner
+    return json.dumps(profiles), df.to_json(orient="records"), error_banner, None
 
 
 # 2 — Metric cards
@@ -1083,6 +1073,92 @@ def download_json(n_clicks, profiles_json):
         filename="sdg_disc_profiles.json",
     )
 
+
+# Clientside callback — fires the instant files are picked,
+# before the server round-trip begins, so the banner appears immediately.
+app.clientside_callback(
+    """
+    function(contents, filenames) {
+        if (!contents || contents.length === 0) {
+            return window.dash_clientside.no_update;
+        }
+        var count = contents.length;
+        var names = filenames ? filenames.join(', ') : '';
+        return {
+            props: {
+                children: [
+                    {
+                        type: 'Div',
+                        namespace: 'dash_html_components',
+                        props: {
+                            style: {
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '12px',
+                                backgroundColor: '#1c2333',
+                                border: '1px solid #30363d',
+                                borderLeft: '3px solid #58a6ff',
+                                borderRadius: '8px',
+                                padding: '12px 16px',
+                                marginBottom: '16px',
+                                fontSize: '13px',
+                                color: '#e6edf3'
+                            },
+                            children: [
+                                {
+                                    type: 'Span',
+                                    namespace: 'dash_html_components',
+                                    props: {
+                                        className: 'scan-spinner',
+                                        style: {
+                                            display: 'inline-block',
+                                            width: '16px',
+                                            height: '16px',
+                                            border: '2px solid #30363d',
+                                            borderTop: '2px solid #58a6ff',
+                                            borderRadius: '50%',
+                                            flexShrink: 0
+                                        }
+                                    }
+                                },
+                                {
+                                    type: 'Span',
+                                    namespace: 'dash_html_components',
+                                    props: {
+                                        children: 'Scanning ' + count + ' PDF' + (count > 1 ? 's' : '') + ' for DISC data...',
+                                        style: { fontWeight: 600 }
+                                    }
+                                },
+                                {
+                                    type: 'Span',
+                                    namespace: 'dash_html_components',
+                                    props: {
+                                        children: names,
+                                        style: {
+                                            color: '#8b949e',
+                                            fontSize: '11px',
+                                            overflow: 'hidden',
+                                            textOverflow: 'ellipsis',
+                                            whiteSpace: 'nowrap',
+                                            maxWidth: '400px'
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                ]
+            },
+            type: 'Div',
+            namespace: 'dash_html_components'
+        };
+    }
+    """,
+    Output("scan-status", "children", allow_duplicate=True),
+    Input("upload-pdfs", "contents"),
+    State("upload-pdfs", "filename"),
+    prevent_initial_call=True,
+)
 
 if __name__ == "__main__":
     app.run(debug=True)
