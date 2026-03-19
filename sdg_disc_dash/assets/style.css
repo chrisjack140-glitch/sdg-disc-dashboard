@@ -139,24 +139,43 @@ div[style*="border-radius: 12px"][style*="overflow: hidden"] {
 
 
 /* ════════════════════════════════════════
-   REVERSED DROPDOWN — light bg, dark text
+   DROPDOWN — dark bg, white text throughout
    ════════════════════════════════════════ */
+
+/* ── Collapsed state (the pill you see when closed) ── */
 .Select-control,
 div[class*="control"] {
-    background-color: #e6edf3 !important;
+    background-color: #1c2333 !important;
     border-color: #30363d !important;
-    color: #0d1117 !important;
+    color: #e6edf3 !important;
     border-radius: 8px !important;
 }
+
+/* ── Selected value, placeholder, single value — all white ── */
 .Select-value-label,
 div[class*="singleValue"],
-div[class*="placeholder"] {
-    color: #0d1117 !important;
+div[class*="placeholder"],
+div[class*="ValueContainer"],
+div[class*="ValueContainer"] * {
+    color: #e6edf3 !important;
     font-size: 13px !important;
 }
-.Select-arrow { border-top-color: #0d1117 !important; }
 
-/* Open menu — dark */
+/* ── Dropdown chevron arrow — white ── */
+.Select-arrow,
+div[class*="indicatorContainer"] svg,
+div[class*="indicatorsContainer"] svg {
+    border-top-color: #e6edf3 !important;
+    color: #e6edf3 !important;
+    fill: #e6edf3 !important;
+}
+
+/* ── Separator line between value and arrow — hidden ── */
+div[class*="indicatorSeparator"] {
+    background-color: #30363d !important;
+}
+
+/* ── Open menu list — dark ── */
 .Select-menu-outer,
 div[class*="menu"],
 div[class*="MenuList"] {
@@ -173,24 +192,71 @@ div[class*="option"] {
     padding: 8px 12px;
 }
 .Select-option:hover,
-div[class*="option"]:hover {
+div[class*="option"]:hover,
+div[class*="option"]:focus {
     background-color: #1c2333 !important;
     color: #58a6ff !important;
 }
-.Select-value, span[class*="multiValue"] {
-    background-color: #1c2333 !important;
-    border: 1px solid #30363d !important;
+
+/* ── Multi-select selected tags ── */
+.Select-value,
+span[class*="multiValue"],
+div[class*="multiValue"] {
+    background-color: #30363d !important;
+    border: 1px solid #8b949e !important;
     border-radius: 6px !important;
     color: #e6edf3 !important;
 }
+div[class*="multiValue"] > div,
+div[class*="multiValue"] span {
+    color: #e6edf3 !important;
+}
 .Select-value-icon,
-div[class*="multiValueRemove"] { color: #8b949e !important; }
-.Select-value-icon:hover,
-div[class*="multiValueRemove"]:hover { color: #e6edf3 !important; }
-.Select-input input,
-input[class*="Input"] {
-    color: #0d1117 !important;
+div[class*="multiValueRemove"] {
+    color: #8b949e !important;
     background: transparent !important;
+}
+.Select-value-icon:hover,
+div[class*="multiValueRemove"]:hover {
+    color: #e6edf3 !important;
+    background-color: #374151 !important;
+}
+
+/* ── Search / type-to-filter input — white text ── */
+.Select-input input,
+input[class*="Input"],
+div[class*="Input"] input {
+    color: #e6edf3 !important;
+    caret-color: #e6edf3 !important;
+    background: transparent !important;
+}
+div[class*="Input"] { color: #e6edf3 !important; }
+
+/* ── Checkboxes and radio buttons — white ── */
+input[type="checkbox"],
+input[type="radio"] {
+    accent-color: #e6edf3;
+    filter: brightness(1.5);
+}
+
+/* ── dcc.Checklist and dcc.RadioItems labels — white ── */
+.form-check-label,
+label[class*="Label"],
+.dash-checklist label,
+.dash-radioitems label {
+    color: #e6edf3 !important;
+}
+
+/* ── Selected option highlight in open list ── */
+div[class*="option"][aria-selected="true"] {
+    background-color: #1c2333 !important;
+    color: #58a6ff !important;
+}
+
+/* ── Focused dropdown outline ── */
+div[class*="control"]:focus-within {
+    border-color: #58a6ff !important;
+    box-shadow: 0 0 0 1px #58a6ff !important;
 }
 
 

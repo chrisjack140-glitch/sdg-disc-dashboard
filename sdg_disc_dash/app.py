@@ -684,31 +684,43 @@ app.layout = html.Div(
                 ], width=2),
                 dbc.Col([
                     html.Label("Upload Maxwell DISC PDFs", style=LABEL_STYLE),
-                    dcc.Upload(
-                        id="upload-pdfs",
-                        children=html.Div([
-                            "Drag & drop or ",
-                            html.A("browse", style={"color": ACCENT, "cursor": "pointer",
-                                                    "fontWeight": 600}),
-                        ], style={"fontSize": "12px"}),
-                        style={
-                            "width": "100%", "height": "38px", "lineHeight": "38px",
-                            "borderWidth": "1px", "borderStyle": "dashed",
-                            "borderRadius": "8px", "textAlign": "center",
-                            "borderColor": BORDER, "color": MUTED,
-                            "backgroundColor": SURFACE,
-                        },
-                        multiple=True,
+                    dcc.Loading(
+                        type="dot",
+                        color=ACCENT,
+                        children=dcc.Upload(
+                            id="upload-pdfs",
+                            children=html.Div([
+                                "Drag & drop or ",
+                                html.A("browse", style={"color": ACCENT, "cursor": "pointer",
+                                                        "fontWeight": 600}),
+                            ], style={"fontSize": "12px"}),
+                            style={
+                                "width": "100%", "height": "38px", "lineHeight": "38px",
+                                "borderWidth": "1px", "borderStyle": "dashed",
+                                "borderRadius": "8px", "textAlign": "center",
+                                "borderColor": BORDER, "color": MUTED,
+                                "backgroundColor": SURFACE,
+                            },
+                            multiple=True,
+                        ),
                     ),
                 ], width=4),
             ], className="mb-4 g-3", style={"paddingTop": "24px"}),
 
             html.Div(id="upload-errors"),
 
-            # Metric cards
-            html.Div(id="metric-cards"),
+            # Loading wrapper — shows spinner while PDFs are being processed
+            dcc.Loading(
+                id="loading-upload",
+                type="circle",
+                color=ACCENT,
+                fullscreen=False,
+                style={"paddingTop": "40px"},
+                children=[
+                    # Metric cards
+                    html.Div(id="metric-cards"),
 
-            # Collapsible ranking — DISC filter buttons
+                    # Collapsible ranking — DISC filter buttons
             html.Div([
                 dbc.Row([
                     dbc.Col(
@@ -747,6 +759,9 @@ app.layout = html.Div(
             ], className="mb-4"),
 
             html.Div(id="tab-content"),
+
+                ] # close dcc.Loading children
+            ),  # close dcc.Loading
 
             # Downloads
             html.Hr(style={"borderColor": BORDER, "marginTop": "32px",
