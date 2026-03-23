@@ -65,6 +65,13 @@ body {
 ::-webkit-scrollbar-thumb { background: var(--scrollbar); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
 
+/* ── App root ── */
+#app-root {
+    background-color: var(--bg) !important;
+    color: var(--text) !important;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
 /* ════════════════════════════════════════════════════════
    STICKY HEADER
    ════════════════════════════════════════════════════════ */

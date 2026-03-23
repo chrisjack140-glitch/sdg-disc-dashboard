@@ -42,21 +42,20 @@ server = app.server
 # ─────────────────────────────────────────
 # Style dicts
 # ─────────────────────────────────────────
-CARD_STYLE = {
-    "backgroundColor": SURFACE,
-    "border": f"1px solid {BORDER}",
-    "borderRadius": "12px",
-    "padding": "20px",
-    "marginBottom": "16px",
-    "boxShadow": "0 4px 24px rgba(0,0,0,0.45)",
-}
-SECTION_STYLE = {
-    "backgroundColor": SURFACE2,
-    "border": f"1px solid {BORDER}",
-    "borderRadius": "10px",
-    "padding": "14px",
-    "marginBottom": "12px",
-}
+def CARD_STYLE(theme="dark"):
+    c = {"dark": {"s": "#161b22", "b": "#30363d"}, "light": {"s": "#f3f4f6", "b": "#d0d7de"}}[theme if theme in ("dark","light") else "dark"]
+    return {"backgroundColor": c["s"], "border": f"1px solid {c['b']}", "borderRadius": "12px",
+            "padding": "20px", "marginBottom": "16px",
+            "boxShadow": "0 4px 24px rgba(0,0,0,0.45)" if theme=="dark" else "0 2px 8px rgba(0,0,0,0.07)",
+            "transition": "background-color 0.3s ease, border-color 0.3s ease"}
+
+def SECTION_STYLE(theme="dark"):
+    c = {"dark": {"s": "#1c2333", "b": "#30363d"}, "light": {"s": "#e5e7eb", "b": "#d0d7de"}}[theme if theme in ("dark","light") else "dark"]
+    return {"backgroundColor": c["s"], "border": f"1px solid {c['b']}", "borderRadius": "10px",
+            "padding": "14px", "marginBottom": "12px",
+            "transition": "background-color 0.3s ease, border-color 0.3s ease"}
+
+# GRAPH_CARD is now handled by _graph_card() function
 GRAPH_CARD = {
     "backgroundColor": SURFACE,
     "border": f"1px solid {BORDER}",
@@ -381,7 +380,7 @@ def ranking_table(df: pd.DataFrame, anchor_graph: str, sort_factor: str) -> html
             [header, html.Tbody(tbody_rows)],
             style={"width": "100%", "borderCollapse": "collapse"},
         ),
-    ], style={**SECTION_STYLE, "padding": "0", "overflow": "hidden"})
+    ], style={**SECTION_STYLE(), "padding": "0", "overflow": "hidden"})
 
 
 def participant_card(profile: dict) -> html.Div:
@@ -459,7 +458,7 @@ def participant_card(profile: dict) -> html.Div:
                     }),
                 ], width="auto"),
             ], align="center"),
-        ], style=CARD_STYLE),
+        ], style=CARD_STYLE()),
         dbc.Row(factor_cols, className="g-3 mb-3"),
         html.Div([
             html.Div("Raw Graph Scores", style={
@@ -496,7 +495,7 @@ def participant_card(profile: dict) -> html.Div:
                     ),
                 ]),
             ]),
-        ], style=CARD_STYLE),
+        ], style=CARD_STYLE()),
     ])
 
 
@@ -559,23 +558,34 @@ def comparison_card(profile: dict) -> html.Div:
             style={"color": MUTED, "fontSize": "10px",
                    "fontFamily": "monospace", "marginTop": "4px"},
         ),
-    ], style=SECTION_STYLE)
+    ], style=SECTION_STYLE())
 
 
-def _graph_card(children, title: str = "") -> html.Div:
+def _graph_card(children, title: str = "", theme: str = "dark") -> html.Div:
+    c = _theme_colors(theme)
+    card_style = {
+        "backgroundColor": c["surface"],
+        "border": f"1px solid {c['border']}",
+        "borderRadius": "12px",
+        "overflow": "hidden",
+        "boxShadow": f"0 4px 24px {'rgba(0,0,0,0.45)' if theme=='dark' else 'rgba(0,0,0,0.07)'}",
+        "marginBottom": "0",
+        "transition": "background-color 0.3s ease, border-color 0.3s ease",
+    }
     header = ([html.Div(title, style={
         "padding": "12px 16px 0 16px",
-        "fontSize": "12px", "fontWeight": 700, "color": MUTED,
+        "fontSize": "12px", "fontWeight": 700, "color": c["muted"],
         "letterSpacing": "0.04em",
     })] if title else [])
-    return html.Div([*header, children], style=GRAPH_CARD)
+    return html.Div([*header, children], style=card_style)
 
 # ─────────────────────────────────────────
 # Layout
 # ─────────────────────────────────────────
 app.layout = html.Div(
-    style={"backgroundColor": BG, "minHeight": "100vh",
-           "fontFamily": "Inter, system-ui, sans-serif", "color": TEXT},
+    id="app-root",
+    style={"minHeight": "100vh",
+           "fontFamily": "Inter, system-ui, sans-serif"},
     children=[
 
         dcc.Store(id="profiles-store"),
@@ -888,14 +898,14 @@ def render_tab(active_tab, df_json, profiles_json, anchor_graph, theme):
                 dbc.Col(_graph_card(
                     dcc.Graph(figure=build_anchor_comparison_chart(df, anchor_graph, theme),
                               config={"displayModeBar": False}),
-                ), width=8),
+                    theme=theme), width=8),
                 dbc.Col(_graph_card(
                     dcc.Graph(figure=build_disc_type_chart(profiles, theme),
                               config={"displayModeBar": False}),
-                ), width=4),
+                    theme=theme), width=4),
             ], className="g-3 mb-3"),
             _graph_card(dcc.Graph(figure=build_heatmap(df, anchor_graph, theme),
-                                  config={"displayModeBar": True, "scrollZoom": True})),
+                                  config={"displayModeBar": True, "scrollZoom": True}), theme=theme),
             html.Div(style={"marginTop": "20px"}),
             html.Div("Per-Factor Mean Charts", style={
                 "color": MUTED, "fontSize": "11px", "fontWeight": 700,
@@ -948,7 +958,7 @@ def render_tab(active_tab, df_json, profiles_json, anchor_graph, theme):
                     ),
                 ], width=6),
             ], className="mb-3"),
-            _graph_card(dcc.Graph(id="radar-chart", config={"displayModeBar": False})),
+            _graph_card(dcc.Graph(id="radar-chart", config={"displayModeBar": False}), theme=theme),
             html.Hr(style={"borderColor": BORDER, "margin": "24px 0"}),
             html.Div("Side-by-Side Operator Cards", style={
                 "color": TEXT, "fontWeight": 700, "fontSize": "14px",
@@ -982,8 +992,7 @@ def update_letter_chart(letter, df_json, anchor_graph, theme):
     df = pd.read_json(io.StringIO(df_json), orient="records")
     return _graph_card(
         dcc.Graph(figure=build_letter_mean_combo(df, letter, anchor_graph, theme),
-                  config={"displayModeBar": True, "scrollZoom": True}),
-    )
+                  config={"displayModeBar": True, "scrollZoom": True}), theme=theme)
 
 
 # 7 — Participant card
