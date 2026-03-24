@@ -260,11 +260,14 @@ def build_letter_mean_combo(df, letter, anchor_graph, theme="dark"):
 def shift_badge(value: float) -> html.Span:
     if abs(value) <= 0.15:
         return html.Span(f"± {abs(value):.2f}",
+                         className="shift-neutral",
                          style={"color": MUTED, "fontWeight": 600, "fontSize": "11px"})
     if value > 0:
         return html.Span(f"▲ {value:+.2f}",
+                         className="shift-positive",
                          style={"color": GREEN, "fontWeight": 700, "fontSize": "11px"})
     return html.Span(f"▼ {value:+.2f}",
+                     className="shift-negative",
                      style={"color": RED_IND, "fontWeight": 700, "fontSize": "11px"})
 
 
@@ -395,11 +398,11 @@ def participant_card(profile: dict) -> html.Div:
                   for t in fp["traits"][:4]]
         factor_cols.append(dbc.Col(html.Div([
             html.Div([
-                html.Span(f, style={"fontSize": "26px", "fontWeight": 900, "color": color}),
+                html.Span(f, className="factor-letter", style={"fontSize": "26px", "fontWeight": 900, "color": color}),
                 html.Span(f" {fp['anchor_score']:+.2f}",
                           style={"fontSize": "13px", "color": MUTED, "marginLeft": "6px"}),
             ], style={"marginBottom": "2px"}),
-            html.Div(fp["bucket"].replace("_", " ").title(), style={
+            html.Div(fp["bucket"].replace("_", " ").title(), className="bucket-label", style={
                 "fontSize": "10px", "color": color, "fontWeight": 700,
                 "letterSpacing": "0.06em", "textTransform": "uppercase",
                 "marginBottom": "10px",
@@ -433,7 +436,7 @@ def participant_card(profile: dict) -> html.Div:
         html.Div([
             dbc.Row([
                 dbc.Col([
-                    html.Div("SDG DISC Operator Report", style={
+                    html.Div("SDG DISC Operator Report", className="report-title", style={
                         "fontSize": "17px", "fontWeight": 800, "color": TEXT,
                         "marginBottom": "4px",
                     }),
@@ -509,11 +512,11 @@ def comparison_card(profile: dict) -> html.Div:
         traits = "; ".join(fp["traits"][:2])
         mini_cols.append(dbc.Col(html.Div([
             html.Div([
-                html.Span(f, style={"fontWeight": 900, "color": color, "fontSize": "15px"}),
+                html.Span(f, className="factor-letter", style={"fontWeight": 900, "color": color, "fontSize": "15px"}),
                 html.Span(f" {fp['anchor_score']:+.2f}",
                           style={"fontSize": "12px", "color": MUTED}),
             ], style={"marginBottom": "2px"}),
-            html.Div(fp["bucket"].replace("_", " "), style={
+            html.Div(fp["bucket"].replace("_", " "), className="bucket-label", style={
                 "fontSize": "10px", "color": color, "fontWeight": 600, "marginBottom": "4px",
             }),
             html.Div(traits, style={"fontSize": "10px", "color": MUTED,
@@ -606,7 +609,7 @@ app.layout = html.Div(
                                 "padding": "3px 8px", "borderRadius": "5px",
                                 "marginRight": "10px", "letterSpacing": "0.05em",
                             }),
-                            html.Span("DISC Dashboard", style={
+                            html.Span("DISC Dashboard", className="header-title", style={
                                 "fontWeight": 700, "fontSize": "15px", "color": TEXT,
                             }),
                         ], style={"display": "flex", "alignItems": "center"}),
@@ -935,7 +938,7 @@ def render_tab(active_tab, df_json, profiles_json, anchor_graph, theme):
 
     if active_tab == "comparisons":
         return html.Div([
-            html.Div("Radar Profile Comparison", style={
+            html.Div("Radar Profile Comparison", className="section-title", style={
                 "color": TEXT, "fontWeight": 700, "fontSize": "14px",
                 "marginBottom": "14px",
             }),
@@ -960,7 +963,7 @@ def render_tab(active_tab, df_json, profiles_json, anchor_graph, theme):
             ], className="mb-3"),
             _graph_card(dcc.Graph(id="radar-chart", config={"displayModeBar": False}), theme=theme),
             html.Hr(style={"borderColor": BORDER, "margin": "24px 0"}),
-            html.Div("Side-by-Side Operator Cards", style={
+            html.Div("Side-by-Side Operator Cards", className="section-title", style={
                 "color": TEXT, "fontWeight": 700, "fontSize": "14px",
                 "marginBottom": "14px",
             }),

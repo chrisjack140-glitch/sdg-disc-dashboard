@@ -140,20 +140,195 @@ body[data-theme="light"] div[style*="rgb(17, 24, 39)"] {
     color: var(--text) !important;
 }
 
-/* All text inherits theme colour */
-body[data-theme="light"] p,
-body[data-theme="light"] span,
-body[data-theme="light"] div,
-body[data-theme="light"] li,
-body[data-theme="light"] td,
-body[data-theme="light"] th {
-    color: var(--text);
-    border-color: var(--border);
-    transition: color 0.3s ease, background-color 0.3s ease;
+/* ════════════════════════════════════════════════════════
+   LIGHT MODE — SURGICAL TEXT FIXES
+   Only target elements that need overriding.
+   DO NOT use a broad span/div rule — it kills inline colours.
+   ════════════════════════════════════════════════════════ */
+
+/* ── Header: "DISC Dashboard" title and SDG badge text ── */
+body[data-theme="light"] .sticky-header span,
+body[data-theme="light"] .sticky-header div {
+    color: #1f2328 !important;
+}
+/* Keep SDG badge readable — white text on blue bg */
+body[data-theme="light"] .sticky-header span[style*="backgroundColor"],
+body[data-theme="light"] .sticky-header span[style*="background-color"] {
+    color: #0d1117 !important;
 }
 
-/* ════════════════════════════════════════════════════════
-   PLOTLY GRAPHS — light mode backgrounds
+/* ── Tab link text in light mode ── */
+body[data-theme="light"] .nav-tabs .nav-link {
+    color: #57606a !important;
+}
+body[data-theme="light"] .nav-tabs .nav-link.active {
+    color: #0969da !important;
+}
+
+/* ── Section headings (Radar title, Side-by-Side title etc) ── */
+body[data-theme="light"] #tab-content > div > div[style*="fontWeight: 700"],
+body[data-theme="light"] #tab-content > div > div[style*="font-weight: 700"] {
+    color: #1f2328 !important;
+}
+
+/* ── SDG DISC Operator Report title ── */
+body[data-theme="light"] [style*="fontSize: 17px"],
+body[data-theme="light"] [style*="font-size: 17px"] {
+    color: #1f2328 !important;
+}
+
+/* ── Participant name in operator report header (accent blue — keep) ── */
+body[data-theme="light"] [style*="color: rgb(88, 166, 255)"] {
+    color: #0969da !important;
+}
+
+/* ── Participant names in comparison cards ── */
+body[data-theme="light"] [style*="fontSize: 15px"][style*="fontWeight: 800"],
+body[data-theme="light"] [style*="font-size: 15px"][style*="font-weight: 800"] {
+    color: #1f2328 !important;
+}
+
+/* ── "Top Two / Anchor" subtitle line in comparison cards ── */
+body[data-theme="light"] [style*="fontSize: 11px"][style*="color: rgb(139"] {
+    color: #57606a !important;
+}
+
+/* ── Raw graph scores monospace text ── */
+body[data-theme="light"] [style*="fontFamily: monospace"],
+body[data-theme="light"] [style*="font-family: monospace"] {
+    color: #1f2328 !important;
+}
+
+/* ── Section labels like PUBLIC / STRESS / MIRROR ── */
+body[data-theme="light"] [style*="fontSize: 9px"],
+body[data-theme="light"] [style*="font-size: 9px"] {
+    color: #57606a !important;
+}
+
+/* ── DISC factor letter colours — ALWAYS preserved ── */
+/* D = red */
+body[data-theme="light"] [style*="color: rgb(248, 81, 73)"],
+body[data-theme="light"] [style*="color: #f85149"] {
+    color: #cf222e !important;
+}
+/* I = yellow/gold */
+body[data-theme="light"] [style*="color: rgb(210, 153, 34)"],
+body[data-theme="light"] [style*="color: #d29922"] {
+    color: #9a6700 !important;
+}
+/* S = green */
+body[data-theme="light"] [style*="color: rgb(63, 185, 80)"],
+body[data-theme="light"] [style*="color: #3fb950"] {
+    color: #1a7f37 !important;
+}
+/* C = blue */
+body[data-theme="light"] [style*="color: rgb(88, 166, 255)"],
+body[data-theme="light"] [style*="color: #58a6ff"] {
+    color: #0969da !important;
+}
+
+/* ── Shift arrows — GREEN for positive, RED for negative ── */
+/* Positive arrow (green) */
+body[data-theme="light"] [style*="color: rgb(63, 185, 80)"] {
+    color: #1a7f37 !important;
+}
+/* Negative arrow (red) */
+body[data-theme="light"] [style*="color: rgb(248, 81, 73)"] {
+    color: #cf222e !important;
+}
+
+/* ── Bucket labels (balanced, high, moderate high etc) — keep DISC colour ── */
+/* These are already handled by the factor colour rules above */
+
+/* ── Muted/secondary text ── */
+body[data-theme="light"] [style*="color: rgb(139, 148, 158)"],
+body[data-theme="light"] [style*="color: #8b949e"] {
+    color: #57606a !important;
+}
+
+/* ── Primary body text ── */
+body[data-theme="light"] [style*="color: rgb(230, 237, 243)"],
+body[data-theme="light"] [style*="color: #e6edf3"] {
+    color: #1f2328 !important;
+}
+
+/* ── DISC Style badge (top right of operator card) ── */
+body[data-theme="light"] [style*="fontSize: 26px"][style*="fontWeight: 900"],
+body[data-theme="light"] [style*="font-size: 26px"][style*="font-weight: 900"] {
+    color: #0969da !important;
+}
+
+/* ── "DISC STYLE" label above the badge ── */
+body[data-theme="light"] [style*="fontSize: 9px"][style*="letterSpacing"] {
+    color: #57606a !important;
+}
+
+/* ── Traits and list items in factor tiles ── */
+body[data-theme="light"] .factor-tile li {
+    color: #57606a !important;
+}
+
+/* ── "Traits" section header inside factor tiles ── */
+body[data-theme="light"] .factor-tile [style*="textTransform: uppercase"][style*="fontSize: 10px"] {
+    color: #57606a !important;
+}
+
+/* ── Shift label text (Public → Stress:) ── */
+body[data-theme="light"] .factor-tile [style*="fontSize: 11px"] {
+    color: #57606a !important;
+}
+
+/* ── Section title labels (RAW GRAPH SCORES, PER-FACTOR MEAN CHARTS) ── */
+body[data-theme="light"] [style*="textTransform: uppercase"][style*="letterSpacing"] {
+    color: #57606a !important;
+}
+
+/* ── Comparison card raw scores line ── */
+body[data-theme="light"] [style*="fontSize: 10px"][style*="fontFamily: monospace"],
+body[data-theme="light"] [style*="font-size: 10px"][style*="font-family: monospace"] {
+    color: #57606a !important;
+}
+
+/* ── Participant rankings toggle button ── */
+body[data-theme="light"] #rank-toggle {
+    color: #57606a !important;
+}
+body[data-theme="light"] #rank-toggle:hover {
+    color: #1f2328 !important;
+}
+
+
+/* ── Class-based overrides (most reliable) ── */
+body[data-theme="light"] .header-title,
+body[data-theme="light"] .report-title,
+body[data-theme="light"] .comp-name,
+body[data-theme="light"] .section-title {
+    color: #1f2328 !important;
+}
+
+/* ── Shift badges — always green/red regardless of theme ── */
+.shift-positive { color: #3fb950 !important; }
+.shift-negative { color: #f85149 !important; }
+.shift-neutral  { color: #8b949e !important; }
+
+body[data-theme="light"] .shift-positive { color: #1a7f37 !important; }
+body[data-theme="light"] .shift-negative { color: #cf222e !important; }
+body[data-theme="light"] .shift-neutral  { color: #57606a !important; }
+
+/* ── Factor letters — keep DISC colours in both themes ── */
+/* These are set inline so we rely on specificity via the class */
+body[data-theme="light"] .factor-letter[style*="#f85149"] { color: #cf222e !important; }
+body[data-theme="light"] .factor-letter[style*="#d29922"] { color: #9a6700 !important; }
+body[data-theme="light"] .factor-letter[style*="#3fb950"] { color: #1a7f37 !important; }
+body[data-theme="light"] .factor-letter[style*="#58a6ff"] { color: #0969da !important; }
+
+/* ── Bucket labels — keep DISC colours in light mode ── */
+body[data-theme="light"] .bucket-label[style*="#f85149"] { color: #cf222e !important; }
+body[data-theme="light"] .bucket-label[style*="#d29922"] { color: #9a6700 !important; }
+body[data-theme="light"] .bucket-label[style*="#3fb950"] { color: #1a7f37 !important; }
+body[data-theme="light"] .bucket-label[style*="#58a6ff"] { color: #0969da !important; }
+
+
    ════════════════════════════════════════════════════════ */
 body[data-theme="light"] .js-plotly-plot .plotly,
 body[data-theme="light"] .js-plotly-plot .plotly .main-svg,
