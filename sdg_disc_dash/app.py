@@ -200,8 +200,24 @@ def build_disc_type_chart(profiles, theme="dark"):
 
 def build_multi_radar_chart(selected_profiles, graph_name, theme="dark"):
     categories = ["DI","I","IS","S","SC","C","CD","D"]
-    palette = [FACTOR_COLORS["D"], FACTOR_COLORS["I"], FACTOR_COLORS["S"], FACTOR_COLORS["C"],
-               PURPLE, CYAN, "#fb7185", "#f97316"]
+    # 15 unique colours before any repeat — visually distinct across the spectrum
+    palette = [
+        "#f85149",  # 1  — DISC Red (D)
+        "#58a6ff",  # 2  — DISC Blue (C)
+        "#3fb950",  # 3  — DISC Green (S)
+        "#d29922",  # 4  — DISC Gold (I)
+        "#bc8cff",  # 5  — Violet
+        "#39d353",  # 6  — Bright cyan-green
+        "#fb7185",  # 7  — Rose pink
+        "#f97316",  # 8  — Orange
+        "#22d3ee",  # 9  — Cyan
+        "#a78bfa",  # 10 — Lavender
+        "#34d399",  # 11 — Emerald
+        "#fbbf24",  # 12 — Amber
+        "#e879f9",  # 13 — Fuchsia
+        "#38bdf8",  # 14 — Sky blue
+        "#4ade80",  # 15 — Lime green
+    ]
     c = _theme_colors(theme)
     fig = go.Figure()
     for idx, profile in enumerate(selected_profiles):
@@ -211,7 +227,7 @@ def build_multi_radar_chart(selected_profiles, graph_name, theme="dark"):
         fig.add_trace(go.Scatterpolar(
             r=vals+[vals[0]], theta=categories+[categories[0]], fill="none",
             name=profile["participant_name"],
-            line=dict(color=palette[idx % len(palette)], width=2), opacity=0.9,
+            line=dict(color=palette[idx % len(palette)], width=2.5), opacity=0.9,
             hovertemplate="<b>%{fullData.name}</b><br>%{theta}: %{r:.2f}<extra></extra>",
         ))
     fig.update_layout(**_base_layout(
