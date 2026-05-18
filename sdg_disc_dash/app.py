@@ -577,104 +577,130 @@ def _eqi_insights_section(profile: dict) -> Optional[html.Details]:
     if not ins:
         return None
 
-    # ── Connection block ────────────────────────────────────────────────────
+    # ── Style header ────────────────────────────────────────────────────────
     body_children = [
         html.Div([
-            html.Div(
-                f"{ins['style_name']} Style  ·  {ins['style_desc']}",
-                style={"fontSize": "11px", "fontWeight": 700,
-                       "color": THEME["dark"]["text"], "marginBottom": "8px"},
-            ),
-            html.P(ins["connection"], style={
+            html.Span(f"{ins['style_name']} Style", style={
+                "fontSize": "12px", "fontWeight": 800,
+                "color": THEME["dark"]["text"],
+            }),
+            html.Span(f"  ·  {ins['style_desc']}", style={
                 "fontSize": "11px", "color": THEME["dark"]["muted"],
-                "lineHeight": "1.65", "margin": 0,
             }),
         ], style={
             "backgroundColor": THEME["dark"]["bg"],
             "borderLeft": f"3px solid {THEME['dark']['purple']}",
             "borderRadius": "0 6px 6px 0",
-            "padding": "12px 14px", "marginBottom": "14px",
+            "padding": "10px 14px", "marginBottom": "16px",
         }),
     ]
 
-    # ── Confirmed strengths ─────────────────────────────────────────────────
-    if ins.get("confirmed_strengths"):
-        chips = [
-            html.Span(f"{s['label']} ({s['score']})", style={
-                "backgroundColor": THEME["dark"]["green"],
-                "color": THEME["dark"]["bg"],
-                "padding": "2px 10px", "borderRadius": "12px",
-                "fontSize": "11px", "fontWeight": 600,
-                "marginRight": "6px", "marginBottom": "4px",
-                "display": "inline-block",
-            }) for s in ins["confirmed_strengths"]
-        ]
-        body_children += [
-            html.Div("EQ STRENGTHS ALIGNED WITH YOUR STYLE", style={
-                "fontSize": "10px", "fontWeight": 700,
-                "color": THEME["dark"]["muted"], "letterSpacing": "0.07em",
-                "textTransform": "uppercase", "marginBottom": "6px",
-            }),
-            html.Div(chips, style={"display": "flex", "flexWrap": "wrap",
-                                   "marginBottom": "14px"}),
-        ]
+    # ── DISC ↔ EQI Correlations ─────────────────────────────────────────────
+    if ins.get("correlations"):
+        corr_rows = []
+        for corr in ins["correlations"]:
+            score      = corr.get("score")
+            is_inverse = corr.get("inverse", False)
+            if score is None:
+                score_el = html.Span("—", style={"color": THEME["dark"]["muted"],
+                                                  "fontSize": "11px"})
+            else:
+                if score >= 110:
+                    sc = THEME["dark"]["green"]
+                elif score >= 100:
+                    sc = THEME["dark"]["accent"]
+                elif score >= 90:
+                    sc = THEME["dark"]["gold"]
+                else:
+                    sc = THEME["dark"]["red"]
+                score_el = html.Span(str(score), style={
+                    "color": sc, "fontWeight": 700, "fontSize": "11px",
+                })
 
-    # ── Priority development areas ──────────────────────────────────────────
-    if ins.get("priority_growth"):
-        growth_items = []
-        for item in ins["priority_growth"]:
-            score = item["score"]
-            score_color = (THEME["dark"]["gold"]
-                           if score >= 90 else THEME["dark"]["red"])
-            growth_items.append(html.Div([
+            corr_rows.append(html.Div([
                 html.Div([
-                    html.Span(item["label"], style={
+                    html.Span(corr["label"], style={
                         "fontWeight": 700, "fontSize": "12px",
                         "color": THEME["dark"]["text"],
                     }),
-                    html.Span(f"{score}  —  {item['level']}", style={
-                        "fontSize": "11px", "fontWeight": 600,
-                        "color": score_color, "marginLeft": "10px",
+                    html.Span(" (inverse)" if is_inverse else "", style={
+                        "fontSize": "10px", "color": THEME["dark"]["gold"],
+                        "marginLeft": "4px",
                     }),
+                    html.Span(" — ", style={"color": THEME["dark"]["muted"]}),
+                    score_el,
                 ], style={"display": "flex", "alignItems": "center",
-                          "marginBottom": "6px"}),
-                html.P(item["tip"], style={
+                          "marginBottom": "4px", "flexWrap": "wrap"}),
+                html.P(corr["note"], style={
                     "fontSize": "11px", "color": THEME["dark"]["muted"],
                     "lineHeight": "1.6", "margin": 0,
                 }),
             ], style={
-                "border": f"1px solid {THEME['dark']['border']}",
-                "borderRadius": "8px", "padding": "12px 14px",
-                "marginBottom": "8px",
+                "borderBottom": f"1px solid {THEME['dark']['border']}",
+                "paddingBottom": "10px", "marginBottom": "10px",
             }))
+
         body_children += [
-            html.Div("PRIORITY DEVELOPMENT AREAS", style={
+            html.Div("DISC — EQ-i CORRELATIONS FOR YOUR STYLE", style={
                 "fontSize": "10px", "fontWeight": 700,
                 "color": THEME["dark"]["muted"], "letterSpacing": "0.07em",
-                "textTransform": "uppercase", "marginBottom": "8px",
+                "textTransform": "uppercase", "marginBottom": "10px",
             }),
-            *growth_items,
+            html.Div(corr_rows, style={"marginBottom": "18px"}),
         ]
 
-    # ── Unexpected gaps ─────────────────────────────────────────────────────
-    if ins.get("unexpected_gaps"):
-        chips = [
-            html.Span(f"{g['label']} ({g['score']})", style={
-                "backgroundColor": THEME["dark"]["surface2"],
+    # ── Bottom 3 development areas ──────────────────────────────────────────
+    if ins.get("bottom_three"):
+        growth_items = []
+        for item in ins["bottom_three"]:
+            score = item["score"]
+            if score >= 110:
+                score_color = THEME["dark"]["green"]
+            elif score >= 100:
+                score_color = THEME["dark"]["accent"]
+            elif score >= 90:
+                score_color = THEME["dark"]["gold"]
+            else:
+                score_color = THEME["dark"]["red"]
+
+            action_bullets = [
+                html.Li(action, style={
+                    "fontSize": "11px", "color": THEME["dark"]["muted"],
+                    "lineHeight": "1.6", "marginBottom": "4px",
+                }) for action in item.get("actions", [])
+            ]
+
+            growth_items.append(html.Div([
+                html.Div([
+                    html.Span(item["label"], style={
+                        "fontWeight": 700, "fontSize": "13px",
+                        "color": THEME["dark"]["text"],
+                    }),
+                    html.Span(f"  {score}", style={
+                        "fontSize": "12px", "fontWeight": 700,
+                        "color": score_color, "marginLeft": "8px",
+                    }),
+                    html.Span(f"  —  {item['level']}", style={
+                        "fontSize": "11px", "color": score_color,
+                    }),
+                ], style={"display": "flex", "alignItems": "center",
+                          "marginBottom": "8px", "flexWrap": "wrap"}),
+                html.Ul(action_bullets, style={
+                    "paddingLeft": "16px", "margin": 0,
+                }),
+            ], style={
                 "border": f"1px solid {THEME['dark']['border']}",
-                "color": THEME["dark"]["muted"],
-                "padding": "2px 8px", "borderRadius": "10px",
-                "fontSize": "10px", "marginRight": "5px",
-                "marginBottom": "4px", "display": "inline-block",
-            }) for g in ins["unexpected_gaps"]
-        ]
+                "borderRadius": "8px", "padding": "12px 14px",
+                "marginBottom": "10px",
+            }))
+
         body_children += [
-            html.Div(
-                f"Additional gaps (outside typical {ins['style_name']} pattern):",
-                style={"fontSize": "10px", "color": THEME["dark"]["muted"],
-                       "marginTop": "8px", "marginBottom": "5px"},
-            ),
-            html.Div(chips, style={"display": "flex", "flexWrap": "wrap"}),
+            html.Div("BOTTOM 3 DEVELOPMENT AREAS", style={
+                "fontSize": "10px", "fontWeight": 700,
+                "color": THEME["dark"]["muted"], "letterSpacing": "0.07em",
+                "textTransform": "uppercase", "marginBottom": "10px",
+            }),
+            *growth_items,
         ]
 
     return html.Details([
@@ -698,7 +724,7 @@ def _eqi_insights_section(profile: dict) -> Optional[html.Details]:
 def _eqi_comparison_insights(profile: dict) -> Optional[html.Details]:
     """
     Condensed collapsible EQI Insights for comparison cards.
-    Shows the connection paragraph and top 1-2 growth areas only.
+    Shows the bottom 3 underdeveloped subscales with scores only (no action steps).
     """
     eqi_scores = profile.get("eqi_scores", {})
     if not eqi_scores:
@@ -712,39 +738,43 @@ def _eqi_comparison_insights(profile: dict) -> Optional[html.Details]:
     if not summ:
         return None
 
-    body = [
-        html.P(summ["connection"], style={
-            "fontSize": "10px", "color": THEME["dark"]["muted"],
-            "lineHeight": "1.6", "margin": "0 0 10px 0",
-        }),
-    ]
-
-    if summ.get("top_growth"):
-        g = summ["top_growth"]
-        score_color = (THEME["dark"]["gold"]
-                       if g["score"] >= 90 else THEME["dark"]["red"])
+    body = []
+    for item in summ.get("bottom_three", []):
+        score = item["score"]
+        if score >= 110:
+            sc = THEME["dark"]["green"]
+        elif score >= 100:
+            sc = THEME["dark"]["accent"]
+        elif score >= 90:
+            sc = THEME["dark"]["gold"]
+        else:
+            sc = THEME["dark"]["red"]
         body.append(html.Div([
-            html.Span(g["label"], style={
+            html.Span(item["label"], style={
                 "fontSize": "11px", "fontWeight": 700,
                 "color": THEME["dark"]["text"],
             }),
-            html.Span(f" {g['score']}  —  {g['level']}", style={
-                "fontSize": "10px", "color": score_color,
+            html.Span(f"  {score}  —  {item['level']}", style={
+                "fontSize": "10px", "color": sc,
             }),
-        ]))
-        if summ["n_gaps"] > 1:
-            body.append(html.Div(
-                f"+ {summ['n_gaps'] - 1} more development area(s)",
-                style={"fontSize": "10px", "color": THEME["dark"]["muted"],
-                       "marginTop": "4px"},
-            ))
+        ], style={"marginBottom": "5px"}))
+
+    if not body:
+        return None
 
     return html.Details([
         html.Summary(
             f"EQI Insights  ·  {summ['style_name']} Style",
             className="eqi-insights-summary eqi-insights-summary-sm",
         ),
-        html.Div(body, style={"padding": "8px 14px 12px"}),
+        html.Div([
+            html.Div("BOTTOM 3 DEVELOPMENT AREAS", style={
+                "fontSize": "9px", "fontWeight": 700,
+                "color": THEME["dark"]["muted"], "letterSpacing": "0.07em",
+                "textTransform": "uppercase", "marginBottom": "6px",
+            }),
+            *body,
+        ], style={"padding": "8px 14px 12px"}),
     ], className="eqi-insights-details eqi-insights-details-sm")
 
 
