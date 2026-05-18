@@ -1,6 +1,7 @@
 import io
 import json
 from collections import Counter
+from typing import Optional
 
 import dash
 from dash import dcc, html, Input, Output, State
