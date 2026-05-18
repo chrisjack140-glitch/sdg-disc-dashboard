@@ -654,3 +654,63 @@ div[style*="border-radius: 12px"][style*="overflow: hidden"] {
     animation: graphFadeIn 0.5s ease-out both;
     transition: background-color 0.3s ease, border-color 0.3s ease;
 }
+
+/* ════════════════════════════════════════════════════════
+   EQI INSIGHTS — collapsible <details> block
+   ════════════════════════════════════════════════════════ */
+.eqi-insights-details {
+    border-top: 1px solid var(--border);
+    background-color: var(--surface);
+    border-radius: 0 0 12px 12px;
+    margin-top: -1px;           /* merge visually with card above */
+}
+.eqi-insights-details[open] > .eqi-insights-summary {
+    border-bottom: 1px solid var(--border);
+}
+
+.eqi-insights-summary {
+    display:         flex;
+    align-items:     center;
+    gap:             10px;
+    padding:         13px 20px;
+    cursor:          pointer;
+    font-size:       13px;
+    font-weight:     700;
+    color:           var(--text);
+    list-style:      none;          /* hide default marker */
+    user-select:     none;
+    transition:      background-color 0.15s ease;
+}
+.eqi-insights-summary::-webkit-details-marker { display: none; }
+.eqi-insights-summary:hover { background-color: var(--surface2); }
+
+/* Rotate arrow when open */
+.eqi-insights-details[open] .eqi-insights-summary::before { content: "▼ "; }
+.eqi-insights-details:not([open]) .eqi-insights-summary::before { content: "▶ "; }
+.eqi-insights-summary::before {
+    font-size: 9px;
+    color: var(--muted);
+}
+
+/* Compact variant used in comparison cards */
+.eqi-insights-details-sm {
+    margin-top:    8px;
+    border-radius: 8px;
+    border:        1px solid var(--border);
+}
+.eqi-insights-summary-sm {
+    font-size:   11px;
+    padding:     9px 14px;
+}
+
+/* Light-mode text fixes for insights content */
+body[data-theme="light"] .eqi-insights-details {
+    background-color: var(--surface) !important;
+    border-color:     var(--border)  !important;
+}
+body[data-theme="light"] .eqi-insights-summary {
+    color: var(--text) !important;
+}
+body[data-theme="light"] .eqi-insights-summary:hover {
+    background-color: var(--surface2) !important;
+}

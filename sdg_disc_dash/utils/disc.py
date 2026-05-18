@@ -1,10 +1,13 @@
 import io
 import re
 import base64
+from difflib import SequenceMatcher
 from typing import Dict, List, Optional
 
 import pandas as pd
 import pdfplumber
+
+from utils.eqi_parser import is_eqi_pdf, parse_eqi_bytes
 
 # ─────────────────────────────────────────
 # Constants
@@ -258,7 +261,23 @@ def decode_upload(contents: str, filename: str) -> Dict:
 
 def process_uploaded_files(files_data: List[Dict], anchor_graph: str = "stress"):
     profiles, rows, errors = [], [], []
+    eqi_results: List[Dict] = []
+    disc_files: List[Dict] = []
+    eqi_files: List[Dict] = []
+
+    # ── Pass 1: classify each file as EQI or DISC ──────────────────────────
     for file_dict in files_data:
+        try:
+            page1_text = extract_page1_text(file_dict["content"])
+            if is_eqi_pdf(page1_text):
+                eqi_files.append(file_dict)
+            else:
+                disc_files.append(file_dict)
+        except Exception:
+            disc_files.append(file_dict)
+
+    # ── Pass 2: parse DISC files (existing flow) ───────────────────────────
+    for file_dict in disc_files:
         try:
             raw_bytes        = file_dict["content"]
             full_text        = extract_text_from_pdf_bytes(raw_bytes)
@@ -270,6 +289,7 @@ def process_uploaded_files(files_data: List[Dict], anchor_graph: str = "stress")
                                              style_type=style_type)
             profile["source_pdf"]       = file_dict["name"]
             profile["participant_name"] = participant_name
+            profile["eqi_scores"]       = {}   # populated in pass 4
             profiles.append(profile)
 
             row = {
@@ -290,5 +310,39 @@ def process_uploaded_files(files_data: List[Dict], anchor_graph: str = "stress")
 
         except Exception as exc:
             errors.append({"file": file_dict["name"], "error": str(exc)})
+
+    # ── Pass 3: parse EQI files ────────────────────────────────────────────
+    for file_dict in eqi_files:
+        try:
+            result = parse_eqi_bytes(file_dict["content"])
+            if result:
+                eqi_results.append(result)
+        except Exception as exc:
+            errors.append({"file": file_dict["name"],
+                           "error": f"EQI parse error: {exc}"})
+
+    # ── Pass 4: match EQI results to DISC profiles by name similarity ──────
+    used_eqi: set = set()
+    for profile in profiles:
+        disc_name = profile["participant_name"].lower().strip()
+        best_sim, best_idx = 0.0, -1
+        for i, eqi in enumerate(eqi_results):
+            if i in used_eqi:
+                continue
+            sim = SequenceMatcher(
+                None, disc_name, eqi["name"].lower().strip()
+            ).ratio()
+            if sim > best_sim:
+                best_sim, best_idx = sim, i
+
+        if best_idx >= 0 and best_sim >= 0.65:
+            eqi = eqi_results[best_idx]
+            # Flat dict: snake_case subscales + full-name composites + total_ei
+            eqi_scores: Dict = dict(eqi["subscales"])
+            eqi_scores.update(eqi["composites"])          # {"Self-Perception": 114, ...}
+            if eqi["total_ei"] is not None:
+                eqi_scores["total_ei"] = eqi["total_ei"]
+            profile["eqi_scores"] = eqi_scores
+            used_eqi.add(best_idx)
 
     return profiles, pd.DataFrame(rows), errors
