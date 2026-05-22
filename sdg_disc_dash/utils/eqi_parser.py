@@ -1,7 +1,9 @@
 """
 EQI Report Parser — Dash-compatible (bytes-based)
 ==================================================
-Reads ONLY pages 1 (name) and 3 (score overview) for speed.
+Supports both EQ-i 2.0 Workplace Report and Leadership Report formats.
+Reads page 1 for the participant name, then scans pages 3–6 for scores,
+selecting whichever page yields the most complete subscale data.
 Output keys match EQI_COMPOSITES and build_eqi_bar_chart() in app.py.
 """
 import io
@@ -38,12 +40,12 @@ COMPOSITE_LABELS: Dict[str, str] = {
     "stress management composite":  "Stress Management",
 }
 
-# Signals present on page 1 of an EQ-i 2.0 report
+# Signals present on page 1 of an EQ-i 2.0 report (Workplace or Leadership)
 _EQI_SIGNALS = [
     "eq-i", "eqi", "total ei",
     "multi-health systems", "self-perception composite",
     "stress management composite", "emotional intelligence",
-    "workplace report",
+    "workplace report", "leadership report",
 ]
 
 
@@ -55,9 +57,13 @@ def is_eqi_pdf(page1_text: str) -> bool:
 
 def parse_eqi_bytes(file_bytes: bytes) -> Optional[Dict]:
     """
-    Parse an EQ-i 2.0 Workplace Report PDF from raw bytes.
+    Parse an EQ-i 2.0 PDF (Workplace or Leadership Report) from raw bytes.
     Returns None if the file cannot be identified or parsed.
-    Only reads pages 1 and 3.
+
+    Reads page 1 for the participant name, then scans pages 3–6 (indices 2–5)
+    for scores, selecting whichever page yields the most complete subscale set.
+    - Workplace Report: full scores are on page 3 (index 2)
+    - Leadership Report: full scores are on page 6 (index 5)
 
     Returned dict structure:
       name        str   participant name
@@ -70,24 +76,42 @@ def parse_eqi_bytes(file_bytes: bytes) -> Optional[Dict]:
             if len(pdf.pages) < 3:
                 return None
             page1_text = pdf.pages[0].extract_text() or ""
-            page3_text = pdf.pages[2].extract_text() or ""
+            # Candidate score pages: index 2 (Workplace) through 5 (Leadership)
+            candidate_texts = [
+                pdf.pages[i].extract_text() or ""
+                for i in range(2, min(6, len(pdf.pages)))
+            ]
     except Exception:
         return None
 
-    if not is_eqi_pdf(page1_text) and not is_eqi_pdf(page3_text):
+    if not is_eqi_pdf(page1_text) and not any(
+        is_eqi_pdf(t) for t in candidate_texts
+    ):
         return None
 
     name = _extract_name(page1_text)
-    total_ei, composites, subscales = _extract_scores(page3_text)
 
-    if total_ei is None and not subscales:
+    # Pick the candidate page that yields the most complete subscale data
+    best_total: Optional[int] = None
+    best_composites: Dict[str, int] = {}
+    best_subscales: Dict[str, int] = {}
+    for text in candidate_texts:
+        total, composites, subscales = _extract_scores(text)
+        if len(subscales) > len(best_subscales):
+            best_total, best_composites, best_subscales = (
+                total, composites, subscales
+            )
+        elif len(subscales) == len(best_subscales) and best_total is None:
+            best_total = total
+
+    if best_total is None and not best_subscales:
         return None
 
     return {
         "name":       name,
-        "total_ei":   total_ei,
-        "composites": composites,
-        "subscales":  subscales,
+        "total_ei":   best_total,
+        "composites": best_composites,
+        "subscales":  best_subscales,
     }
 
 
@@ -95,6 +119,11 @@ def parse_eqi_bytes(file_bytes: bytes) -> Optional[Dict]:
 
 def _extract_name(text: str) -> str:
     lines = [ln.strip() for ln in text.split("\n") if ln.strip()]
+    # Leadership Report: "Leadership\nReport\n<Name>\n<Date>"
+    if (len(lines) >= 3
+            and lines[0].lower() == "leadership"
+            and lines[1].lower() == "report"):
+        return lines[2]
     for line in lines[:8]:
         if re.match(r"^[A-Z][a-z]+([\s\-'][A-Z][a-z]+){1,4}$", line):
             return line
@@ -108,13 +137,28 @@ def _extract_scores(
     composites: Dict[str, int] = {}
     subscales: Dict[str, int] = {}
 
-    for line in text.split("\n"):
-        line = line.strip()
+    lines = [ln.strip() for ln in text.split("\n")]
+    # Subscale name without a trailing score (Leadership Report format):
+    # score appears alone on the very next non-empty line.
+    pending_subscale: Optional[str] = None
+
+    for line in lines:
         if not line:
             continue
 
-        # Total EI
-        m = re.search(r"Total EI\s+(\d{2,3})", line, re.IGNORECASE)
+        # Consume a pending subscale score (Leadership Report multi-line format)
+        if pending_subscale is not None:
+            m = re.match(r"^(\d{2,3})$", line)
+            if m:
+                if pending_subscale not in subscales:
+                    subscales[pending_subscale] = int(m.group(1))
+                pending_subscale = None
+                continue
+            # Next line wasn't a bare number — abandon the pending match
+            pending_subscale = None
+
+        # Total EI — handle both "Total EI 108" and "Total EI: 108"
+        m = re.search(r"Total EI:?\s+(\d{2,3})", line, re.IGNORECASE)
         if m:
             total_ei = int(m.group(1))
             continue
@@ -139,8 +183,12 @@ def _extract_scores(
         ):
             if label.lower() in line_lower:
                 score = _tail_int(line)
-                if score is not None and snake_key not in subscales:
-                    subscales[snake_key] = score
+                if score is not None:
+                    if snake_key not in subscales:
+                        subscales[snake_key] = score
+                else:
+                    # Score is on the next line (Leadership Report layout)
+                    pending_subscale = snake_key
                 break
 
     return total_ei, composites, subscales
