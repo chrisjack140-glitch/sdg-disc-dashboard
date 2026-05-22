@@ -4,7 +4,7 @@ DISC–EQI Correlation Engine
 Maps each DISC style to its correlated EQ-i 2.0 subscales
 and provides action steps for the bottom 3 underdeveloped subscales.
 """
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple
 
 # ── Style metadata ──────────────────────────────────────────────────────────
 
@@ -22,7 +22,7 @@ STYLE_DESCS = {
     "C": "Analytical, systematic, quality-focused, and precise",
 }
 
-# ── DISC → EQI correlations ─────────────────────────────────────────────────
+# ── DISC → EQI style correlations (top 4 per style, for the style header) ──
 # Each entry: (snake_key, display_label, correlation_description, is_inverse)
 
 DISC_EQI_CORRELATIONS: Dict[str, List[Dict]] = {
@@ -46,9 +46,9 @@ DISC_EQI_CORRELATIONS: Dict[str, List[Dict]] = {
             "inverse": False,
         },
         {
-            "key":     "stress_tolerance",
-            "label":   "Stress Tolerance",
-            "note":    "Very high D with low Stress Tolerance creates volatility under pressure.",
+            "key":     "impulse_control",
+            "label":   "Impulse Control",
+            "note":    "High D styles move fast — low impulse control is the most common D-factor EQ risk.",
             "inverse": True,
         },
     ],
@@ -132,8 +132,83 @@ DISC_EQI_CORRELATIONS: Dict[str, List[Dict]] = {
     ],
 }
 
+# ── Full subscale → primary DISC factor mapping ─────────────────────────────
+# Covers all 15 subscales. inverse=True means high DISC predicts low EQI.
+
+SUBSCALE_DISC_MAP: Dict[str, Dict] = {
+    "self_regard": {
+        "disc": "C", "inverse": False,
+        "note": "C styles hold themselves to high personal standards; self-regard reflects whether those inner expectations are being met.",
+    },
+    "self_actualization": {
+        "disc": "I", "inverse": False,
+        "note": "I styles are driven by meaning, growth, and engagement — self-actualization tracks the I factor's motivational energy.",
+    },
+    "emotional_self_awareness": {
+        "disc": "C", "inverse": True,
+        "note": "C styles tend to intellectualize rather than feel; low emotional self-awareness is the most common C-style EQ blind spot.",
+    },
+    "emotional_expression": {
+        "disc": "I", "inverse": False,
+        "note": "I styles express emotions openly and naturally — high I aligns with high emotional expression.",
+    },
+    "assertiveness": {
+        "disc": "D", "inverse": False,
+        "note": "Assertiveness mirrors the D factor's directness — high D should align with high assertiveness.",
+    },
+    "independence": {
+        "disc": "D", "inverse": False,
+        "note": "D styles resist external influence and prefer self-direction; a strong D score typically pairs with high independence.",
+    },
+    "interpersonal_relationships": {
+        "disc": "I", "inverse": False,
+        "note": "I styles build rapport naturally; the depth of interpersonal relationships tracks closely with I-factor strength.",
+    },
+    "empathy": {
+        "disc": "S", "inverse": False,
+        "note": "S styles listen before they respond; empathy is the EQ expression of the S factor's patience and care for others.",
+    },
+    "social_responsibility": {
+        "disc": "S", "inverse": False,
+        "note": "S styles value harmony and community; social responsibility reflects the S factor's commitment to group well-being.",
+    },
+    "problem_solving": {
+        "disc": "D", "inverse": False,
+        "note": "D styles move toward solutions decisively; problem-solving tracks the D factor's action orientation under pressure.",
+    },
+    "reality_testing": {
+        "disc": "C", "inverse": False,
+        "note": "C styles verify before they commit; strong reality testing reflects the C factor's data-first, detail-driven approach.",
+    },
+    "impulse_control": {
+        "disc": "D", "inverse": True,
+        "note": "High D styles are wired for speed and action — low impulse control is the most common EQ risk of a strong D style.",
+    },
+    "flexibility": {
+        "disc": "S", "inverse": True,
+        "note": "Very high S creates a preference for consistency and routine; low flexibility is the structural EQ risk of a dominant S style.",
+    },
+    "stress_tolerance": {
+        "disc": "S", "inverse": False,
+        "note": "S styles absorb pressure steadily; stress tolerance tracks the S factor's capacity for patience and composure under load.",
+    },
+    "optimism": {
+        "disc": "I", "inverse": False,
+        "note": "I styles maintain a positive, energizing outlook; optimism is the EQ signature of the I factor.",
+    },
+}
+
+# ── Subscale grouping order (mirrors EQ-i 2.0 composite structure) ──────────
+
+COMPOSITE_SUBSCALE_ORDER: List[Tuple[str, List[str]]] = [
+    ("Self-Perception",   ["self_regard", "self_actualization", "emotional_self_awareness"]),
+    ("Self-Expression",   ["emotional_expression", "assertiveness", "independence"]),
+    ("Interpersonal",     ["interpersonal_relationships", "empathy", "social_responsibility"]),
+    ("Decision Making",   ["problem_solving", "reality_testing", "impulse_control"]),
+    ("Stress Management", ["flexibility", "stress_tolerance", "optimism"]),
+]
+
 # ── Action steps for every subscale ────────────────────────────────────────
-# 3 concrete, first-person actions per subscale
 
 SUBSCALE_ACTIONS: Dict[str, List[str]] = {
     "self_regard": [
@@ -243,16 +318,55 @@ def eq_level_short(score: int) -> str:
     return "Priority Growth"
 
 
-def generate_insights(primary_style: str, eqi_scores: Dict) -> Dict:
+def alignment_signal(
+    disc_score: Optional[float],
+    eqi_score: Optional[int],
+    inverse: bool,
+) -> Tuple[Optional[str], Optional[str]]:
+    """
+    Return (label, color_key) describing how the person's DISC score
+    aligns with their EQI subscale score.  color_key is a THEME["dark"] key.
+    Returns (None, None) when there is no meaningful signal.
+    """
+    if disc_score is None or eqi_score is None:
+        return None, None
+
+    disc_hi = disc_score > 1.0
+    disc_lo = disc_score < -1.0
+    eqi_good = eqi_score >= 100
+    eqi_risk = eqi_score < 90
+
+    if not inverse:
+        if disc_hi and eqi_good:
+            return "Aligned", "green"
+        if disc_hi and eqi_risk:
+            return "Gap", "gold"
+        if disc_lo and eqi_good:
+            return "EQ Strength", "accent"
+    else:
+        if disc_hi and eqi_risk:
+            return "Inverse Risk", "red"
+        if disc_hi and eqi_good:
+            return "Counterbalanced", "green"
+
+    return None, None
+
+
+def generate_insights(
+    primary_style: str,
+    eqi_scores: Dict,
+    disc_factor_scores: Optional[Dict[str, float]] = None,
+) -> Dict:
     """
     Returns:
-      correlations  — list of DISC-EQI correlation dicts for this style
-      bottom_three  — 3 lowest subscale scores with action steps
+      correlations              — top style correlations (legacy, kept for compat)
+      all_subscale_correlations — all 15 subscales grouped by composite,
+                                  each with disc letter, disc score, alignment
+      bottom_three              — 3 lowest subscale scores with action steps
     """
     if primary_style not in DISC_EQI_CORRELATIONS:
         return {}
 
-    # Snake-case subscale scores only
     subscales = {
         k: int(v) for k, v in eqi_scores.items()
         if k in SUBSCALE_DISPLAY and isinstance(v, (int, float))
@@ -274,19 +388,53 @@ def generate_insights(primary_style: str, eqi_scores: Dict) -> Dict:
         for k, v in ranked[:3]
     ]
 
-    # Enrich correlations with the person's actual score
+    # Top style correlations (enriched with score)
     correlations = []
     for corr in DISC_EQI_CORRELATIONS[primary_style]:
         entry = dict(corr)
         entry["score"] = subscales.get(corr["key"])
         correlations.append(entry)
 
+    # Full subscale correlation analysis grouped by composite
+    all_subscale_correlations = []
+    for comp_name, sub_keys in COMPOSITE_SUBSCALE_ORDER:
+        comp_entries = []
+        for snake_key in sub_keys:
+            eqi_score = subscales.get(snake_key)
+            mapping = SUBSCALE_DISC_MAP.get(snake_key, {})
+            disc_letter = mapping.get("disc", "")
+            disc_score = (
+                disc_factor_scores.get(disc_letter)
+                if disc_factor_scores and disc_letter
+                else None
+            )
+            inverse = mapping.get("inverse", False)
+            align_label, align_color_key = alignment_signal(
+                disc_score, eqi_score, inverse
+            )
+            comp_entries.append({
+                "key":             snake_key,
+                "label":           SUBSCALE_DISPLAY.get(snake_key, snake_key),
+                "eqi_score":       eqi_score,
+                "disc_letter":     disc_letter,
+                "disc_score":      disc_score,
+                "inverse":         inverse,
+                "note":            mapping.get("note", ""),
+                "align_label":     align_label,
+                "align_color_key": align_color_key,
+            })
+        all_subscale_correlations.append({
+            "composite": comp_name,
+            "subscales": comp_entries,
+        })
+
     return {
-        "primary_style": primary_style,
-        "style_name":    STYLE_NAMES.get(primary_style, primary_style),
-        "style_desc":    STYLE_DESCS.get(primary_style, ""),
-        "correlations":  correlations,
-        "bottom_three":  bottom_three,
+        "primary_style":             primary_style,
+        "style_name":                STYLE_NAMES.get(primary_style, primary_style),
+        "style_desc":                STYLE_DESCS.get(primary_style, ""),
+        "correlations":              correlations,
+        "all_subscale_correlations": all_subscale_correlations,
+        "bottom_three":              bottom_three,
     }
 
 

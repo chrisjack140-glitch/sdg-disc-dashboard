@@ -16,6 +16,7 @@ from utils.disc import (
 from utils.insights import (
     generate_insights, generate_summary_insights,
     SUBSCALE_DISPLAY, STYLE_NAMES,
+    SUBSCALE_DISC_MAP, COMPOSITE_SUBSCALE_ORDER,
 )
 
 # ═══════════════════════════════════════════════════════════════
@@ -411,26 +412,8 @@ def build_eqi_bar_chart(eqi_scores: dict, theme: str = "dark") -> go.Figure:
     labels = list(composite_scores.keys())
     values = [composite_scores[k] for k in labels]
 
-    # Colour each bar based on deviation from norm
-    bar_colors = []
-    for v in values:
-        if v < EQI_NORM - EQI_SD:       # below 85 — deficit
-            bar_colors.append(THEME["dark"]["red"])
-        elif v > EQI_NORM + EQI_SD:     # above 115 — strength
-            bar_colors.append(THEME["dark"]["green"])
-        else:
-            bar_colors.append(THEME["eqi"].get(labels[bar_colors.__len__()],
-                              THEME["dark"]["accent"]))
-
-    # Rebuild with correct composite colour mapping
-    bar_colors = []
-    for lbl, v in zip(labels, values):
-        if v < EQI_NORM - EQI_SD:
-            bar_colors.append(THEME["dark"]["red"])
-        elif v > EQI_NORM + EQI_SD:
-            bar_colors.append(THEME["dark"]["green"])
-        else:
-            bar_colors.append(THEME["eqi"][lbl])
+    # Always use the composite's category colour (matches MHS EQ-i report)
+    bar_colors = [THEME["eqi"][lbl] for lbl in labels]
 
     fig = go.Figure()
     fig.add_trace(go.Bar(
@@ -560,10 +543,20 @@ def _eq_total_bar(eqi_scores: dict) -> Optional[html.Div]:
     ], style={"marginTop": "12px", "marginBottom": "2px"})
 
 
+def _eqi_score_color(score: Optional[int]) -> str:
+    if score is None:        return THEME["dark"]["muted"]
+    if score >= 110:         return THEME["dark"]["green"]
+    if score >= 100:         return THEME["dark"]["accent"]
+    if score >= 90:          return THEME["dark"]["gold"]
+    return THEME["dark"]["red"]
+
+
 def _eqi_insights_section(profile: dict) -> Optional[html.Details]:
     """
     Collapsible <details> block shown on individual report cards when
     both DISC and EQI data are present.
+
+    Order: Bottom 3 Development Areas (top) → Full subscale correlations
     """
     eqi_scores = profile.get("eqi_scores", {})
     if not eqi_scores:
@@ -573,7 +566,15 @@ def _eqi_insights_section(profile: dict) -> Optional[html.Details]:
     if not primary:
         return None
 
-    ins = generate_insights(primary, eqi_scores)
+    # Extract DISC anchor scores so correlations can show alignment
+    disc_factor_scores = {}
+    for f in ["D", "I", "S", "C"]:
+        fp = profile.get("factor_profiles", {}).get(f, {})
+        s = fp.get("anchor_score")
+        if s is not None:
+            disc_factor_scores[f] = s
+
+    ins = generate_insights(primary, eqi_scores, disc_factor_scores)
     if not ins:
         return None
 
@@ -595,99 +596,33 @@ def _eqi_insights_section(profile: dict) -> Optional[html.Details]:
         }),
     ]
 
-    # ── DISC ↔ EQI Correlations ─────────────────────────────────────────────
-    if ins.get("correlations"):
-        corr_rows = []
-        for corr in ins["correlations"]:
-            score      = corr.get("score")
-            is_inverse = corr.get("inverse", False)
-            if score is None:
-                score_el = html.Span("—", style={"color": THEME["dark"]["muted"],
-                                                  "fontSize": "11px"})
-            else:
-                if score >= 110:
-                    sc = THEME["dark"]["green"]
-                elif score >= 100:
-                    sc = THEME["dark"]["accent"]
-                elif score >= 90:
-                    sc = THEME["dark"]["gold"]
-                else:
-                    sc = THEME["dark"]["red"]
-                score_el = html.Span(str(score), style={
-                    "color": sc, "fontWeight": 700, "fontSize": "11px",
-                })
-
-            corr_rows.append(html.Div([
-                html.Div([
-                    html.Span(corr["label"], style={
-                        "fontWeight": 700, "fontSize": "12px",
-                        "color": THEME["dark"]["text"],
-                    }),
-                    html.Span(" (inverse)" if is_inverse else "", style={
-                        "fontSize": "10px", "color": THEME["dark"]["gold"],
-                        "marginLeft": "4px",
-                    }),
-                    html.Span(" — ", style={"color": THEME["dark"]["muted"]}),
-                    score_el,
-                ], style={"display": "flex", "alignItems": "center",
-                          "marginBottom": "4px", "flexWrap": "wrap"}),
-                html.P(corr["note"], style={
-                    "fontSize": "11px", "color": THEME["dark"]["muted"],
-                    "lineHeight": "1.6", "margin": 0,
-                }),
-            ], style={
-                "borderBottom": f"1px solid {THEME['dark']['border']}",
-                "paddingBottom": "10px", "marginBottom": "10px",
-            }))
-
-        body_children += [
-            html.Div("DISC — EQ-i CORRELATIONS FOR YOUR STYLE", style={
-                "fontSize": "10px", "fontWeight": 700,
-                "color": THEME["dark"]["muted"], "letterSpacing": "0.07em",
-                "textTransform": "uppercase", "marginBottom": "10px",
-            }),
-            html.Div(corr_rows, style={"marginBottom": "18px"}),
-        ]
-
-    # ── Bottom 3 development areas ──────────────────────────────────────────
+    # ── BOTTOM 3 DEVELOPMENT AREAS (at top of section) ─────────────────────
     if ins.get("bottom_three"):
         growth_items = []
         for item in ins["bottom_three"]:
-            score = item["score"]
-            if score >= 110:
-                score_color = THEME["dark"]["green"]
-            elif score >= 100:
-                score_color = THEME["dark"]["accent"]
-            elif score >= 90:
-                score_color = THEME["dark"]["gold"]
-            else:
-                score_color = THEME["dark"]["red"]
-
+            sc = _eqi_score_color(item["score"])
             action_bullets = [
                 html.Li(action, style={
                     "fontSize": "11px", "color": THEME["dark"]["muted"],
                     "lineHeight": "1.6", "marginBottom": "4px",
                 }) for action in item.get("actions", [])
             ]
-
             growth_items.append(html.Div([
                 html.Div([
                     html.Span(item["label"], style={
                         "fontWeight": 700, "fontSize": "13px",
                         "color": THEME["dark"]["text"],
                     }),
-                    html.Span(f"  {score}", style={
+                    html.Span(f"  {item['score']}", style={
                         "fontSize": "12px", "fontWeight": 700,
-                        "color": score_color, "marginLeft": "8px",
+                        "color": sc, "marginLeft": "8px",
                     }),
                     html.Span(f"  —  {item['level']}", style={
-                        "fontSize": "11px", "color": score_color,
+                        "fontSize": "11px", "color": sc,
                     }),
                 ], style={"display": "flex", "alignItems": "center",
                           "marginBottom": "8px", "flexWrap": "wrap"}),
-                html.Ul(action_bullets, style={
-                    "paddingLeft": "16px", "margin": 0,
-                }),
+                html.Ul(action_bullets, style={"paddingLeft": "16px", "margin": 0}),
             ], style={
                 "border": f"1px solid {THEME['dark']['border']}",
                 "borderRadius": "8px", "padding": "12px 14px",
@@ -701,6 +636,127 @@ def _eqi_insights_section(profile: dict) -> Optional[html.Details]:
                 "textTransform": "uppercase", "marginBottom": "10px",
             }),
             *growth_items,
+            html.Hr(style={"borderColor": THEME["dark"]["border"],
+                           "margin": "18px 0"}),
+        ]
+
+    # ── FULL SUBSCALE CORRELATIONS — all 15 grouped by composite ───────────
+    if ins.get("all_subscale_correlations"):
+        comp_blocks = []
+        for group in ins["all_subscale_correlations"]:
+            comp_name = group["composite"]
+            comp_color = THEME["eqi"].get(comp_name, THEME["dark"]["accent"])
+            sub_rows = []
+            for sub in group["subscales"]:
+                eqi_sc   = sub.get("eqi_score")
+                disc_ltr = sub.get("disc_letter", "")
+                disc_sc  = sub.get("disc_score")
+                inverse  = sub.get("inverse", False)
+                align_lbl    = sub.get("align_label")
+                align_ck     = sub.get("align_color_key")
+                align_hex    = THEME["dark"].get(align_ck, "") if align_ck else ""
+
+                eqi_color  = _eqi_score_color(eqi_sc)
+                disc_color = (
+                    THEME["dark"]["green"] if disc_sc and disc_sc > 0
+                    else THEME["dark"]["red"] if disc_sc and disc_sc < 0
+                    else THEME["dark"]["muted"]
+                )
+                disc_color = THEME["disc"].get(disc_ltr, THEME["dark"]["muted"])
+
+                header_items = [
+                    html.Span(sub["label"], style={
+                        "fontWeight": 700, "fontSize": "12px",
+                        "color": THEME["dark"]["text"],
+                        "minWidth": "160px",
+                    }),
+                    # EQI score
+                    html.Span(
+                        str(eqi_sc) if eqi_sc is not None else "—",
+                        style={"color": eqi_color, "fontWeight": 700,
+                               "fontSize": "12px", "marginLeft": "10px"},
+                    ),
+                ]
+
+                # DISC correlation badge
+                if disc_ltr:
+                    disc_display = (
+                        f"{disc_sc:+.2f}" if disc_sc is not None else "—"
+                    )
+                    header_items += [
+                        html.Span(" ↔ ", style={
+                            "color": THEME["dark"]["muted"], "fontSize": "11px",
+                            "margin": "0 4px",
+                        }),
+                        html.Span(disc_ltr, style={
+                            "color": disc_color, "fontWeight": 900,
+                            "fontSize": "12px",
+                        }),
+                        html.Span(f" {disc_display}", style={
+                            "color": disc_color, "fontSize": "11px",
+                            "fontWeight": 600,
+                        }),
+                        html.Span(" (inverse)" if inverse else "", style={
+                            "fontSize": "10px", "color": THEME["dark"]["gold"],
+                            "marginLeft": "4px",
+                        }),
+                    ]
+
+                # Alignment badge
+                if align_lbl and align_hex:
+                    header_items.append(
+                        html.Span(align_lbl, style={
+                            "fontSize": "10px", "fontWeight": 700,
+                            "color": align_hex,
+                            "backgroundColor": f"{align_hex}22",
+                            "border": f"1px solid {align_hex}55",
+                            "borderRadius": "10px",
+                            "padding": "1px 7px",
+                            "marginLeft": "8px",
+                        })
+                    )
+
+                sub_rows.append(html.Div([
+                    html.Div(header_items, style={
+                        "display": "flex", "alignItems": "center",
+                        "flexWrap": "wrap", "marginBottom": "3px",
+                    }),
+                    html.P(sub.get("note", ""), style={
+                        "fontSize": "11px", "color": THEME["dark"]["muted"],
+                        "lineHeight": "1.6", "margin": "0 0 0 4px",
+                    }),
+                ], style={
+                    "borderBottom": f"1px solid {THEME['dark']['border']}",
+                    "paddingBottom": "8px", "marginBottom": "8px",
+                }))
+
+            comp_blocks.append(html.Div([
+                html.Div(comp_name, style={
+                    "fontSize": "10px", "fontWeight": 800,
+                    "color": comp_color, "letterSpacing": "0.07em",
+                    "textTransform": "uppercase",
+                    "borderLeft": f"3px solid {comp_color}",
+                    "paddingLeft": "8px", "marginBottom": "10px",
+                }),
+                *sub_rows,
+            ], style={"marginBottom": "18px"}))
+
+        body_children += [
+            html.Div("DISC — EQ-i 2.0 SUBSCALE CORRELATIONS", style={
+                "fontSize": "10px", "fontWeight": 700,
+                "color": THEME["dark"]["muted"], "letterSpacing": "0.07em",
+                "textTransform": "uppercase", "marginBottom": "14px",
+            }),
+            html.Div([
+                html.Span("Score", style={
+                    "fontSize": "10px", "color": THEME["dark"]["muted"],
+                    "marginRight": "16px",
+                }),
+                html.Span("↔  DISC factor + anchor score", style={
+                    "fontSize": "10px", "color": THEME["dark"]["muted"],
+                }),
+            ], style={"marginBottom": "14px"}),
+            *comp_blocks,
         ]
 
     return html.Details([
@@ -1334,131 +1390,246 @@ app.layout = html.Div(
             "boxShadow": f"0 2px 20px {THEME['dark']['shadow_md']}",
         }, className="sticky-header"),
 
-        # ── Page body ──────────────────────────────────────────────
-        dbc.Container([
-
-            # Controls row
-            dbc.Row([
-                dbc.Col([
-                    html.Label("Anchor Graph", style=LABEL_STYLE),
-                    dcc.Dropdown(
-                        id="anchor-graph",
-                        options=[{"label": g.title(), "value": g}
-                                 for g in ["stress", "mirror", "public"]],
-                        value="stress", clearable=False,
-                        style=DROPDOWN_STYLE(),
-                    ),
-                ], width=2),
-                dbc.Col([
-                    html.Label("Upload DISC & EQ-i 2.0 PDFs", style=LABEL_STYLE),
-                    dcc.Upload(
-                        id="upload-pdfs",
-                        children=html.Div([
-                            "Drag & drop or ",
-                            html.A("browse",
-                                   style={"color": THEME["dark"]["accent"],
-                                          "cursor": "pointer",
-                                          "fontWeight": 600}),
-                        ], style={"fontSize": "12px"}),
-                        style={
-                            "width": "100%", "height": "38px",
-                            "lineHeight": "38px",
-                            "borderWidth": "1px", "borderStyle": "dashed",
-                            "borderRadius": "8px", "textAlign": "center",
-                            "borderColor": THEME["dark"]["border"],
-                            "color": THEME["dark"]["muted"],
-                            "backgroundColor": THEME["dark"]["surface"],
-                        },
-                        multiple=True,
-                    ),
-                ], width=4),
-            ], className="mb-4 g-3", style={"paddingTop": "24px"}),
-
-            html.Div(id="upload-errors"),
-            html.Div(id="scan-status"),
-
-            # Metric cards
-            html.Div(id="metric-cards"),
-
-            # Collapsible ranking with DISC filter buttons
-            html.Div([
-                dbc.Row([
-                    dbc.Col(
-                        dbc.Button(
-                            [html.Span("▶ ", id="rank-chevron",
-                                       style={"fontSize": "10px",
-                                              "marginRight": "4px"}),
-                             "Participant Rankings"],
-                            id="rank-toggle", color="link", n_clicks=0,
+        # ── Landing page (shown before any upload) ─────────────────
+        html.Div(
+            id="landing-section",
+            children=[
+                dbc.Container([
+                    # SDG logo banner
+                    html.Div(
+                        html.Img(
+                            src="/assets/sdg_logo.png",
                             style={
-                                "color": THEME["dark"]["muted"],
-                                "fontSize": "11px", "fontWeight": 700,
-                                "letterSpacing": "0.08em",
-                                "textTransform": "uppercase",
-                                "textDecoration": "none",
-                                "padding": "8px 0",
-                                "border": "none", "background": "none",
+                                "maxWidth": "720px", "width": "100%",
+                                "borderRadius": "12px",
+                                "boxShadow": f"0 8px 40px {THEME['dark']['shadow_lg']}",
                             },
-                        ), width="auto",
+                        ),
+                        style={"textAlign": "center", "marginBottom": "40px"},
                     ),
-                    dbc.Col(
-                        dbc.ButtonGroup([
-                            dbc.Button(
-                                f, id=f"rank-btn-{f}", n_clicks=0,
+
+                    # Upload + anchor controls side by side
+                    dbc.Row([
+                        # Upload area
+                        dbc.Col([
+                            html.Label(
+                                "Upload DISC & EQ-i 2.0 PDFs",
+                                style={**LABEL_STYLE, "fontSize": "12px"},
+                            ),
+                            dcc.Upload(
+                                id="upload-pdfs",
+                                children=html.Div([
+                                    html.Div("↑", style={
+                                        "fontSize": "32px",
+                                        "color": THEME["dark"]["accent"],
+                                        "marginBottom": "8px",
+                                    }),
+                                    html.Div("Drag & drop or ", style={
+                                        "fontSize": "14px",
+                                        "color": THEME["dark"]["muted"],
+                                        "display": "inline",
+                                    }),
+                                    html.A("browse", style={
+                                        "color": THEME["dark"]["accent"],
+                                        "cursor": "pointer",
+                                        "fontWeight": 700,
+                                        "fontSize": "14px",
+                                    }),
+                                    html.Div(
+                                        "DISC PDFs + EQ-i 2.0 PDFs — upload both in the same batch",
+                                        style={
+                                            "fontSize": "11px",
+                                            "color": THEME["dark"]["muted"],
+                                            "marginTop": "6px",
+                                        },
+                                    ),
+                                ]),
                                 style={
-                                    "backgroundColor": THEME["dark"]["surface2"],
-                                    "color": THEME["disc"][f],
-                                    "border": f"1px solid {THEME['disc'][f]}",
-                                    "fontSize": "11px", "fontWeight": 800,
-                                    "padding": "4px 12px",
-                                    "borderRadius": "6px",
+                                    "width": "100%", "minHeight": "120px",
+                                    "lineHeight": "1.4",
+                                    "borderWidth": "1px",
+                                    "borderStyle": "dashed",
+                                    "borderRadius": "12px",
+                                    "textAlign": "center",
+                                    "padding": "24px 16px",
+                                    "borderColor": THEME["dark"]["border"],
+                                    "color": THEME["dark"]["muted"],
+                                    "backgroundColor": THEME["dark"]["surface"],
+                                    "cursor": "pointer",
                                 },
-                            ) for f in FACTORS
-                        ], style={"gap": "6px"}),
-                        width="auto",
-                    ),
-                ], align="center", className="mb-1"),
-                dbc.Collapse(
-                    html.Div(id="ranking-table"),
-                    id="rank-collapse", is_open=False,
-                ),
-            ], className="mb-4"),
+                                multiple=True,
+                            ),
+                        ], md=7),
 
-            html.Div(id="tab-content"),
+                        # Anchor graph dropdown
+                        dbc.Col([
+                            html.Label(
+                                "Anchor Graph",
+                                style={**LABEL_STYLE, "fontSize": "12px"},
+                            ),
+                            dcc.Dropdown(
+                                id="anchor-graph",
+                                options=[
+                                    {"label": "Stress (Adapted)", "value": "stress"},
+                                    {"label": "Public (Natural)", "value": "public"},
+                                    {"label": "Mirror",           "value": "mirror"},
+                                ],
+                                value="stress",
+                                clearable=False,
+                                style=DROPDOWN_STYLE(),
+                            ),
+                            html.P(
+                                "Selects which DISC graph drives scores and "
+                                "shift calculations throughout the dashboard.",
+                                style={
+                                    "fontSize": "11px",
+                                    "color": THEME["dark"]["muted"],
+                                    "lineHeight": "1.6",
+                                    "marginTop": "10px",
+                                },
+                            ),
+                        ], md=4),
+                    ], justify="center", className="g-4"),
+                ], fluid=True, style={"maxWidth": "860px"}),
+            ],
+            style={
+                "display": "flex",
+                "flexDirection": "column",
+                "alignItems": "center",
+                "justifyContent": "center",
+                "minHeight": "80vh",
+                "padding": "48px 16px",
+            },
+        ),
 
-            # Downloads
-            html.Hr(style={
-                "borderColor": THEME["dark"]["border"],
-                "marginTop": "32px", "marginBottom": "20px",
-            }),
-            dbc.Row([
-                dbc.Col(html.Button(
-                    "↓  Export CSV", id="btn-csv", n_clicks=0,
-                    style={
-                        "backgroundColor": THEME["dark"]["surface"],
-                        "color": THEME["dark"]["text"],
-                        "border": f"1px solid {THEME['dark']['border']}",
-                        "borderRadius": "8px", "padding": "10px 20px",
-                        "fontSize": "12px", "cursor": "pointer",
-                        "width": "100%", "fontWeight": 600,
-                        "letterSpacing": "0.04em",
-                    },
-                ), width=2),
-                dbc.Col(html.Button(
-                    "↓  Export JSON", id="btn-json", n_clicks=0,
-                    style={
-                        "backgroundColor": THEME["dark"]["surface"],
-                        "color": THEME["dark"]["text"],
-                        "border": f"1px solid {THEME['dark']['border']}",
-                        "borderRadius": "8px", "padding": "10px 20px",
-                        "fontSize": "12px", "cursor": "pointer",
-                        "width": "100%", "fontWeight": 600,
-                        "letterSpacing": "0.04em",
-                    },
-                ), width=2),
-            ], className="mb-5 g-3"),
+        # ── Dashboard body (hidden until upload) ───────────────────
+        html.Div(
+            id="dashboard-body",
+            style={"display": "none"},
+            children=[
+                dbc.Container([
 
-        ], fluid=True),
+                    # Compact controls row
+                    dbc.Row([
+                        dbc.Col([
+                            html.Label("Anchor Graph", style=LABEL_STYLE),
+                            dcc.Dropdown(
+                                id="anchor-graph-dash",
+                                options=[
+                                    {"label": "Stress (Adapted)", "value": "stress"},
+                                    {"label": "Public (Natural)", "value": "public"},
+                                    {"label": "Mirror",           "value": "mirror"},
+                                ],
+                                value="stress", clearable=False,
+                                style=DROPDOWN_STYLE(),
+                            ),
+                        ], width=2),
+                        dbc.Col(
+                            html.Button(
+                                "↺  New Session",
+                                id="btn-new-session",
+                                n_clicks=0,
+                                style={
+                                    "backgroundColor": "transparent",
+                                    "color": THEME["dark"]["muted"],
+                                    "border": f"1px solid {THEME['dark']['border']}",
+                                    "borderRadius": "8px",
+                                    "padding": "6px 16px",
+                                    "fontSize": "12px",
+                                    "cursor": "pointer",
+                                    "marginTop": "22px",
+                                    "fontWeight": 600,
+                                },
+                            ),
+                            width="auto",
+                        ),
+                    ], className="mb-4 g-3", style={"paddingTop": "24px"}),
+
+                    html.Div(id="upload-errors"),
+                    html.Div(id="scan-status"),
+
+                    html.Div(id="metric-cards"),
+
+                    # Collapsible ranking
+                    html.Div([
+                        dbc.Row([
+                            dbc.Col(
+                                dbc.Button(
+                                    [html.Span("▶ ", id="rank-chevron",
+                                               style={"fontSize": "10px",
+                                                      "marginRight": "4px"}),
+                                     "Participant Rankings"],
+                                    id="rank-toggle", color="link", n_clicks=0,
+                                    style={
+                                        "color": THEME["dark"]["muted"],
+                                        "fontSize": "11px", "fontWeight": 700,
+                                        "letterSpacing": "0.08em",
+                                        "textTransform": "uppercase",
+                                        "textDecoration": "none",
+                                        "padding": "8px 0",
+                                        "border": "none", "background": "none",
+                                    },
+                                ), width="auto",
+                            ),
+                            dbc.Col(
+                                dbc.ButtonGroup([
+                                    dbc.Button(
+                                        f, id=f"rank-btn-{f}", n_clicks=0,
+                                        style={
+                                            "backgroundColor": THEME["dark"]["surface2"],
+                                            "color": THEME["disc"][f],
+                                            "border": f"1px solid {THEME['disc'][f]}",
+                                            "fontSize": "11px", "fontWeight": 800,
+                                            "padding": "4px 12px",
+                                            "borderRadius": "6px",
+                                        },
+                                    ) for f in FACTORS
+                                ], style={"gap": "6px"}),
+                                width="auto",
+                            ),
+                        ], align="center", className="mb-1"),
+                        dbc.Collapse(
+                            html.Div(id="ranking-table"),
+                            id="rank-collapse", is_open=False,
+                        ),
+                    ], className="mb-4"),
+
+                    html.Div(id="tab-content"),
+
+                    html.Hr(style={
+                        "borderColor": THEME["dark"]["border"],
+                        "marginTop": "32px", "marginBottom": "20px",
+                    }),
+                    dbc.Row([
+                        dbc.Col(html.Button(
+                            "↓  Export CSV", id="btn-csv", n_clicks=0,
+                            style={
+                                "backgroundColor": THEME["dark"]["surface"],
+                                "color": THEME["dark"]["text"],
+                                "border": f"1px solid {THEME['dark']['border']}",
+                                "borderRadius": "8px", "padding": "10px 20px",
+                                "fontSize": "12px", "cursor": "pointer",
+                                "width": "100%", "fontWeight": 600,
+                                "letterSpacing": "0.04em",
+                            },
+                        ), width=2),
+                        dbc.Col(html.Button(
+                            "↓  Export JSON", id="btn-json", n_clicks=0,
+                            style={
+                                "backgroundColor": THEME["dark"]["surface"],
+                                "color": THEME["dark"]["text"],
+                                "border": f"1px solid {THEME['dark']['border']}",
+                                "borderRadius": "8px", "padding": "10px 20px",
+                                "fontSize": "12px", "cursor": "pointer",
+                                "width": "100%", "fontWeight": 600,
+                                "letterSpacing": "0.04em",
+                            },
+                        ), width=2),
+                    ], className="mb-5 g-3"),
+
+                ], fluid=True),
+            ],
+        ),
     ],
 )
 
@@ -1468,15 +1639,54 @@ app.layout = html.Div(
 # Each callback has a one-line comment: Triggered by → Updates
 # ═══════════════════════════════════════════════════════════════
 
+# 0a — profiles-store → toggle landing / dashboard visibility
+@app.callback(
+    Output("landing-section",  "style"),
+    Output("dashboard-body",   "style"),
+    Input("profiles-store",    "data"),
+)
+def toggle_layout(profiles_data):
+    if profiles_data:
+        return {"display": "none"}, {}
+    return (
+        {
+            "display": "flex", "flexDirection": "column",
+            "alignItems": "center", "justifyContent": "center",
+            "minHeight": "80vh", "padding": "48px 16px",
+        },
+        {"display": "none"},
+    )
+
+
+# 0b — New Session button → clear stores, return to landing
+@app.callback(
+    Output("profiles-store",  "data",  allow_duplicate=True),
+    Output("df-store",        "data",  allow_duplicate=True),
+    Input("btn-new-session",  "n_clicks"),
+    prevent_initial_call=True,
+)
+def new_session(n_clicks):
+    return None, None
+
+
+# 0c — anchor-graph (landing) → sync to anchor-graph-dash (dashboard)
+@app.callback(
+    Output("anchor-graph-dash", "value"),
+    Input("anchor-graph",       "value"),
+)
+def sync_anchor(val):
+    return val or "stress"
+
+
 # 1 — PDF upload → parse profiles, build dataframe, show errors
 @app.callback(
-    Output("profiles-store", "data"),
-    Output("df-store", "data"),
-    Output("upload-errors", "children"),
-    Output("scan-status", "children"),
-    Input("upload-pdfs", "contents"),
-    State("upload-pdfs", "filename"),
-    State("anchor-graph", "value"),
+    Output("profiles-store", "data",   allow_duplicate=True),
+    Output("df-store",       "data",   allow_duplicate=True),
+    Output("upload-errors",  "children"),
+    Output("scan-status",    "children"),
+    Input("upload-pdfs",     "contents"),
+    State("upload-pdfs",     "filename"),
+    State("anchor-graph",    "value"),
     prevent_initial_call=True,
 )
 def process_uploads(contents_list, filenames, anchor_graph):
@@ -1502,11 +1712,11 @@ def process_uploads(contents_list, filenames, anchor_graph):
            error_banner, None
 
 
-# 2 — df-store or anchor-graph change → rebuild four DISC metric tiles
+# 2 — df-store or anchor-graph-dash change → rebuild four DISC metric tiles
 @app.callback(
     Output("metric-cards", "children"),
     Input("df-store", "data"),
-    Input("anchor-graph", "value"),
+    Input("anchor-graph-dash", "value"),
 )
 def update_metric_cards(df_json, anchor_graph):
     if not df_json:
@@ -1527,12 +1737,12 @@ def update_metric_cards(df_json, anchor_graph):
     Output("rank-btn-I",     "style"),
     Output("rank-btn-S",     "style"),
     Output("rank-btn-C",     "style"),
-    Input("df-store",        "data"),
-    Input("anchor-graph",    "value"),
-    Input("rank-btn-D",      "n_clicks"),
-    Input("rank-btn-I",      "n_clicks"),
-    Input("rank-btn-S",      "n_clicks"),
-    Input("rank-btn-C",      "n_clicks"),
+    Input("df-store",           "data"),
+    Input("anchor-graph-dash",  "value"),
+    Input("rank-btn-D",         "n_clicks"),
+    Input("rank-btn-I",         "n_clicks"),
+    Input("rank-btn-S",         "n_clicks"),
+    Input("rank-btn-C",         "n_clicks"),
 )
 def update_ranking(df_json, anchor_graph, nd, ni, ns, nc):
     from dash import ctx
@@ -1573,14 +1783,14 @@ def toggle_ranking(n, is_open):
     return new_open, ("▼ " if new_open else "▶ ")
 
 
-# 5 — Tab selection, data stores, anchor-graph, or theme → render tab content
+# 5 — Tab selection, data stores, anchor-graph-dash, or theme → render tab content
 @app.callback(
-    Output("tab-content",   "children"),
-    Input("tabs",           "active_tab"),
-    Input("df-store",       "data"),
-    Input("profiles-store", "data"),
-    Input("anchor-graph",   "value"),
-    Input("theme-store",    "data"),
+    Output("tab-content",      "children"),
+    Input("tabs",              "active_tab"),
+    Input("df-store",          "data"),
+    Input("profiles-store",    "data"),
+    Input("anchor-graph-dash", "value"),
+    Input("theme-store",       "data"),
 )
 def render_tab(active_tab, df_json, profiles_json, anchor_graph, theme):
     theme = theme or "dark"
@@ -1701,13 +1911,13 @@ def render_tab(active_tab, df_json, profiles_json, anchor_graph, theme):
     return None
 
 
-# 6 — Letter tab selection, df-store, anchor-graph, or theme → per-factor chart
+# 6 — Letter tab selection, df-store, anchor-graph-dash, or theme → per-factor chart
 @app.callback(
-    Output("letter-chart-body", "children"),
-    Input("letter-tabs",        "active_tab"),
-    Input("df-store",           "data"),
-    Input("anchor-graph",       "value"),
-    Input("theme-store",        "data"),
+    Output("letter-chart-body",  "children"),
+    Input("letter-tabs",         "active_tab"),
+    Input("df-store",            "data"),
+    Input("anchor-graph-dash",   "value"),
+    Input("theme-store",         "data"),
 )
 def update_letter_chart(letter, df_json, anchor_graph, theme):
     theme = theme or "dark"
