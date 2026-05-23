@@ -492,14 +492,7 @@ def _eq_total_bar(eqi_scores: dict) -> Optional[html.Div]:
     pct     = max(0.0, min(100.0, (total_ei - 70) / 60 * 100))
     mid_pct = (100 - 70) / 60 * 100   # 50 %
 
-    if total_ei >= 110:
-        bar_color = THEME["dark"]["green"]
-    elif total_ei >= 100:
-        bar_color = THEME["dark"]["accent"]
-    elif total_ei >= 90:
-        bar_color = THEME["dark"]["gold"]
-    else:
-        bar_color = THEME["dark"]["red"]
+    bar_color = THEME["dark"]["purple"]
 
     return html.Div([
         html.Div([
