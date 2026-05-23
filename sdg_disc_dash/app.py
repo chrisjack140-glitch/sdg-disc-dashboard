@@ -1552,20 +1552,24 @@ app.layout = html.Div(
         html.Div(
             id="landing-section",
             children=[
-                dbc.Container([
-                    # SDG logo banner
-                    html.Div(
-                        html.Img(
-                            src="/assets/sdg_logo.svg",
-                            style={
-                                "maxWidth": "720px", "width": "100%",
-                                "borderRadius": "12px",
-                                "boxShadow": f"0 8px 40px {THEME['dark']['shadow_lg']}",
-                            },
-                        ),
-                        style={"textAlign": "center", "marginBottom": "40px"},
-                    ),
+                # Full-screen faded background logo
+                html.Img(
+                    src="/assets/sdg_logo.svg",
+                    style={
+                        "position":      "absolute",
+                        "top":           "50%",
+                        "left":          "0",
+                        "width":         "100%",
+                        "height":        "auto",
+                        "transform":     "translateY(-50%)",
+                        "opacity":       "0.07",
+                        "pointerEvents": "none",
+                        "userSelect":    "none",
+                        "display":       "block",
+                    },
+                ),
 
+                dbc.Container([
                     # ── Saved sessions panel (hidden when empty) ───────
                     html.Div(
                         id="presets-landing",
@@ -1739,15 +1743,21 @@ app.layout = html.Div(
                             ),
                         ], md=4),
                     ], justify="center", className="g-4"),
-                ], fluid=True, style={"maxWidth": "860px"}),
+                ], fluid=True, style={
+                    "maxWidth":  "860px",
+                    "position":  "relative",
+                    "zIndex":    "1",
+                }),
             ],
             style={
-                "display": "flex",
-                "flexDirection": "column",
-                "alignItems": "center",
+                "display":        "flex",
+                "flexDirection":  "column",
+                "alignItems":     "center",
                 "justifyContent": "center",
-                "minHeight": "80vh",
-                "padding": "48px 16px",
+                "minHeight":      "80vh",
+                "padding":        "48px 16px",
+                "position":       "relative",
+                "overflow":       "hidden",
             },
         ),
 
