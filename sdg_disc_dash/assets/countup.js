@@ -12,7 +12,7 @@
 (function () {
     'use strict';
 
-    var DURATION = 900;   // animation duration in ms
+    var DURATION = 2400;  // animation duration in ms
     var DECIMALS = 2;     // decimal places to display
 
     /** Cubic ease-out — fast start, gentle arrival */
