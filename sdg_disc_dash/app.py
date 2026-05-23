@@ -114,10 +114,7 @@ def T(key: str, theme: str = "dark") -> str:
 # ─────────────────────────────────────────
 app = dash.Dash(
     __name__,
-    external_stylesheets=[
-        dbc.themes.CYBORG,
-        "https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400;1,700&display=swap",
-    ],
+    external_stylesheets=[dbc.themes.CYBORG],
     suppress_callback_exceptions=True,
 )
 server = app.server
@@ -875,17 +872,16 @@ def metric_cards(df: pd.DataFrame, anchor_graph: str) -> dbc.Row:
                 html.Div([
                     # Watermark factor letter — faded behind content
                     html.Div(f, style={
-                        "position":   "absolute",
-                        "right":      "10px",
-                        "bottom":     "-4px",
-                        "fontSize":   "88px",
-                        "fontWeight": 900,
-                        "fontFamily": "'Playfair Display', Georgia, serif",
-                        "color":      color,
-                        "opacity":    "0.07",
-                        "lineHeight": "1",
+                        "position":      "absolute",
+                        "right":         "10px",
+                        "bottom":        "-4px",
+                        "fontSize":      "88px",
+                        "fontWeight":    900,
+                        "color":         color,
+                        "opacity":       "0.07",
+                        "lineHeight":    "1",
                         "pointerEvents": "none",
-                        "userSelect": "none",
+                        "userSelect":    "none",
                         "letterSpacing": "-0.04em",
                     }),
                     # ── Content layer ───────────────────────────
@@ -899,10 +895,8 @@ def metric_cards(df: pd.DataFrame, anchor_graph: str) -> dbc.Row:
                             "marginBottom":  "2px",
                         }),
                         html.Div("Team Mean", style={
-                            "color":      THEME["dark"]["muted"],
-                            "fontSize":   "10px",
-                            "fontStyle":  "italic",
-                            "fontFamily": "'Playfair Display', Georgia, serif",
+                            "color":        THEME["dark"]["muted"],
+                            "fontSize":     "10px",
                             "marginBottom": "10px",
                         }),
                         html.Div(
@@ -914,8 +908,7 @@ def metric_cards(df: pd.DataFrame, anchor_graph: str) -> dbc.Row:
                             },
                             style={
                                 "fontSize":      "56px",
-                                "fontWeight":    700,
-                                "fontFamily":    "'Playfair Display', Georgia, serif",
+                                "fontWeight":    900,
                                 "color":         THEME["dark"]["text"],
                                 "lineHeight":    "1",
                                 "letterSpacing": "-0.03em",
@@ -1110,7 +1103,6 @@ def participant_card(profile: dict) -> html.Div:
                              style={
                                  "fontSize":      "11px",
                                  "fontWeight":    700,
-                                 "fontFamily":    "'Playfair Display', Georgia, serif",
                                  "fontStyle":     "italic",
                                  "color":         THEME["dark"]["muted"],
                                  "letterSpacing": "0.06em",
@@ -1121,13 +1113,11 @@ def participant_card(profile: dict) -> html.Div:
                         profile.get("participant_name", ""),
                         className="participant-name",
                         style={
-                            "fontFamily":    "'Playfair Display', Georgia, serif",
-                            "fontSize":      "22px",
-                            "fontWeight":    700,
-                            "color":         THEME["dark"]["accent"],
-                            "lineHeight":    "1.15",
-                            "marginBottom":  "4px",
-                            "letterSpacing": "0.01em",
+                            "fontSize":     "22px",
+                            "fontWeight":   700,
+                            "color":        THEME["dark"]["accent"],
+                            "lineHeight":   "1.15",
+                            "marginBottom": "4px",
                         },
                     ),
                     html.Div(
@@ -1151,7 +1141,6 @@ def participant_card(profile: dict) -> html.Div:
                         "marginBottom":  "2px",
                     }),
                     html.Div(style_type, style={
-                        "fontFamily":    "'Playfair Display', Georgia, serif",
                         "fontSize":      "44px",
                         "fontWeight":    700,
                         "color":         THEME["dark"]["accent"],
@@ -1381,6 +1370,27 @@ app.layout = html.Div(
         dcc.Store(id="theme-store", data="dark"),
         dcc.Download(id="download-csv"),
         dcc.Download(id="download-json"),
+
+        # ── PDF loading overlay (full-screen, shown during processing) ──
+        html.Div(
+            id="loading-overlay",
+            style={"display": "none"},
+            children=[
+                html.Img(
+                    src="/assets/sdg_loader.svg",
+                    className="sdg-pulse-loader",
+                    style={"width": "180px", "height": "180px"},
+                ),
+                html.Div("Reading PDFs…", style={
+                    "color":         THEME["dark"]["muted"],
+                    "fontSize":      "11px",
+                    "fontWeight":    600,
+                    "letterSpacing": "0.14em",
+                    "textTransform": "uppercase",
+                    "marginTop":     "28px",
+                }),
+            ],
+        ),
 
         # ── Sticky header ──────────────────────────────────────────
         html.Div([
@@ -1753,6 +1763,32 @@ def new_session(n_clicks):
     return None, None
 
 
+# 0e — upload-pdfs contents → show loading overlay immediately (clientside)
+app.clientside_callback(
+    """
+    function(contents) {
+        var SHOW = {
+            display:         'flex',
+            position:        'fixed',
+            top:             '0',
+            left:            '0',
+            width:           '100%',
+            height:          '100%',
+            background:      'rgba(8,8,15,0.93)',
+            zIndex:          '9999',
+            alignItems:      'center',
+            justifyContent:  'center',
+            flexDirection:   'column'
+        };
+        var HIDE = { display: 'none' };
+        return (contents && contents.length > 0) ? SHOW : HIDE;
+    }
+    """,
+    Output("loading-overlay", "style"),
+    Input("upload-pdfs",      "contents"),
+)
+
+
 # 0c — anchor-graph (landing) → sync to anchor-graph-dash (dashboard)
 @app.callback(
     Output("anchor-graph-dash", "value"),
@@ -1795,7 +1831,7 @@ def update_session_banner(profiles_json, df_json):
     dominant_color = THEME["disc"].get(dominant_style, THEME["dark"]["accent"])
 
     # ── Build banner cells ──────────────────────────────────────
-    def _cell(label, value, value_color=None, serif=False):
+    def _cell(label, value, value_color=None, large=False):
         return html.Div([
             html.Div(label, style={
                 "fontSize":      "9px",
@@ -1806,9 +1842,8 @@ def update_session_banner(profiles_json, df_json):
                 "marginBottom":  "3px",
             }),
             html.Div(value, style={
-                "fontSize":   "18px" if serif else "15px",
+                "fontSize":   "18px" if large else "15px",
                 "fontWeight": 700,
-                "fontFamily": "'Playfair Display', Georgia, serif" if serif else "inherit",
                 "color":      value_color or THEME["dark"]["text"],
                 "lineHeight": "1",
             }),
@@ -1828,27 +1863,25 @@ def update_session_banner(profiles_json, df_json):
             value="SDG Cohort",
             debounce=True,
             style={
-                "background":    "transparent",
-                "border":        "none",
-                "borderBottom":  f"1px solid {THEME['dark']['border']}",
-                "color":         THEME["dark"]["accent"],
-                "fontSize":      "15px",
-                "fontWeight":    700,
-                "fontFamily":    "'Playfair Display', Georgia, serif",
-                "outline":       "none",
-                "padding":       "0",
-                "width":         "160px",
-                "letterSpacing": "0.01em",
+                "background":   "transparent",
+                "border":       "none",
+                "borderBottom": f"1px solid {THEME['dark']['border']}",
+                "color":        THEME["dark"]["accent"],
+                "fontSize":     "15px",
+                "fontWeight":   700,
+                "outline":      "none",
+                "padding":      "0",
+                "width":        "160px",
             },
         ),
     ], style={"padding": "0 20px 0 0", "borderRight": f"1px solid {THEME['dark']['border']}"})
 
     cells = [
         cohort_input,
-        _cell("Participants",   str(n_participants), serif=True),
+        _cell("Participants",   str(n_participants), large=True),
         _cell("Session Date",   upload_date),
-        *([_cell("Team EQ Avg", eq_avg, THEME["dark"]["purple"], serif=True)] if eq_avg else []),
-        _cell("Dominant Style", dominant_style, dominant_color, serif=True),
+        *([_cell("Team EQ Avg", eq_avg, THEME["dark"]["purple"], large=True)] if eq_avg else []),
+        _cell("Dominant Style", dominant_style, dominant_color, large=True),
     ]
 
     banner_children = html.Div(
@@ -1879,20 +1912,23 @@ def update_session_banner(profiles_json, df_json):
     return banner_children, banner_style
 
 
-# 1 — PDF upload → parse profiles, build dataframe, show errors
+# 1 — PDF upload → parse profiles, build dataframe, show errors, hide overlay
+_OVERLAY_HIDE = {"display": "none"}
+
 @app.callback(
-    Output("profiles-store", "data",   allow_duplicate=True),
-    Output("df-store",       "data",   allow_duplicate=True),
-    Output("upload-errors",  "children"),
-    Output("scan-status",    "children"),
-    Input("upload-pdfs",     "contents"),
-    State("upload-pdfs",     "filename"),
-    State("anchor-graph",    "value"),
+    Output("profiles-store",  "data",   allow_duplicate=True),
+    Output("df-store",        "data",   allow_duplicate=True),
+    Output("upload-errors",   "children"),
+    Output("scan-status",     "children"),
+    Output("loading-overlay", "style",  allow_duplicate=True),
+    Input("upload-pdfs",      "contents"),
+    State("upload-pdfs",      "filename"),
+    State("anchor-graph",     "value"),
     prevent_initial_call=True,
 )
 def process_uploads(contents_list, filenames, anchor_graph):
     if not contents_list:
-        return None, None, None, None
+        return None, None, None, None, _OVERLAY_HIDE
     files_data = [decode_upload(c, f)
                   for c, f in zip(contents_list, filenames)]
     profiles, df, errors = process_uploaded_files(files_data, anchor_graph)
@@ -1907,10 +1943,10 @@ def process_uploads(contents_list, filenames, anchor_graph):
         )
     if df.empty:
         return (None, None,
-                dbc.Alert("No valid profiles found.", color="danger"), None)
-    # Scan banner cleared (returns None) once processing completes
-    return json.dumps(profiles), df.to_json(orient="records"), \
-           error_banner, None
+                dbc.Alert("No valid profiles found.", color="danger"),
+                None, _OVERLAY_HIDE)
+    return (json.dumps(profiles), df.to_json(orient="records"),
+            error_banner, None, _OVERLAY_HIDE)
 
 
 # 2 — df-store or anchor-graph-dash change → rebuild four DISC metric tiles

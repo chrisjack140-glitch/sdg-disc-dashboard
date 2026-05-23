@@ -807,31 +807,19 @@ body[data-theme="light"] .eqi-insights-summary:hover {
 }
 
 /* ════════════════════════════════════════════════════════
-   TYPOGRAPHY — Playfair Display serif accents
-   Applied to participant names, DISC style badge, score
-   callout numbers, and section headers.
+   TYPOGRAPHY
    ════════════════════════════════════════════════════════ */
 
-/* Participant name — gold serif in operator card header */
+/* Participant name — gold, larger than old 13px baseline */
 .participant-name {
-    font-family: 'Playfair Display', Georgia, serif !important;
     font-weight: 700;
-    letter-spacing: 0.01em;
     color: var(--accent) !important;
 }
 body[data-theme="light"] .participant-name {
     color: var(--accent) !important;
 }
 
-/* Report title — small italic serif above participant name */
-.report-title {
-    font-family: 'Playfair Display', Georgia, serif !important;
-    font-style: italic;
-    font-weight: 400;
-    letter-spacing: 0.06em;
-}
-
-/* Metric card — large score numbers in Playfair */
+/* Metric card — large score numbers */
 body[data-theme="light"] .metric-hover [style*="fontSize: 56px"],
 body[data-theme="light"] .metric-hover [style*="font-size: 56px"] {
     color: #1f2328 !important;
@@ -843,29 +831,21 @@ body[data-theme="light"] .metric-hover [style*="font-size: 56px"] {
     pointer-events: none !important;
 }
 
-/* DISC style type badge — large serif in participant card */
+/* DISC style type badge — large in participant card */
 body[data-theme="light"] [style*="fontSize: 44px"],
 body[data-theme="light"] [style*="font-size: 44px"] {
     color: var(--accent) !important;
 }
 
-/* Header dashboard title — slightly larger with tracking */
-.header-title {
-    letter-spacing: 0.01em;
-}
-
 /* ════════════════════════════════════════════════════════
    SESSION BANNER
    Full-width summary strip that appears after upload.
-   Shows cohort name (editable), participant count,
-   session date, team EQ average, and dominant style.
    ════════════════════════════════════════════════════════ */
 #session-banner {
     animation: cardSlideUp 0.4s ease-out both;
     transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
-/* Cohort name text input — underline-only style */
 #cohort-name-input {
     caret-color: var(--accent) !important;
 }
@@ -873,21 +853,37 @@ body[data-theme="light"] [style*="font-size: 44px"] {
     border-bottom-color: var(--accent) !important;
 }
 
-/* Banner stat cells */
-#session-banner [style*="borderRight"] {
-    transition: border-color 0.3s ease;
-}
-
 body[data-theme="light"] #session-banner {
     background-color: var(--surface) !important;
     border-color:     var(--border)  !important;
     border-top-color: var(--accent)  !important;
 }
-body[data-theme="light"] #session-banner [style*="color: rgb(201, 165, 53)"],
-body[data-theme="light"] #session-banner [style*="color: #c9a535"] {
-    color: var(--accent) !important;
-}
 body[data-theme="light"] #cohort-name-input {
     color: var(--accent) !important;
     border-bottom-color: var(--border) !important;
+}
+
+/* ════════════════════════════════════════════════════════
+   PDF LOADING OVERLAY
+   Full-screen overlay shown while PDFs are being parsed.
+   The SDG diamond shape pulses in and out — text hidden.
+   ════════════════════════════════════════════════════════ */
+#loading-overlay {
+    /* Layout set by clientside callback inline style;
+       these rules apply when it IS visible */
+    transition: opacity 0.25s ease;
+}
+
+/* Breathing pulse — scale + opacity oscillation */
+@keyframes sdgPulse {
+    0%   { opacity: 0.30; transform: scale(0.88); }
+    50%  { opacity: 1.00; transform: scale(1.00); }
+    100% { opacity: 0.30; transform: scale(0.88); }
+}
+
+.sdg-pulse-loader {
+    animation: sdgPulse 2s ease-in-out infinite;
+    display: block;
+    /* Slight gold drop-shadow to make the mark glow */
+    filter: drop-shadow(0 0 18px rgba(201, 165, 53, 0.45));
 }
