@@ -856,11 +856,13 @@ def metric_cards(df: pd.DataFrame, anchor_graph: str) -> dbc.Row:
     • Serif "Team Mean" label
     """
     cols = []
-    for f in FACTORS:
+    for idx, f in enumerate(FACTORS):
         col   = f"{anchor_graph}_{f}"
         mean  = float(df[col].mean())
         color = THEME["disc"][f]
         sign  = "+" if mean >= 0 else ""
+        # Delay matches CSS cardSlideUp stagger + 250 ms head-start
+        count_delay = 250 + idx * 80
         cols.append(dbc.Col(
             html.Div([
                 # ── Coloured top border stripe ──────────────────
@@ -903,14 +905,22 @@ def metric_cards(df: pd.DataFrame, anchor_graph: str) -> dbc.Row:
                             "fontFamily": "'Playfair Display', Georgia, serif",
                             "marginBottom": "10px",
                         }),
-                        html.Div(f"{sign}{mean:.2f}", style={
-                            "fontSize":      "56px",
-                            "fontWeight":    700,
-                            "fontFamily":    "'Playfair Display', Georgia, serif",
-                            "color":         THEME["dark"]["text"],
-                            "lineHeight":    "1",
-                            "letterSpacing": "-0.03em",
-                        }),
+                        html.Div(
+                            f"{sign}{mean:.2f}",
+                            className="count-up-target",
+                            **{
+                                "data-count-to":    f"{mean:.4f}",
+                                "data-count-delay": str(count_delay),
+                            },
+                            style={
+                                "fontSize":      "56px",
+                                "fontWeight":    700,
+                                "fontFamily":    "'Playfair Display', Georgia, serif",
+                                "color":         THEME["dark"]["text"],
+                                "lineHeight":    "1",
+                                "letterSpacing": "-0.03em",
+                            },
+                        ),
                     ]),
                 ], style={
                     "position": "relative",
