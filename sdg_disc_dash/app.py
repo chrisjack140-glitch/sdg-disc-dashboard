@@ -1985,6 +1985,32 @@ app.clientside_callback(
 )
 
 
+# 0f — Load Preset button → show loading overlay immediately (clientside)
+app.clientside_callback(
+    """
+    function(n_clicks) {
+        if (!n_clicks) return {display: 'none'};
+        return {
+            display:         'flex',
+            position:        'fixed',
+            top:             '0',
+            left:            '0',
+            width:           '100%',
+            height:          '100%',
+            background:      'rgba(8,8,15,0.93)',
+            zIndex:          '9999',
+            alignItems:      'center',
+            justifyContent:  'center',
+            flexDirection:   'column'
+        };
+    }
+    """,
+    Output("loading-overlay", "style",  allow_duplicate=True),
+    Input("btn-load-preset",  "n_clicks"),
+    prevent_initial_call=True,
+)
+
+
 # 0c — anchor-graph (landing) → sync to anchor-graph-dash (dashboard)
 @app.callback(
     Output("anchor-graph-dash", "value"),
@@ -2622,11 +2648,12 @@ def save_preset(n_clicks, cohort_name, profiles_json, df_json, presets_json):
     return json.dumps(presets), f"✓ Saved as '{name}'"
 
 
-# P3 — Load button → restore preset into profiles/df stores
+# P3 — Load button → restore preset into profiles/df stores + dismiss overlay
 @app.callback(
     Output("profiles-store",       "data",  allow_duplicate=True),
     Output("df-store",             "data",  allow_duplicate=True),
     Output("preset-load-feedback", "children"),
+    Output("loading-overlay",      "style", allow_duplicate=True),
     Input("btn-load-preset",       "n_clicks"),
     State("preset-selector",       "value"),
     State("presets-store",         "data"),
@@ -2634,12 +2661,12 @@ def save_preset(n_clicks, cohort_name, profiles_json, df_json, presets_json):
 )
 def load_preset(n_clicks, selected, presets_json):
     if not selected or not presets_json:
-        return None, None, "Select a session first."
+        return None, None, "Select a session first.", _OVERLAY_HIDE
     presets = json.loads(presets_json)
     if selected not in presets:
-        return None, None, f"Session '{selected}' not found."
+        return None, None, f"Session '{selected}' not found.", _OVERLAY_HIDE
     meta = presets[selected]
-    return meta["profiles_json"], meta["df_json"], ""
+    return meta["profiles_json"], meta["df_json"], "", _OVERLAY_HIDE
 
 
 # P4 — Delete button → remove preset from store
