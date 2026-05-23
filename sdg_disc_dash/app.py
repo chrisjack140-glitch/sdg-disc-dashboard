@@ -543,6 +543,16 @@ def _eq_total_bar(eqi_scores: dict) -> Optional[html.Div]:
     ], style={"marginTop": "12px", "marginBottom": "2px"})
 
 
+# Explanations shown when hovering over alignment badges in EQI Insights
+_BADGE_TOOLTIPS = {
+    "Aligned":         "Your DISC score and EQ-i score point in the same direction — the behavioral tendency is supported by the emotional skill.",
+    "Gap":             "Your DISC style is strong here, but your EQ-i score reveals a development opportunity. The behavior is present; the emotional skill needs growth.",
+    "Inverse Risk":    "A high score on this DISC factor typically suppresses this EQ-i subscale. This is a known blind spot — awareness is the first step.",
+    "Counterbalanced": "Despite the inverse pressure from your DISC style, your EQ-i score shows strong development here. This is a meaningful strength.",
+    "EQ Strength":     "Your EQ-i score exceeds what your DISC style alone would predict. This subscale is a genuine emotional intelligence asset.",
+}
+
+
 def _eqi_score_color(score: Optional[int]) -> str:
     if score is None:        return THEME["dark"]["muted"]
     if score >= 110:         return THEME["dark"]["green"]
@@ -702,18 +712,24 @@ def _eqi_insights_section(profile: dict) -> Optional[html.Details]:
                         }),
                     ]
 
-                # Alignment badge
+                # Alignment badge — with hover tooltip
                 if align_lbl and align_hex:
+                    tooltip_text = _BADGE_TOOLTIPS.get(align_lbl, "")
                     header_items.append(
-                        html.Span(align_lbl, style={
-                            "fontSize": "10px", "fontWeight": 700,
-                            "color": align_hex,
-                            "backgroundColor": f"{align_hex}22",
-                            "border": f"1px solid {align_hex}55",
-                            "borderRadius": "10px",
-                            "padding": "1px 7px",
-                            "marginLeft": "8px",
-                        })
+                        html.Span(
+                            align_lbl,
+                            className="badge-tooltip",
+                            **{"data-tooltip": tooltip_text},
+                            style={
+                                "fontSize": "10px", "fontWeight": 700,
+                                "color": align_hex,
+                                "backgroundColor": f"{align_hex}22",
+                                "border": f"1px solid {align_hex}55",
+                                "borderRadius": "10px",
+                                "padding": "1px 7px",
+                                "marginLeft": "8px",
+                            },
+                        )
                     )
 
                 sub_rows.append(html.Div([
