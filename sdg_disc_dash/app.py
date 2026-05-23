@@ -1433,7 +1433,8 @@ app.layout = html.Div(
 
         dcc.Store(id="profiles-store"),
         dcc.Store(id="df-store"),
-        dcc.Store(id="theme-store", data="dark"),
+        dcc.Store(id="theme-store",   data="dark"),
+        dcc.Store(id="presets-store", storage_type="local"),  # persists across sessions
         dcc.Download(id="download-csv"),
         dcc.Download(id="download-json"),
 
@@ -1565,6 +1566,97 @@ app.layout = html.Div(
                         style={"textAlign": "center", "marginBottom": "40px"},
                     ),
 
+                    # ── Saved sessions panel (hidden when empty) ───────
+                    html.Div(
+                        id="presets-landing",
+                        style={"display": "none"},
+                        children=[
+                            html.Div([
+                                # Header row
+                                html.Div([
+                                    html.Div("SAVED SESSIONS", style={
+                                        "fontSize":      "10px",
+                                        "fontWeight":    700,
+                                        "letterSpacing": "0.12em",
+                                        "color":         THEME["dark"]["muted"],
+                                        "textTransform": "uppercase",
+                                    }),
+                                ], style={"marginBottom": "12px"}),
+                                # Selector + action buttons
+                                html.Div([
+                                    dcc.Dropdown(
+                                        id="preset-selector",
+                                        options=[],
+                                        placeholder="Select a saved session…",
+                                        clearable=False,
+                                        style={**DROPDOWN_STYLE(), "flex": "1",
+                                               "minWidth": "0"},
+                                    ),
+                                    html.Button("Load", id="btn-load-preset",
+                                                n_clicks=0, style={
+                                        "backgroundColor": THEME["dark"]["accent"],
+                                        "color":           THEME["dark"]["bg"],
+                                        "border":          "none",
+                                        "borderRadius":    "8px",
+                                        "padding":         "8px 18px",
+                                        "fontSize":        "12px",
+                                        "fontWeight":      700,
+                                        "cursor":          "pointer",
+                                        "whiteSpace":      "nowrap",
+                                        "flexShrink":      "0",
+                                    }),
+                                    html.Button("Delete", id="btn-delete-preset",
+                                                n_clicks=0, style={
+                                        "backgroundColor": "transparent",
+                                        "color":           THEME["dark"]["muted"],
+                                        "border":    f"1px solid {THEME['dark']['border']}",
+                                        "borderRadius":    "8px",
+                                        "padding":         "8px 14px",
+                                        "fontSize":        "12px",
+                                        "fontWeight":      600,
+                                        "cursor":          "pointer",
+                                        "whiteSpace":      "nowrap",
+                                        "flexShrink":      "0",
+                                    }),
+                                ], style={"display": "flex", "gap": "10px",
+                                          "alignItems": "center"}),
+                                html.Div(id="preset-load-feedback", style={
+                                    "fontSize": "11px", "marginTop": "8px",
+                                    "color":    THEME["dark"]["muted"],
+                                    "minHeight": "16px",
+                                }),
+                            ], style={
+                                "backgroundColor": THEME["dark"]["surface"],
+                                "border":     f"1px solid {THEME['dark']['border']}",
+                                "borderTop":  f"3px solid {THEME['dark']['accent']}",
+                                "borderRadius": "12px",
+                                "padding":    "18px 20px",
+                                "marginBottom": "0",
+                            }),
+                            # OR divider
+                            html.Div([
+                                html.Div(style={
+                                    "flex": "1",
+                                    "height": "1px",
+                                    "backgroundColor": THEME["dark"]["border"],
+                                }),
+                                html.Span("or upload new PDFs", style={
+                                    "color":         THEME["dark"]["muted"],
+                                    "fontSize":      "11px",
+                                    "padding":       "0 14px",
+                                    "whiteSpace":    "nowrap",
+                                    "letterSpacing": "0.04em",
+                                }),
+                                html.Div(style={
+                                    "flex": "1",
+                                    "height": "1px",
+                                    "backgroundColor": THEME["dark"]["border"],
+                                }),
+                            ], style={"display": "flex", "alignItems": "center",
+                                      "margin": "22px 0"}),
+                        ],
+                    ),
+
                     # Upload + anchor controls side by side
                     dbc.Row([
                         # Upload area
@@ -1681,6 +1773,34 @@ app.layout = html.Div(
                                 style=DROPDOWN_STYLE(),
                             ),
                         ], width=2),
+                        dbc.Col(
+                            html.Button(
+                                "⬛  Save Session",
+                                id="btn-save-preset",
+                                n_clicks=0,
+                                style={
+                                    "backgroundColor": "transparent",
+                                    "color":           THEME["dark"]["accent"],
+                                    "border":    f"1px solid {THEME['dark']['accent']}",
+                                    "borderRadius":    "8px",
+                                    "padding":         "6px 16px",
+                                    "fontSize":        "12px",
+                                    "cursor":          "pointer",
+                                    "marginTop":       "22px",
+                                    "fontWeight":      600,
+                                },
+                            ),
+                            width="auto",
+                        ),
+                        dbc.Col(
+                            html.Div(id="preset-save-feedback", style={
+                                "fontSize":  "11px",
+                                "color":     THEME["dark"]["muted"],
+                                "marginTop": "26px",
+                                "minHeight": "16px",
+                            }),
+                            width="auto",
+                        ),
                         dbc.Col(
                             html.Button(
                                 "↺  New Session",
@@ -2431,6 +2551,104 @@ app.clientside_callback(
     State("upload-pdfs",  "filename"),
     prevent_initial_call=True,
 )
+
+# ═══════════════════════════════════════════════════════════════
+# PRESET CALLBACKS  (P1–P4)
+# ═══════════════════════════════════════════════════════════════
+
+# P1 — presets-store change → refresh selector options + show/hide panel
+@app.callback(
+    Output("presets-landing",      "style"),
+    Output("preset-selector",      "options"),
+    Output("preset-selector",      "value"),
+    Input("presets-store",         "data"),
+)
+def update_preset_ui(presets_json):
+    HIDE = {"display": "none"}
+    SHOW = {"display": "block", "width": "100%", "marginBottom": "0"}
+    if not presets_json:
+        return HIDE, [], None
+    presets = json.loads(presets_json)
+    if not presets:
+        return HIDE, [], None
+    options = [
+        {
+            "label": f"{name}  ·  {meta['n']} participants  ·  {meta['saved_at']}",
+            "value": name,
+        }
+        for name, meta in sorted(
+            presets.items(),
+            key=lambda kv: kv[1].get("saved_at", ""),
+            reverse=True,
+        )
+    ]
+    first = options[0]["value"] if options else None
+    return SHOW, options, first
+
+
+# P2 — Save Session button → write current session into presets-store
+@app.callback(
+    Output("presets-store",        "data",  allow_duplicate=True),
+    Output("preset-save-feedback", "children"),
+    Input("btn-save-preset",       "n_clicks"),
+    State("cohort-name-input",     "value"),
+    State("profiles-store",        "data"),
+    State("df-store",              "data"),
+    State("presets-store",         "data"),
+    prevent_initial_call=True,
+)
+def save_preset(n_clicks, cohort_name, profiles_json, df_json, presets_json):
+    if not profiles_json or not df_json:
+        return presets_json, "Nothing to save — upload PDFs first."
+    presets = json.loads(presets_json) if presets_json else {}
+    name    = (cohort_name or "").strip() or "Unnamed Session"
+    profiles = json.loads(profiles_json)
+    presets[name] = {
+        "profiles_json": profiles_json,
+        "df_json":       df_json,
+        "saved_at":      datetime.now().strftime("%b %d, %Y"),
+        "n":             len(profiles),
+    }
+    return json.dumps(presets), f"✓ Saved as '{name}'"
+
+
+# P3 — Load button → restore preset into profiles/df stores
+@app.callback(
+    Output("profiles-store",       "data",  allow_duplicate=True),
+    Output("df-store",             "data",  allow_duplicate=True),
+    Output("preset-load-feedback", "children"),
+    Input("btn-load-preset",       "n_clicks"),
+    State("preset-selector",       "value"),
+    State("presets-store",         "data"),
+    prevent_initial_call=True,
+)
+def load_preset(n_clicks, selected, presets_json):
+    if not selected or not presets_json:
+        return None, None, "Select a session first."
+    presets = json.loads(presets_json)
+    if selected not in presets:
+        return None, None, f"Session '{selected}' not found."
+    meta = presets[selected]
+    return meta["profiles_json"], meta["df_json"], ""
+
+
+# P4 — Delete button → remove preset from store
+@app.callback(
+    Output("presets-store",        "data",  allow_duplicate=True),
+    Output("preset-load-feedback", "children", allow_duplicate=True),
+    Input("btn-delete-preset",     "n_clicks"),
+    State("preset-selector",       "value"),
+    State("presets-store",         "data"),
+    prevent_initial_call=True,
+)
+def delete_preset(n_clicks, selected, presets_json):
+    if not selected or not presets_json:
+        return presets_json, "Nothing selected."
+    presets = json.loads(presets_json)
+    presets.pop(selected, None)
+    msg = f"Deleted '{selected}'" if selected else ""
+    return json.dumps(presets), msg
+
 
 if __name__ == "__main__":
     app.run(debug=True)
