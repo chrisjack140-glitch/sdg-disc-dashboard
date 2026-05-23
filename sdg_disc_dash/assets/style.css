@@ -864,6 +864,80 @@ body[data-theme="light"] #cohort-name-input {
 }
 
 /* ════════════════════════════════════════════════════════
+   FULL SCREEN GRAPH BUTTON
+   Injected dynamically by fullscreen.js onto each graph card.
+   Fades in on card hover; always visible while in fullscreen.
+   ════════════════════════════════════════════════════════ */
+.graph-fs-btn {
+    position:        absolute;
+    top:             8px;
+    right:           8px;
+    width:           28px;
+    height:          28px;
+    padding:         0;
+    background:      var(--surface2);
+    border:          1px solid var(--border);
+    border-radius:   6px;
+    color:           var(--muted);
+    font-size:       14px;
+    line-height:     1;
+    cursor:          pointer;
+    display:         flex;
+    align-items:     center;
+    justify-content: center;
+    z-index:         20;
+    opacity:         0;
+    transition:      opacity 0.18s ease, color 0.18s ease,
+                     border-color 0.18s ease;
+}
+
+/* Reveal on card hover */
+*:hover > .graph-fs-btn { opacity: 1; }
+
+/* Button hover — gold accent */
+.graph-fs-btn:hover {
+    opacity:      1 !important;
+    color:        var(--accent) !important;
+    border-color: var(--accent) !important;
+}
+
+/* ── Fullscreen state ───────────────────────────── */
+
+/* Always show close button */
+:fullscreen            .graph-fs-btn,
+:-webkit-full-screen   .graph-fs-btn {
+    opacity:   1;
+    top:       16px;
+    right:     16px;
+    width:     34px;
+    height:    34px;
+    font-size: 16px;
+}
+
+/* Card background & layout when fullscreen */
+:fullscreen,
+:-webkit-full-screen {
+    background-color: var(--bg)  !important;
+    padding:          24px       !important;
+    overflow:         hidden     !important;
+    display:          flex       !important;
+    flex-direction:   column     !important;
+    box-sizing:       border-box !important;
+}
+
+/* Make the Plotly SVG fill the available height */
+:fullscreen          .js-plotly-plot,
+:fullscreen          .plot-container,
+:fullscreen          .svg-container,
+:-webkit-full-screen .js-plotly-plot,
+:-webkit-full-screen .plot-container,
+:-webkit-full-screen .svg-container {
+    flex:   1       !important;
+    width:  100%    !important;
+    height: 100%    !important;
+}
+
+/* ════════════════════════════════════════════════════════
    PDF LOADING OVERLAY
    Full-screen overlay shown while PDFs are being parsed.
    The SDG diamond shape pulses in and out — text hidden.
