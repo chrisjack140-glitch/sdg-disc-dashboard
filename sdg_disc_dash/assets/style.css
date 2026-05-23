@@ -805,3 +805,89 @@ body[data-theme="light"] .eqi-insights-summary:hover {
     border-top-color:    transparent;
     border-bottom-color: var(--border);
 }
+
+/* ════════════════════════════════════════════════════════
+   TYPOGRAPHY — Playfair Display serif accents
+   Applied to participant names, DISC style badge, score
+   callout numbers, and section headers.
+   ════════════════════════════════════════════════════════ */
+
+/* Participant name — gold serif in operator card header */
+.participant-name {
+    font-family: 'Playfair Display', Georgia, serif !important;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    color: var(--accent) !important;
+}
+body[data-theme="light"] .participant-name {
+    color: var(--accent) !important;
+}
+
+/* Report title — small italic serif above participant name */
+.report-title {
+    font-family: 'Playfair Display', Georgia, serif !important;
+    font-style: italic;
+    font-weight: 400;
+    letter-spacing: 0.06em;
+}
+
+/* Metric card — large score numbers in Playfair */
+body[data-theme="light"] .metric-hover [style*="fontSize: 56px"],
+body[data-theme="light"] .metric-hover [style*="font-size: 56px"] {
+    color: #1f2328 !important;
+}
+
+/* Metric card watermark letter — always faded, never interactive */
+.metric-hover [style*="opacity: 0.07"] {
+    user-select: none !important;
+    pointer-events: none !important;
+}
+
+/* DISC style type badge — large serif in participant card */
+body[data-theme="light"] [style*="fontSize: 44px"],
+body[data-theme="light"] [style*="font-size: 44px"] {
+    color: var(--accent) !important;
+}
+
+/* Header dashboard title — slightly larger with tracking */
+.header-title {
+    letter-spacing: 0.01em;
+}
+
+/* ════════════════════════════════════════════════════════
+   SESSION BANNER
+   Full-width summary strip that appears after upload.
+   Shows cohort name (editable), participant count,
+   session date, team EQ average, and dominant style.
+   ════════════════════════════════════════════════════════ */
+#session-banner {
+    animation: cardSlideUp 0.4s ease-out both;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+/* Cohort name text input — underline-only style */
+#cohort-name-input {
+    caret-color: var(--accent) !important;
+}
+#cohort-name-input:focus {
+    border-bottom-color: var(--accent) !important;
+}
+
+/* Banner stat cells */
+#session-banner [style*="borderRight"] {
+    transition: border-color 0.3s ease;
+}
+
+body[data-theme="light"] #session-banner {
+    background-color: var(--surface) !important;
+    border-color:     var(--border)  !important;
+    border-top-color: var(--accent)  !important;
+}
+body[data-theme="light"] #session-banner [style*="color: rgb(201, 165, 53)"],
+body[data-theme="light"] #session-banner [style*="color: #c9a535"] {
+    color: var(--accent) !important;
+}
+body[data-theme="light"] #cohort-name-input {
+    color: var(--accent) !important;
+    border-bottom-color: var(--border) !important;
+}

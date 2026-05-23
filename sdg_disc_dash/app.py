@@ -1,6 +1,7 @@
 import io
 import json
 from collections import Counter
+from datetime import datetime
 from typing import Optional
 
 import dash
@@ -113,7 +114,10 @@ def T(key: str, theme: str = "dark") -> str:
 # ─────────────────────────────────────────
 app = dash.Dash(
     __name__,
-    external_stylesheets=[dbc.themes.CYBORG],
+    external_stylesheets=[
+        dbc.themes.CYBORG,
+        "https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400;1,700&display=swap",
+    ],
     suppress_callback_exceptions=True,
 )
 server = app.server
@@ -845,8 +849,11 @@ def _eqi_comparison_insights(profile: dict) -> Optional[html.Details]:
 
 def metric_cards(df: pd.DataFrame, anchor_graph: str) -> dbc.Row:
     """
-    Four DISC metric tiles — coloured accent bar, factor letter,
-    Team Mean label, large score number.
+    Four DISC metric tiles — dramatic luxury redesign.
+    • 4px coloured top border
+    • Faded watermark factor letter in background
+    • 56px Playfair Display score number
+    • Serif "Team Mean" label
     """
     cols = []
     for f in FACTORS:
@@ -856,33 +863,66 @@ def metric_cards(df: pd.DataFrame, anchor_graph: str) -> dbc.Row:
         sign  = "+" if mean >= 0 else ""
         cols.append(dbc.Col(
             html.Div([
+                # ── Coloured top border stripe ──────────────────
                 html.Div(style={
-                    "height": "3px",
+                    "height": "4px",
                     "backgroundColor": color,
                     "borderRadius": "12px 12px 0 0",
                 }),
+                # ── Card body (relative so watermark can be absolute) ──
                 html.Div([
+                    # Watermark factor letter — faded behind content
                     html.Div(f, style={
-                        "color": color, "fontWeight": 800, "fontSize": "11px",
-                        "letterSpacing": "0.1em", "textTransform": "uppercase",
-                        "marginBottom": "4px",
+                        "position":   "absolute",
+                        "right":      "10px",
+                        "bottom":     "-4px",
+                        "fontSize":   "88px",
+                        "fontWeight": 900,
+                        "fontFamily": "'Playfair Display', Georgia, serif",
+                        "color":      color,
+                        "opacity":    "0.07",
+                        "lineHeight": "1",
+                        "pointerEvents": "none",
+                        "userSelect": "none",
+                        "letterSpacing": "-0.04em",
                     }),
-                    html.Div("Team Mean", style={
-                        "color": THEME["dark"]["muted"],
-                        "fontSize": "10px", "marginBottom": "8px",
-                    }),
-                    html.Div(f"{sign}{mean:.2f}", style={
-                        "fontSize": "34px", "fontWeight": 900,
-                        "color": THEME["dark"]["text"],
-                        "lineHeight": "1", "letterSpacing": "-0.02em",
-                    }),
-                ], style={"padding": "14px 16px 20px 16px"}),
+                    # ── Content layer ───────────────────────────
+                    html.Div([
+                        html.Div(f, style={
+                            "color":         color,
+                            "fontWeight":    800,
+                            "fontSize":      "11px",
+                            "letterSpacing": "0.12em",
+                            "textTransform": "uppercase",
+                            "marginBottom":  "2px",
+                        }),
+                        html.Div("Team Mean", style={
+                            "color":      THEME["dark"]["muted"],
+                            "fontSize":   "10px",
+                            "fontStyle":  "italic",
+                            "fontFamily": "'Playfair Display', Georgia, serif",
+                            "marginBottom": "10px",
+                        }),
+                        html.Div(f"{sign}{mean:.2f}", style={
+                            "fontSize":      "56px",
+                            "fontWeight":    700,
+                            "fontFamily":    "'Playfair Display', Georgia, serif",
+                            "color":         THEME["dark"]["text"],
+                            "lineHeight":    "1",
+                            "letterSpacing": "-0.03em",
+                        }),
+                    ]),
+                ], style={
+                    "position": "relative",
+                    "padding":  "16px 18px 22px 18px",
+                    "overflow": "hidden",
+                }),
             ], style={
                 "backgroundColor": THEME["dark"]["surface"],
-                "border": f"1px solid {THEME['dark']['border']}",
-                "borderRadius": "12px",
-                "boxShadow": f"0 4px 20px {THEME['dark']['shadow_sm']}",
-                "overflow": "hidden",
+                "border":          f"1px solid {THEME['dark']['border']}",
+                "borderRadius":    "12px",
+                "boxShadow":       f"0 4px 24px {THEME['dark']['shadow_sm']}",
+                "overflow":        "hidden",
             }, className="metric-hover"),
         ))
     return dbc.Row(cols, className="mb-4 g-3")
@@ -1057,35 +1097,57 @@ def participant_card(profile: dict) -> html.Div:
                 dbc.Col([
                     html.Div("SDG DISC Operator Report",
                              className="report-title",
-                             style={"fontSize": "17px", "fontWeight": 800,
-                                    "color": THEME["dark"]["text"],
-                                    "marginBottom": "4px"}),
-                    html.Div([
-                        html.Span(profile.get("participant_name", ""),
-                                  style={"color": THEME["dark"]["accent"],
-                                         "fontWeight": 700,
-                                         "fontSize": "13px"}),
-                        html.Span(
-                            f"  ·  Anchor: "
-                            f"{profile.get('anchor_graph','stress').title()}"
-                            f"  ·  Top Two: {top_two}",
-                            style={"color": THEME["dark"]["muted"],
-                                   "fontSize": "12px"},
-                        ),
-                    ]),
+                             style={
+                                 "fontSize":      "11px",
+                                 "fontWeight":    700,
+                                 "fontFamily":    "'Playfair Display', Georgia, serif",
+                                 "fontStyle":     "italic",
+                                 "color":         THEME["dark"]["muted"],
+                                 "letterSpacing": "0.06em",
+                                 "textTransform": "uppercase",
+                                 "marginBottom":  "6px",
+                             }),
+                    html.Div(
+                        profile.get("participant_name", ""),
+                        className="participant-name",
+                        style={
+                            "fontFamily":    "'Playfair Display', Georgia, serif",
+                            "fontSize":      "22px",
+                            "fontWeight":    700,
+                            "color":         THEME["dark"]["accent"],
+                            "lineHeight":    "1.15",
+                            "marginBottom":  "4px",
+                            "letterSpacing": "0.01em",
+                        },
+                    ),
+                    html.Div(
+                        f"Anchor: "
+                        f"{profile.get('anchor_graph','stress').title()}"
+                        f"  ·  Top Two: {top_two}",
+                        style={"color": THEME["dark"]["muted"],
+                               "fontSize": "12px"},
+                    ),
                     # EQ total bar — shown when EQI report is linked
                     *([eq_bar] if eq_bar else []),
                 ]),
                 dbc.Col([
                     html.Div("DISC STYLE", style={
-                        "color": THEME["dark"]["muted"], "fontSize": "9px",
-                        "fontWeight": 700, "letterSpacing": "0.1em",
-                        "textAlign": "right",
+                        "color":         THEME["dark"]["muted"],
+                        "fontSize":      "9px",
+                        "fontWeight":    700,
+                        "letterSpacing": "0.12em",
+                        "textAlign":     "right",
+                        "textTransform": "uppercase",
+                        "marginBottom":  "2px",
                     }),
                     html.Div(style_type, style={
-                        "fontSize": "26px", "fontWeight": 900,
-                        "color": THEME["dark"]["accent"],
-                        "textAlign": "right",
+                        "fontFamily":    "'Playfair Display', Georgia, serif",
+                        "fontSize":      "44px",
+                        "fontWeight":    700,
+                        "color":         THEME["dark"]["accent"],
+                        "textAlign":     "right",
+                        "lineHeight":    "1",
+                        "letterSpacing": "-0.02em",
                     }),
                 ], width="auto"),
             ], align="start"),
@@ -1557,6 +1619,9 @@ app.layout = html.Div(
                     html.Div(id="upload-errors"),
                     html.Div(id="scan-status"),
 
+                    # Session header banner — shows after upload
+                    html.Div(id="session-banner", style={"display": "none"}),
+
                     html.Div(id="metric-cards"),
 
                     # Collapsible ranking
@@ -1685,6 +1750,123 @@ def new_session(n_clicks):
 )
 def sync_anchor(val):
     return val or "stress"
+
+
+# 0d — profiles-store + df-store → session banner
+@app.callback(
+    Output("session-banner", "children"),
+    Output("session-banner", "style"),
+    Input("profiles-store",  "data"),
+    Input("df-store",        "data"),
+)
+def update_session_banner(profiles_json, df_json):
+    """Build a slim full-width session overview banner after upload."""
+    if not profiles_json or not df_json:
+        return [], {"display": "none"}
+
+    profiles = json.loads(profiles_json)
+    df       = pd.read_json(io.StringIO(df_json))
+
+    # ── Gather stats ────────────────────────────────────────────
+    n_participants = len(profiles)
+    upload_date    = datetime.now().strftime("%B %d, %Y")
+
+    # Team EQ average — average across all participants that have EQI
+    eq_scores = [
+        p["eqi_scores"].get("total_ei")
+        for p in profiles
+        if p.get("eqi_scores") and p["eqi_scores"].get("total_ei") is not None
+    ]
+    eq_avg = f"{sum(eq_scores)/len(eq_scores):.0f}" if eq_scores else None
+
+    # Dominant DISC style — most common primary style
+    primary_styles = [p.get("primary_style") for p in profiles if p.get("primary_style")]
+    dominant_style = Counter(primary_styles).most_common(1)[0][0] if primary_styles else "—"
+    dominant_color = THEME["disc"].get(dominant_style, THEME["dark"]["accent"])
+
+    # ── Build banner cells ──────────────────────────────────────
+    def _cell(label, value, value_color=None, serif=False):
+        return html.Div([
+            html.Div(label, style={
+                "fontSize":      "9px",
+                "fontWeight":    700,
+                "letterSpacing": "0.12em",
+                "textTransform": "uppercase",
+                "color":         THEME["dark"]["muted"],
+                "marginBottom":  "3px",
+            }),
+            html.Div(value, style={
+                "fontSize":   "18px" if serif else "15px",
+                "fontWeight": 700,
+                "fontFamily": "'Playfair Display', Georgia, serif" if serif else "inherit",
+                "color":      value_color or THEME["dark"]["text"],
+                "lineHeight": "1",
+            }),
+        ], style={"padding": "0 20px", "borderRight": f"1px solid {THEME['dark']['border']}"})
+
+    cohort_input = html.Div([
+        html.Div("COHORT NAME", style={
+            "fontSize":      "9px",
+            "fontWeight":    700,
+            "letterSpacing": "0.12em",
+            "textTransform": "uppercase",
+            "color":         THEME["dark"]["muted"],
+            "marginBottom":  "3px",
+        }),
+        dcc.Input(
+            id="cohort-name-input",
+            value="SDG Cohort",
+            debounce=True,
+            style={
+                "background":    "transparent",
+                "border":        "none",
+                "borderBottom":  f"1px solid {THEME['dark']['border']}",
+                "color":         THEME["dark"]["accent"],
+                "fontSize":      "15px",
+                "fontWeight":    700,
+                "fontFamily":    "'Playfair Display', Georgia, serif",
+                "outline":       "none",
+                "padding":       "0",
+                "width":         "160px",
+                "letterSpacing": "0.01em",
+            },
+        ),
+    ], style={"padding": "0 20px 0 0", "borderRight": f"1px solid {THEME['dark']['border']}"})
+
+    cells = [
+        cohort_input,
+        _cell("Participants",   str(n_participants), serif=True),
+        _cell("Session Date",   upload_date),
+        *([_cell("Team EQ Avg", eq_avg, THEME["dark"]["purple"], serif=True)] if eq_avg else []),
+        _cell("Dominant Style", dominant_style, dominant_color, serif=True),
+    ]
+
+    banner_children = html.Div(
+        html.Div(cells, style={
+            "display":     "flex",
+            "alignItems":  "center",
+            "flexWrap":    "wrap",
+            "gap":         "0",
+        }),
+        style={
+            "display":         "flex",
+            "alignItems":      "center",
+            "justifyContent":  "flex-start",
+            "padding":         "14px 20px",
+        },
+    )
+
+    banner_style = {
+        "backgroundColor": THEME["dark"]["surface"],
+        "border":          f"1px solid {THEME['dark']['border']}",
+        "borderTop":       f"3px solid {THEME['dark']['accent']}",
+        "borderRadius":    "12px",
+        "marginBottom":    "24px",
+        "boxShadow":       f"0 2px 16px {THEME['dark']['shadow_sm']}",
+        "display":         "block",
+    }
+
+    return banner_children, banner_style
 
 
 # 1 — PDF upload → parse profiles, build dataframe, show errors
