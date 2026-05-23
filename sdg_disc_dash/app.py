@@ -1,3 +1,4 @@
+import base64
 import io
 import json
 from collections import Counter
@@ -19,6 +20,71 @@ from utils.insights import (
     SUBSCALE_DISPLAY, STYLE_NAMES,
     SUBSCALE_DISC_MAP, COMPOSITE_SUBSCALE_ORDER,
 )
+
+# ─────────────────────────────────────────
+# Loading overlay — SDG diamond mark as a base64 data URI.
+# Embedded inline so it never depends on asset-serving paths.
+# ─────────────────────────────────────────
+_DIAMOND_SVG = """\
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-6 38 342 342">
+  <g stroke="#c9a535" stroke-width="0.9" opacity="0.45" fill="none">
+    <line x1="165" y1="45"  x2="278" y2="210"/>
+    <line x1="165" y1="45"  x2="52"  y2="210"/>
+    <line x1="330" y1="210" x2="165" y2="97"/>
+    <line x1="330" y1="210" x2="165" y2="323"/>
+    <line x1="165" y1="375" x2="278" y2="210"/>
+    <line x1="165" y1="375" x2="52"  y2="210"/>
+    <line x1="0"   y1="210" x2="165" y2="97"/>
+    <line x1="0"   y1="210" x2="165" y2="323"/>
+  </g>
+  <g stroke="#c9a535" stroke-width="0.9" opacity="0.38" fill="none">
+    <line x1="165" y1="97"  x2="235" y2="210"/>
+    <line x1="165" y1="97"  x2="95"  y2="210"/>
+    <line x1="278" y1="210" x2="165" y2="140"/>
+    <line x1="278" y1="210" x2="165" y2="280"/>
+    <line x1="165" y1="323" x2="235" y2="210"/>
+    <line x1="165" y1="323" x2="95"  y2="210"/>
+    <line x1="52"  y1="210" x2="165" y2="140"/>
+    <line x1="52"  y1="210" x2="165" y2="280"/>
+  </g>
+  <g stroke="#c9a535" stroke-width="0.9" opacity="0.30" fill="none">
+    <line x1="165" y1="140" x2="204" y2="210"/>
+    <line x1="165" y1="140" x2="126" y2="210"/>
+    <line x1="235" y1="210" x2="165" y2="171"/>
+    <line x1="235" y1="210" x2="165" y2="249"/>
+    <line x1="165" y1="280" x2="204" y2="210"/>
+    <line x1="165" y1="280" x2="126" y2="210"/>
+    <line x1="95"  y1="210" x2="165" y2="171"/>
+    <line x1="95"  y1="210" x2="165" y2="249"/>
+  </g>
+  <polygon points="165,45  330,210  165,375  0,210"   fill="none" stroke="#c9a535" stroke-width="1.3"/>
+  <polygon points="165,97  278,210  165,323  52,210"  fill="none" stroke="#c9a535" stroke-width="1.2"/>
+  <polygon points="165,140 235,210  165,280  95,210"  fill="none" stroke="#c9a535" stroke-width="1.1"/>
+  <polygon points="165,171 204,210  165,249  126,210" fill="none" stroke="#c9a535" stroke-width="1.0"/>
+  <polygon points="165,193 183,210 165,227 147,210" fill="#c9a535"/>
+  <circle cx="165" cy="45"  r="4.5" fill="#c9a535"/>
+  <circle cx="330" cy="210" r="4.5" fill="#c9a535"/>
+  <circle cx="165" cy="375" r="4.5" fill="#c9a535"/>
+  <circle cx="0"   cy="210" r="4.5" fill="#c9a535"/>
+  <circle cx="165" cy="97"  r="3.2" fill="#c9a535"/>
+  <circle cx="278" cy="210" r="3.2" fill="#c9a535"/>
+  <circle cx="165" cy="323" r="3.2" fill="#c9a535"/>
+  <circle cx="52"  cy="210" r="3.2" fill="#c9a535"/>
+  <circle cx="165" cy="140" r="2.2" fill="#c9a535"/>
+  <circle cx="235" cy="210" r="2.2" fill="#c9a535"/>
+  <circle cx="165" cy="280" r="2.2" fill="#c9a535"/>
+  <circle cx="95"  cy="210" r="2.2" fill="#c9a535"/>
+  <circle cx="165" cy="171" r="1.5" fill="#c9a535"/>
+  <circle cx="204" cy="210" r="1.5" fill="#c9a535"/>
+  <circle cx="165" cy="249" r="1.5" fill="#c9a535"/>
+  <circle cx="126" cy="210" r="1.5" fill="#c9a535"/>
+</svg>"""
+
+_DIAMOND_SRC = (
+    "data:image/svg+xml;base64,"
+    + base64.b64encode(_DIAMOND_SVG.encode()).decode()
+)
+
 
 # ═══════════════════════════════════════════════════════════════
 # SINGLE SOURCE OF TRUTH — ALL COLOURS DEFINED HERE
@@ -1377,7 +1443,7 @@ app.layout = html.Div(
             style={"display": "none"},
             children=[
                 html.Img(
-                    src="/assets/sdg_loader.svg",
+                    src=_DIAMOND_SRC,
                     className="sdg-pulse-loader",
                     style={"width": "180px", "height": "180px"},
                 ),
