@@ -25,41 +25,41 @@ from utils.insights import (
 # Never hardcode a hex value outside of this block.
 # ═══════════════════════════════════════════════════════════════
 THEME = {
-    # ── Dark mode (default) ────────────────────────────────────
+    # ── Dark mode (default) — warm near-black + SDG gold accent ──
     "dark": {
-        "bg":           "#0d1117",   # page background
-        "surface":      "#161b22",   # card / panel surface
-        "surface2":     "#1c2333",   # elevated inner panels
-        "border":       "#30363d",   # borders and dividers
-        "text":         "#e6edf3",   # primary text
-        "muted":        "#8b949e",   # secondary / label text
-        "accent":       "#58a6ff",   # blue accent
+        "bg":           "#08080f",   # warm near-black page background
+        "surface":      "#0f0f18",   # card / panel surface
+        "surface2":     "#16161f",   # elevated inner panels
+        "border":       "#26263a",   # borders and dividers
+        "text":         "#e8e0d0",   # warm off-white primary text
+        "muted":        "#7a7490",   # warm muted secondary text
+        "accent":       "#c9a535",   # SDG gold — primary brand accent
         "green":        "#3fb950",   # positive / upward
         "red":          "#f85149",   # negative / downward / D factor
-        "gold":         "#d29922",   # I factor
-        "purple":       "#bc8cff",   # extra palette
+        "gold":         "#d29922",   # I factor (distinct warm gold)
+        "purple":       "#bc8cff",   # EQI / Total EQ
         "cyan":         "#39d353",   # extra palette
-        "shadow_sm":    "rgba(0,0,0,0.35)",
-        "shadow_md":    "rgba(0,0,0,0.45)",
-        "shadow_lg":    "rgba(0,0,0,0.65)",
+        "shadow_sm":    "rgba(0,0,0,0.45)",
+        "shadow_md":    "rgba(0,0,0,0.60)",
+        "shadow_lg":    "rgba(0,0,0,0.80)",
     },
     # ── Light mode ─────────────────────────────────────────────
     "light": {
-        "bg":           "#ffffff",
-        "surface":      "#f3f4f6",
-        "surface2":     "#e5e7eb",
-        "border":       "#d0d7de",
-        "text":         "#1f2328",
-        "muted":        "#57606a",
-        "accent":       "#0969da",
+        "bg":           "#fdfcf8",   # warm white
+        "surface":      "#f5f3ee",   # warm card surface
+        "surface2":     "#ece9e2",   # warm elevated panels
+        "border":       "#d4cfc4",   # warm border
+        "text":         "#1a1814",   # warm near-black text
+        "muted":        "#6b6458",   # warm muted text
+        "accent":       "#a07c1a",   # SDG gold adjusted for light bg
         "green":        "#1a7f37",
         "red":          "#cf222e",
         "gold":         "#9a6700",
         "purple":       "#8250df",
         "cyan":         "#0550ae",
         "shadow_sm":    "rgba(0,0,0,0.04)",
-        "shadow_md":    "rgba(0,0,0,0.07)",
-        "shadow_lg":    "rgba(0,0,0,0.12)",
+        "shadow_md":    "rgba(0,0,0,0.08)",
+        "shadow_lg":    "rgba(0,0,0,0.14)",
     },
     # ── DISC factor colours (same in both themes) ───────────────
     "disc": {
@@ -1317,7 +1317,7 @@ app.layout = html.Div(
                     # Logo / title
                     dbc.Col([
                         html.Div([
-                            html.Span("SDG", style={
+                            html.Span("SDG", className="sdg-badge", style={
                                 "backgroundColor": THEME["dark"]["accent"],
                                 "color": THEME["dark"]["bg"],
                                 "fontWeight": 900, "fontSize": "11px",
@@ -1407,7 +1407,7 @@ app.layout = html.Div(
                     # SDG logo banner
                     html.Div(
                         html.Img(
-                            src="/assets/sdg_logo.png",
+                            src="/assets/sdg_logo.svg",
                             style={
                                 "maxWidth": "720px", "width": "100%",
                                 "borderRadius": "12px",

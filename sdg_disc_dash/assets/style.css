@@ -3,46 +3,52 @@
    All colours defined here. Light mode flips them all at once.
    ════════════════════════════════════════════════════════ */
 
-/* ── Dark (default) ── */
+/* ── Dark (default) — warm near-black + SDG gold accent ── */
 :root,
 body[data-theme="dark"],
 body:not([data-theme]) {
-    --bg:           #0d1117;
-    --surface:      #161b22;
-    --surface2:     #1c2333;
-    --border:       #30363d;
-    --text:         #e6edf3;
-    --muted:        #8b949e;
-    --accent:       #58a6ff;
+    --bg:           #08080f;
+    --surface:      #0f0f18;
+    --surface2:     #16161f;
+    --border:       #26263a;
+    --text:         #e8e0d0;
+    --muted:        #7a7490;
+    --accent:       #c9a535;
     --green:        #3fb950;
     --red:          #f85149;
-    --shadow:       rgba(0,0,0,0.45);
-    --header-bg:    #161b22;
-    --input-bg:     #1c2333;
-    --graph-bg:     #161b22;
-    --plot-bg:      #161b22;
-    --row-alt:      #1c2333;
-    --scrollbar:    #30363d;
+    --shadow:       rgba(0,0,0,0.60);
+    --header-bg:    #0f0f18;
+    --input-bg:     #16161f;
+    --graph-bg:     #0f0f18;
+    --plot-bg:      #0f0f18;
+    --row-alt:      #16161f;
+    --scrollbar:    #26263a;
+    --gold-accent:  #c9a535;
+    --gold-glow:    rgba(201,165,53,0.18);
+    --gold-border:  rgba(201,165,53,0.28);
 }
 
 /* ── Light ── */
 body[data-theme="light"] {
-    --bg:           #ffffff;
-    --surface:      #f3f4f6;
-    --surface2:     #e5e7eb;
-    --border:       #d0d7de;
-    --text:         #1f2328;
-    --muted:        #57606a;
-    --accent:       #0969da;
+    --bg:           #fdfcf8;
+    --surface:      #f5f3ee;
+    --surface2:     #ece9e2;
+    --border:       #d4cfc4;
+    --text:         #1a1814;
+    --muted:        #6b6458;
+    --accent:       #a07c1a;
     --green:        #1a7f37;
     --red:          #cf222e;
-    --shadow:       rgba(0,0,0,0.07);
-    --header-bg:    #ffffff;
-    --input-bg:     #ffffff;
-    --graph-bg:     #f3f4f6;
-    --plot-bg:      #f3f4f6;
-    --row-alt:      #e5e7eb;
-    --scrollbar:    #d0d7de;
+    --shadow:       rgba(0,0,0,0.08);
+    --header-bg:    #fdfcf8;
+    --input-bg:     #fdfcf8;
+    --graph-bg:     #f5f3ee;
+    --plot-bg:      #f5f3ee;
+    --row-alt:      #ece9e2;
+    --scrollbar:    #d4cfc4;
+    --gold-accent:  #a07c1a;
+    --gold-glow:    rgba(160,124,26,0.10);
+    --gold-border:  rgba(160,124,26,0.22);
 }
 
 /* ════════════════════════════════════════════════════════
@@ -70,6 +76,24 @@ body {
     background-color: var(--bg) !important;
     color: var(--text) !important;
     transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* ════════════════════════════════════════════════════════
+   GOLD ACCENT — card / panel top border
+   Applies a hairline gold rule to elevated surfaces,
+   giving the dashboard a luxury editorial feel.
+   ════════════════════════════════════════════════════════ */
+.card, .card-body,
+[class*="card"],
+.eqi-insights-details {
+    border-top: 1px solid var(--gold-border) !important;
+}
+
+/* SDG badge in header pulses gold */
+.sticky-header .sdg-badge {
+    background-color: var(--gold-accent) !important;
+    color: #08080f !important;
+    box-shadow: 0 0 12px var(--gold-glow);
 }
 
 /* ════════════════════════════════════════════════════════
