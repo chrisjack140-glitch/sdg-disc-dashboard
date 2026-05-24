@@ -1788,15 +1788,28 @@ app.layout = html.Div(
                                 "⬛  Save Session",
                                 id="btn-save-preset",
                                 n_clicks=0,
-                                style={"display": "none"},
+                                style={
+                                    "backgroundColor": "transparent",
+                                    "color":           THEME["dark"]["accent"],
+                                    "border":    f"1px solid {THEME['dark']['accent']}",
+                                    "borderRadius":    "8px",
+                                    "padding":         "6px 16px",
+                                    "fontSize":        "12px",
+                                    "cursor":          "pointer",
+                                    "marginTop":       "22px",
+                                    "fontWeight":      600,
+                                },
                             ),
                             width="auto",
-                            style={"display": "none"},
                         ),
                         dbc.Col(
-                            html.Div(id="preset-save-feedback"),
+                            html.Div(id="preset-save-feedback", style={
+                                "fontSize":  "11px",
+                                "color":     THEME["dark"]["muted"],
+                                "marginTop": "26px",
+                                "minHeight": "16px",
+                            }),
                             width="auto",
-                            style={"display": "none"},
                         ),
                         dbc.Col(
                             html.Button(
