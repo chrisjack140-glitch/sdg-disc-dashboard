@@ -3,6 +3,7 @@ import io
 import json
 from collections import Counter
 from datetime import datetime
+from itertools import permutations
 from typing import Optional
 
 import dash
@@ -288,6 +289,15 @@ def _axis(title_text: str = "", show_grid: bool = True,
 
 # ── Chart builders ─────────────────────────────────────────────
 
+# Complete set of all valid Maxwell DISC style types (1–3 letters).
+# Generated from all permutations of 1, 2, and 3 letters from {D,I,S,C}.
+# Ordered so dominant-factor groups appear together (D-types, then I-, S-, C-).
+ALL_DISC_TYPES: list = []
+for _r in (1, 2, 3):
+    for _perm in permutations("DISC", _r):
+        ALL_DISC_TYPES.append("".join(_perm))
+
+
 def build_anchor_comparison_chart(df: pd.DataFrame,
                                    anchor_graph: str,
                                    theme: str = "dark") -> go.Figure:
@@ -345,31 +355,43 @@ def build_heatmap(df: pd.DataFrame,
 
 
 def build_disc_type_chart(profiles: list,
+                           anchor_graph: str = "stress",
                            theme: str = "dark") -> go.Figure:
     c = _tc(theme)
     type_counts = Counter(p.get("style_type", "—") for p in profiles)
-    labels  = sorted(type_counts.keys(), key=lambda k: -type_counts[k])
-    counts  = [type_counts[k] for k in labels]
-    # Colour each bar by the dominant (first) DISC letter of the style type
+
+    # Use the full taxonomy — every valid 1/2/3-letter DISC type.
+    # Types absent from the uploaded data get count 0.
+    labels = ALL_DISC_TYPES
+    counts = [type_counts.get(lbl, 0) for lbl in labels]
+
+    # Colour each bar by its dominant (first) DISC letter
     _fallback = THEME["dark"]["muted"]
     bar_colors = [
-        THEME["disc"].get(lbl[0].upper(), _fallback) if lbl and lbl[0].upper() in THEME["disc"]
-        else _fallback
+        THEME["disc"].get(lbl[0], _fallback)
         for lbl in labels
     ]
+
+    # Suppress "0" text labels to keep the chart clean
+    text_vals = [str(v) if v > 0 else "" for v in counts]
+
+    max_count = max(counts) if any(c > 0 for c in counts) else 1
     fig = go.Figure(go.Bar(
         x=labels, y=counts,
         marker_color=bar_colors, marker_line_width=0, opacity=0.85,
         hovertemplate="<b>%{x}</b><br>Count: %{y}<extra></extra>",
-        text=counts, textposition="outside",
-        textfont=dict(color=c["muted"], size=11),
+        text=text_vals, textposition="outside",
+        textfont=dict(color=c["muted"], size=10),
     ))
+    xaxis = _axis("Type", show_grid=False, theme=theme)
+    xaxis.update(tickangle=-45, tickfont=dict(color=c["muted"], size=9))
     fig.update_layout(**_base_layout(
-        "DISC Type Distribution (from PDF)", height=340, theme=theme,
+        f"DISC Style Distribution — {anchor_graph.title()}", height=380, theme=theme,
         extra=dict(
-            xaxis=_axis("Type", show_grid=False, theme=theme),
-            yaxis=_axis("Count", fixed_range=[0, max(counts) + 1.5], theme=theme),
+            xaxis=xaxis,
+            yaxis=_axis("Count", fixed_range=[0, max_count + 1.5], theme=theme),
             showlegend=False,
+            margin=dict(b=80),
         ),
     ))
     return fig
@@ -965,7 +987,7 @@ def metric_cards(df: pd.DataFrame, anchor_graph: str) -> dbc.Row:
                             "textTransform": "uppercase",
                             "marginBottom":  "2px",
                         }),
-                        html.Div("Team Mean", style={
+                        html.Div(f"Team Mean · {anchor_graph.title()}", style={
                             "color":        THEME["dark"]["muted"],
                             "fontSize":     "10px",
                             "marginBottom": "10px",
@@ -2273,7 +2295,7 @@ def render_tab(active_tab, df_json, profiles_json, anchor_graph, theme):
                 ), width=8),
                 dbc.Col(_graph_card(
                     dcc.Graph(
-                        figure=build_disc_type_chart(profiles, theme),
+                        figure=build_disc_type_chart(profiles, anchor_graph, theme),
                         config={"displayModeBar": False},
                     ), theme=theme,
                 ), width=4),
