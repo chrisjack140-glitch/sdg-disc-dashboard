@@ -350,8 +350,13 @@ def build_disc_type_chart(profiles: list,
     type_counts = Counter(p.get("style_type", "—") for p in profiles)
     labels  = sorted(type_counts.keys(), key=lambda k: -type_counts[k])
     counts  = [type_counts[k] for k in labels]
-    palette = THEME["radar"]
-    bar_colors = [palette[i % len(palette)] for i in range(len(labels))]
+    # Colour each bar by the dominant (first) DISC letter of the style type
+    _fallback = THEME["dark"]["muted"]
+    bar_colors = [
+        THEME["disc"].get(lbl[0].upper(), _fallback) if lbl and lbl[0].upper() in THEME["disc"]
+        else _fallback
+        for lbl in labels
+    ]
     fig = go.Figure(go.Bar(
         x=labels, y=counts,
         marker_color=bar_colors, marker_line_width=0, opacity=0.85,
@@ -443,7 +448,7 @@ def build_letter_mean_combo(df: pd.DataFrame, letter: str,
         line=dict(color=c["border"], width=1.5),
     )
     fig.update_layout(**_base_layout(
-        f"{letter}  —  Scores (Greatest to Least)",
+        f"{letter}  —  {anchor_graph.title()} Scores (Greatest to Least)",
         height=360, theme=theme,
         extra=dict(
             xaxis=_axis(show_grid=False, theme=theme),
