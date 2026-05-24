@@ -1946,10 +1946,19 @@ def new_session(n_clicks):
     return None, None
 
 
-# 0e — upload-pdfs contents → show loading overlay immediately (clientside)
+# 0e — show loading overlay for PDF upload OR preset load (clientside, PRIMARY)
+#
+# Root cause of previous "Duplicate callback outputs" bug:
+#   The former 0f callback (btn-load-preset → loading-overlay) shared the
+#   SAME Input as P3 (load_preset server callback), so Dash hashed both
+#   allow_duplicate outputs identically → collision.
+#
+# Fix: merge 0e + 0f into ONE primary callback (no allow_duplicate needed).
+# P3 keeps its Output("loading-overlay", "style", allow_duplicate=True) and
+# now gets a unique hash because P3's Input differs from this combined callback.
 app.clientside_callback(
     """
-    function(contents) {
+    function(contents, n_load) {
         var SHOW = {
             display:         'flex',
             position:        'fixed',
@@ -1964,37 +1973,24 @@ app.clientside_callback(
             flexDirection:   'column'
         };
         var HIDE = { display: 'none' };
-        return (contents && contents.length > 0) ? SHOW : HIDE;
+
+        var ctx = window.dash_clientside.callback_context;
+        if (ctx && ctx.triggered && ctx.triggered.length > 0) {
+            var trigger = ctx.triggered[0].prop_id;
+            if (trigger === 'upload-pdfs.contents') {
+                return (contents && contents.length > 0) ? SHOW : HIDE;
+            }
+            if (trigger === 'btn-load-preset.n_clicks') {
+                return (n_load && n_load > 0) ? SHOW : HIDE;
+            }
+        }
+        // Initial call — keep hidden
+        return HIDE;
     }
     """,
-    Output("loading-overlay", "style"),
-    Input("upload-pdfs",      "contents"),
-)
-
-
-# 0f — Load Preset button → show loading overlay immediately (clientside)
-app.clientside_callback(
-    """
-    function(n_clicks) {
-        if (!n_clicks) return {display: 'none'};
-        return {
-            display:         'flex',
-            position:        'fixed',
-            top:             '0',
-            left:            '0',
-            width:           '100%',
-            height:          '100%',
-            background:      'rgba(8,8,15,0.93)',
-            zIndex:          '9999',
-            alignItems:      'center',
-            justifyContent:  'center',
-            flexDirection:   'column'
-        };
-    }
-    """,
-    Output("loading-overlay", "style",  allow_duplicate=True),
-    Input("btn-load-preset",  "n_clicks"),
-    prevent_initial_call=True,
+    Output("loading-overlay",  "style"),          # PRIMARY — no allow_duplicate
+    Input("upload-pdfs",       "contents"),
+    Input("btn-load-preset",   "n_clicks"),
 )
 
 
