@@ -310,11 +310,14 @@ for _r in (1, 2, 3):
 
 def build_anchor_comparison_chart(df: pd.DataFrame,
                                    anchor_graph: str,
-                                   theme: str = "dark") -> go.Figure:
+                                   theme: str = "dark",
+                                   anon_map: dict = None) -> go.Figure:
+    names = [anon_map.get(n, n) if anon_map else n
+             for n in df["participant_name"]]
     fig = go.Figure()
     for f in FACTORS:
         fig.add_trace(go.Bar(
-            x=df["participant_name"],
+            x=names,
             y=df[f"{anchor_graph}_{f}"],
             name=f,
             marker_color=THEME["disc"][f],
@@ -337,16 +340,19 @@ def build_anchor_comparison_chart(df: pd.DataFrame,
 
 def build_heatmap(df: pd.DataFrame,
                   anchor_graph: str,
-                  theme: str = "dark") -> go.Figure:
+                  theme: str = "dark",
+                  anon_map: dict = None) -> go.Figure:
     c = _tc(theme)
     z = df[[f"{anchor_graph}_{f}" for f in FACTORS]].values
+    names = [anon_map.get(n, n) if anon_map else n
+             for n in df["participant_name"]]
     colorscale = [
         [0.00, "#1e3a8a"], [0.30, "#3b82f6"],
         [0.50, "#f9fafb"],
         [0.70, "#ef4444"], [1.00, "#7f1d1d"],
     ]
     fig = go.Figure(data=go.Heatmap(
-        z=z, x=FACTORS, y=df["participant_name"],
+        z=z, x=FACTORS, y=names,
         colorscale=colorscale,
         hovertemplate="<b>%{y}</b><br>%{x}: %{z:.2f}<extra></extra>",
         xgap=1, ygap=1,
@@ -1876,16 +1882,6 @@ app.layout = html.Div(
                             ),
                             width="auto",
                         ),
-                    ], className="mb-4 g-3", style={"paddingTop": "24px"}),
-
-                    html.Div(id="upload-errors"),
-                    html.Div(id="scan-status"),
-
-                    # Session header banner — shows after upload
-                    html.Div(id="session-banner", style={"display": "none"}),
-
-                    # ── Cohort filter + anonymise toolbar ───────────────
-                    dbc.Row([
                         dbc.Col(
                             html.Button(
                                 "◉  Filter Cohort",
@@ -1896,17 +1892,22 @@ app.layout = html.Div(
                                     "color":           THEME["dark"]["muted"],
                                     "border":    f"1px solid {THEME['dark']['border']}",
                                     "borderRadius":    "8px",
-                                    "padding":         "5px 14px",
-                                    "fontSize":        "11px",
+                                    "padding":         "6px 14px",
+                                    "fontSize":        "12px",
                                     "fontWeight":      600,
                                     "cursor":          "pointer",
+                                    "marginTop":       "22px",
                                     "letterSpacing":   "0.04em",
                                 },
                             ),
                             width="auto",
                         ),
-                        dbc.Col(html.Div(id="cohort-status"), width="auto",
-                                style={"display": "flex", "alignItems": "center"}),
+                        dbc.Col(
+                            html.Div(id="cohort-status",
+                                     style={"marginTop": "22px"}),
+                            width="auto",
+                            style={"display": "flex", "alignItems": "center"},
+                        ),
                         dbc.Col(
                             html.Button(
                                 "🔒  Anonymize Names",
@@ -1917,17 +1918,18 @@ app.layout = html.Div(
                                     "color":           THEME["dark"]["muted"],
                                     "border":    f"1px solid {THEME['dark']['border']}",
                                     "borderRadius":    "8px",
-                                    "padding":         "5px 14px",
-                                    "fontSize":        "11px",
+                                    "padding":         "6px 14px",
+                                    "fontSize":        "12px",
                                     "fontWeight":      600,
                                     "cursor":          "pointer",
+                                    "marginTop":       "22px",
                                     "letterSpacing":   "0.04em",
                                 },
                             ),
                             width="auto",
                             className="ms-auto",
                         ),
-                    ], align="center", className="mb-2"),
+                    ], className="mb-2 g-3", style={"paddingTop": "24px"}),
 
                     dbc.Collapse(
                         html.Div([
@@ -1992,6 +1994,10 @@ app.layout = html.Div(
                         id="cohort-collapse",
                         is_open=False,
                     ),
+
+                    html.Div(id="upload-errors"),
+                    html.Div(id="scan-status"),
+                    html.Div(id="session-banner", style={"display": "none"}),
 
                     html.Div(id="metric-cards"),
 
@@ -2346,7 +2352,7 @@ def update_metric_cards(df_json, anchor_graph, selected_names):
     return metric_cards(df, anchor_graph)
 
 
-# 3 — df-store, anchor-graph, DISC filter button, or anon → rebuild ranking table
+# 3 — df-store, anchor-graph, DISC filter button, anon, or cohort → rebuild ranking table
 @app.callback(
     Output("ranking-table",  "children"),
     Output("rank-btn-D",     "style"),
@@ -2360,9 +2366,10 @@ def update_metric_cards(df_json, anchor_graph, selected_names):
     Input("rank-btn-S",         "n_clicks"),
     Input("rank-btn-C",         "n_clicks"),
     Input("anon-store",         "data"),
+    Input("cohort-checklist",   "value"),
     State("profiles-store",     "data"),
 )
-def update_ranking(df_json, anchor_graph, nd, ni, ns, nc, is_anon, profiles_json):
+def update_ranking(df_json, anchor_graph, nd, ni, ns, nc, is_anon, selected_names, profiles_json):
     from dash import ctx
     triggered = ctx.triggered_id or "rank-btn-D"
     active = (triggered.replace("rank-btn-", "")
@@ -2386,6 +2393,8 @@ def update_ranking(df_json, anchor_graph, nd, ni, ns, nc, is_anon, profiles_json
     if not df_json:
         return None, *styles
     df = pd.read_json(io.StringIO(df_json), orient="records")
+    if selected_names:
+        df = df[df["participant_name"].isin(selected_names)]
     anon_map = make_anon_map(json.loads(profiles_json)) if is_anon and profiles_json else None
     return ranking_table(df, anchor_graph, active, anon_map=anon_map), *styles
 
@@ -2402,7 +2411,7 @@ def toggle_ranking(n, is_open):
     return new_open, ("▼ " if new_open else "▶ ")
 
 
-# 5 — Tab selection, data stores, anchor-graph-dash, theme, or anon → render tab content
+# 5 — Tab selection, data stores, anchor-graph-dash, theme, anon, or cohort → render tab content
 @app.callback(
     Output("tab-content",      "children"),
     Input("tabs",              "active_tab"),
@@ -2411,8 +2420,9 @@ def toggle_ranking(n, is_open):
     Input("anchor-graph-dash", "value"),
     Input("theme-store",       "data"),
     Input("anon-store",        "data"),
+    Input("cohort-checklist",  "value"),
 )
-def render_tab(active_tab, df_json, profiles_json, anchor_graph, theme, is_anon):
+def render_tab(active_tab, df_json, profiles_json, anchor_graph, theme, is_anon, selected_names):
     theme = theme or "dark"
     if not df_json:
         return None
@@ -2424,6 +2434,13 @@ def render_tab(active_tab, df_json, profiles_json, anchor_graph, theme, is_anon)
     name_opts = [{"label": anon_map[n] if anon_map else n, "value": n}
                  for n in all_names]
 
+    # Apply cohort filter for team-level charts
+    filtered_df = df[df["participant_name"].isin(selected_names)] if selected_names else df
+    filtered_profiles = (
+        [p for p in profiles if p["participant_name"] in selected_names]
+        if selected_names else profiles
+    )
+
     # ── Team Dashboard ─────────────────────────────────────────
     if active_tab == "team":
         return html.Div([
@@ -2431,19 +2448,19 @@ def render_tab(active_tab, df_json, profiles_json, anchor_graph, theme, is_anon)
                 dbc.Col(_graph_card(
                     dcc.Graph(
                         figure=build_anchor_comparison_chart(
-                            df, anchor_graph, theme),
+                            filtered_df, anchor_graph, theme, anon_map=anon_map),
                         config={"displayModeBar": False},
                     ), theme=theme,
                 ), width=8),
                 dbc.Col(_graph_card(
                     dcc.Graph(
-                        figure=build_disc_type_chart(profiles, anchor_graph, theme),
+                        figure=build_disc_type_chart(filtered_profiles, anchor_graph, theme),
                         config={"displayModeBar": False},
                     ), theme=theme,
                 ), width=4),
             ], className="g-3 mb-3"),
             _graph_card(
-                dcc.Graph(figure=build_heatmap(df, anchor_graph, theme),
+                dcc.Graph(figure=build_heatmap(filtered_df, anchor_graph, theme, anon_map=anon_map),
                           config={"displayModeBar": False}),
                 theme=theme,
             ),
@@ -2534,7 +2551,7 @@ def render_tab(active_tab, df_json, profiles_json, anchor_graph, theme, is_anon)
     return None
 
 
-# 6 — Letter tab selection, df-store, anchor-graph-dash, or theme → per-factor chart
+# 6 — Letter tab selection, df-store, anchor-graph-dash, theme, anon, or cohort → per-factor chart
 @app.callback(
     Output("letter-chart-body",  "children"),
     Input("letter-tabs",         "active_tab"),
@@ -2542,13 +2559,16 @@ def render_tab(active_tab, df_json, profiles_json, anchor_graph, theme, is_anon)
     Input("anchor-graph-dash",   "value"),
     Input("theme-store",         "data"),
     Input("anon-store",          "data"),
+    Input("cohort-checklist",    "value"),
     State("profiles-store",      "data"),
 )
-def update_letter_chart(letter, df_json, anchor_graph, theme, is_anon, profiles_json):
+def update_letter_chart(letter, df_json, anchor_graph, theme, is_anon, selected_names, profiles_json):
     theme = theme or "dark"
     if not df_json or not letter:
         return None
     df = pd.read_json(io.StringIO(df_json), orient="records")
+    if selected_names:
+        df = df[df["participant_name"].isin(selected_names)]
     anon_map = make_anon_map(json.loads(profiles_json)) if is_anon and profiles_json else None
     return _graph_card(
         dcc.Graph(
