@@ -1676,6 +1676,30 @@ app.layout = html.Div(
                                     }),
                                 ], style={"display": "flex", "gap": "10px",
                                           "alignItems": "center"}),
+                                dcc.Checklist(
+                                    id="load-anon-check",
+                                    options=[{
+                                        "label": "  Load in anonymous mode",
+                                        "value": "anon",
+                                    }],
+                                    value=[],
+                                    inputStyle={
+                                        "marginRight":  "6px",
+                                        "accentColor":  THEME["dark"]["accent"],
+                                        "width":        "13px",
+                                        "height":       "13px",
+                                        "cursor":       "pointer",
+                                    },
+                                    labelStyle={
+                                        "fontSize":     "11px",
+                                        "color":        THEME["dark"]["muted"],
+                                        "cursor":       "pointer",
+                                        "userSelect":   "none",
+                                        "display":      "inline-flex",
+                                        "alignItems":   "center",
+                                    },
+                                    style={"marginTop": "10px"},
+                                ),
                                 html.Div(id="preset-load-feedback", style={
                                     "fontSize": "11px", "marginTop": "8px",
                                     "color":    THEME["dark"]["muted"],
@@ -2447,8 +2471,7 @@ def render_tab(active_tab, df_json, profiles_json, anchor_graph, theme, is_anon,
             dbc.Row([
                 dbc.Col(_graph_card(
                     dcc.Graph(
-                        figure=build_anchor_comparison_chart(
-                            filtered_df, anchor_graph, theme, anon_map=anon_map),
+                        id="anchor-comparison-chart",
                         config={"displayModeBar": False},
                     ), theme=theme,
                 ), width=8),
@@ -2549,6 +2572,38 @@ def render_tab(active_tab, df_json, profiles_json, anchor_graph, theme, is_anon,
         ], className="tab-fade-in")
 
     return None
+
+
+# 5b — Dedicated callback for anchor comparison chart figure
+#       (separate from render_tab so anon/cohort changes reliably update it)
+@app.callback(
+    Output("anchor-comparison-chart", "figure"),
+    Input("df-store",          "data"),
+    Input("profiles-store",    "data"),
+    Input("anchor-graph-dash", "value"),
+    Input("theme-store",       "data"),
+    Input("anon-store",        "data"),
+    Input("cohort-checklist",  "value"),
+    Input("tabs",              "active_tab"),
+)
+def update_anchor_chart(df_json, profiles_json, anchor_graph, theme,
+                        is_anon, selected_names, active_tab):
+    theme = theme or "dark"
+    c = _tc(theme)
+    empty = go.Figure(layout=dict(
+        paper_bgcolor=c["surface"], plot_bgcolor=c["surface"],
+        font=dict(color=c["text"]),
+    ))
+    if not df_json or active_tab != "team":
+        return empty
+    df       = pd.read_json(io.StringIO(df_json), orient="records")
+    profiles = json.loads(profiles_json) if profiles_json else []
+    if selected_names:
+        df = df[df["participant_name"].isin(selected_names)]
+    if df.empty:
+        return empty
+    anon_map = make_anon_map(profiles) if is_anon else None
+    return build_anchor_comparison_chart(df, anchor_graph, theme, anon_map=anon_map)
 
 
 # 6 — Letter tab selection, df-store, anchor-graph-dash, theme, anon, or cohort → per-factor chart
@@ -2859,19 +2914,22 @@ def save_preset(n_clicks, cohort_name, profiles_json, df_json, presets_json):
     Output("df-store",             "data",  allow_duplicate=True),
     Output("preset-load-feedback", "children"),
     Output("loading-overlay",      "style", allow_duplicate=True),
+    Output("anon-store",           "data",  allow_duplicate=True),
     Input("btn-load-preset",       "n_clicks"),
     State("preset-selector",       "value"),
     State("presets-store",         "data"),
+    State("load-anon-check",       "value"),
     prevent_initial_call=True,
 )
-def load_preset(n_clicks, selected, presets_json):
+def load_preset(n_clicks, selected, presets_json, load_anon):
+    is_anon = "anon" in (load_anon or [])
     if not selected or not presets_json:
-        return None, None, "Select a session first.", _OVERLAY_HIDE
+        return None, None, "Select a session first.", _OVERLAY_HIDE, False
     presets = json.loads(presets_json)
     if selected not in presets:
-        return None, None, f"Session '{selected}' not found.", _OVERLAY_HIDE
+        return None, None, f"Session '{selected}' not found.", _OVERLAY_HIDE, False
     meta = presets[selected]
-    return meta["profiles_json"], meta["df_json"], "", _OVERLAY_HIDE
+    return meta["profiles_json"], meta["df_json"], "", _OVERLAY_HIDE, is_anon
 
 
 # P4 — Delete button → remove preset from store
@@ -2896,18 +2954,26 @@ def delete_preset(n_clicks, selected, presets_json):
 # COHORT FILTER + ANONYMIZE CALLBACKS  (C1–C5)
 # ═══════════════════════════════════════════════════════════════
 
-# C1 — profiles-store changes → populate cohort checklist with all participant names
+# C1 — profiles-store or anon-store changes → populate / re-label cohort checklist
 @app.callback(
     Output("cohort-checklist", "options"),
     Output("cohort-checklist", "value"),
     Input("profiles-store",    "data"),
+    Input("anon-store",        "data"),
+    State("cohort-checklist",  "value"),
 )
-def populate_cohort_checklist(profiles_json):
+def populate_cohort_checklist(profiles_json, is_anon, current_value):
+    from dash import ctx
     if not profiles_json:
         return [], []
     profiles = json.loads(profiles_json)
-    names = sorted({p["participant_name"] for p in profiles})
-    options = [{"label": n, "value": n} for n in names]
+    names    = sorted({p["participant_name"] for p in profiles})
+    anon_map = make_anon_map(profiles) if is_anon else None
+    options  = [{"label": anon_map.get(n, n) if anon_map else n, "value": n}
+                for n in names]
+    # When only anon-store changed, preserve the user's current selection
+    if ctx.triggered_id == "anon-store" and current_value is not None:
+        return options, current_value
     return options, names
 
 
