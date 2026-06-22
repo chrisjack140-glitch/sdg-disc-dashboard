@@ -287,6 +287,16 @@ def _axis(title_text: str = "", show_grid: bool = True,
     return d
 
 
+# ─────────────────────────────────────────
+# Anonymisation helpers
+# ─────────────────────────────────────────
+
+def make_anon_map(profiles: list) -> dict:
+    """Return {real_name: 'Participant N'} ordered alphabetically."""
+    names = sorted({p["participant_name"] for p in profiles})
+    return {n: f"Participant {i + 1}" for i, n in enumerate(names)}
+
+
 # ── Chart builders ─────────────────────────────────────────────
 
 # Complete set of all valid Maxwell DISC style types (1–3 letters).
@@ -399,7 +409,8 @@ def build_disc_type_chart(profiles: list,
 
 def build_multi_radar_chart(selected_profiles: list,
                              graph_name: str,
-                             theme: str = "dark") -> go.Figure:
+                             theme: str = "dark",
+                             anon_map: dict = None) -> go.Figure:
     categories = ["DI", "I", "IS", "S", "SC", "C", "CD", "D"]
     c = _tc(theme)
     fig = go.Figure()
@@ -412,7 +423,8 @@ def build_multi_radar_chart(selected_profiles: list,
             r=vals + [vals[0]],
             theta=categories + [categories[0]],
             fill="none",
-            name=profile["participant_name"],
+            name=(anon_map.get(profile["participant_name"], profile["participant_name"])
+                  if anon_map else profile["participant_name"]),
             line=dict(color=color, width=2.5),
             opacity=0.9,
             hovertemplate="<b>%{fullData.name}</b><br>%{theta}: %{r:.2f}<extra></extra>",
@@ -443,12 +455,14 @@ def build_multi_radar_chart(selected_profiles: list,
 
 def build_letter_mean_combo(df: pd.DataFrame, letter: str,
                              anchor_graph: str,
-                             theme: str = "dark") -> go.Figure:
+                             theme: str = "dark",
+                             anon_map: dict = None) -> go.Figure:
     col      = f"{anchor_graph}_{letter}"
     sorted_df = (df[["participant_name", col]]
                  .copy()
                  .sort_values(col, ascending=False))
-    names    = sorted_df["participant_name"].tolist()
+    names    = [anon_map.get(n, n) if anon_map else n
+                for n in sorted_df["participant_name"].tolist()]
     scores   = sorted_df[col].tolist()
     mean_val = float(df[col].mean())
     color    = THEME["disc"][letter]
@@ -1026,7 +1040,8 @@ def metric_cards(df: pd.DataFrame, anchor_graph: str) -> dbc.Row:
 
 def ranking_table(df: pd.DataFrame,
                   anchor_graph: str,
-                  sort_factor: str) -> html.Div:
+                  sort_factor: str,
+                  anon_map: dict = None) -> html.Div:
     """Collapsible ranking table sorted by chosen DISC factor."""
     col = f"{anchor_graph}_{sort_factor}"
     sorted_df = (
@@ -1076,7 +1091,8 @@ def ranking_table(df: pd.DataFrame,
         tbody_rows.append(html.Tr([
             html.Td(html.Span(str(i + 1), style=bstyle),
                     style={"padding": "8px 12px", "backgroundColor": bg_row}),
-            html.Td(row["participant_name"],
+            html.Td(anon_map.get(row["participant_name"], row["participant_name"])
+                    if anon_map else row["participant_name"],
                     style={"padding": "8px 12px", "color": THEME["dark"]["text"],
                            "fontSize": "13px", "backgroundColor": bg_row}),
             html.Td(f"{'+'if score>=0 else ''}{score:.2f}",
@@ -1097,7 +1113,7 @@ def ranking_table(df: pd.DataFrame,
     ], style={**SECTION_STYLE(), "padding": "0", "overflow": "hidden"})
 
 
-def participant_card(profile: dict) -> html.Div:
+def participant_card(profile: dict, display_name: str = None) -> html.Div:
     """
     Full operator report card with DISC factor tiles,
     shift indicators, raw scores, and EQ-i composite bar chart.
@@ -1105,6 +1121,7 @@ def participant_card(profile: dict) -> html.Div:
     top_two    = ", ".join(profile["summary"]["top_two"])
     style_type = profile.get("style_type", "—")
     eqi        = profile.get("eqi_scores", {})
+    _name      = display_name or profile.get("participant_name", "")
 
     factor_cols = []
     for idx, f in enumerate(FACTORS):
@@ -1203,7 +1220,7 @@ def participant_card(profile: dict) -> html.Div:
                                  "marginBottom":  "6px",
                              }),
                     html.Div(
-                        profile.get("participant_name", ""),
+                        _name,
                         className="participant-name",
                         style={
                             "fontSize":     "22px",
@@ -1306,7 +1323,7 @@ def participant_card(profile: dict) -> html.Div:
     ])
 
 
-def comparison_card(profile: dict) -> html.Div:
+def comparison_card(profile: dict, display_name: str = None) -> html.Div:
     """
     Compact side-by-side card showing DISC mini-tiles,
     shift indicators, raw scores, and EQ-i composite bar chart.
@@ -1314,6 +1331,7 @@ def comparison_card(profile: dict) -> html.Div:
     top_two    = ", ".join(profile["summary"]["top_two"])
     style_type = profile.get("style_type", "—")
     eqi        = profile.get("eqi_scores", {})
+    _name      = display_name or profile.get("participant_name", "")
     mini_cols  = []
 
     for f in FACTORS:
@@ -1379,7 +1397,7 @@ def comparison_card(profile: dict) -> html.Div:
         # Name and style type header
         dbc.Row([
             dbc.Col([
-                html.Div(profile.get("participant_name", ""),
+                html.Div(_name,
                          className="comp-name",
                          style={"fontSize": "15px", "fontWeight": 800,
                                 "color": THEME["dark"]["text"]}),
@@ -1461,7 +1479,8 @@ app.layout = html.Div(
         dcc.Store(id="profiles-store"),
         dcc.Store(id="df-store"),
         dcc.Store(id="theme-store",   data="dark"),
-        dcc.Store(id="presets-store", storage_type="local"),  # persists across sessions
+        dcc.Store(id="presets-store", storage_type="local"),
+        dcc.Store(id="anon-store",    data=False),
         dcc.Download(id="download-csv"),
         dcc.Download(id="download-json"),
 
@@ -1865,6 +1884,115 @@ app.layout = html.Div(
                     # Session header banner — shows after upload
                     html.Div(id="session-banner", style={"display": "none"}),
 
+                    # ── Cohort filter + anonymise toolbar ───────────────
+                    dbc.Row([
+                        dbc.Col(
+                            html.Button(
+                                "◉  Filter Cohort",
+                                id="cohort-toggle",
+                                n_clicks=0,
+                                style={
+                                    "backgroundColor": "transparent",
+                                    "color":           THEME["dark"]["muted"],
+                                    "border":    f"1px solid {THEME['dark']['border']}",
+                                    "borderRadius":    "8px",
+                                    "padding":         "5px 14px",
+                                    "fontSize":        "11px",
+                                    "fontWeight":      600,
+                                    "cursor":          "pointer",
+                                    "letterSpacing":   "0.04em",
+                                },
+                            ),
+                            width="auto",
+                        ),
+                        dbc.Col(html.Div(id="cohort-status"), width="auto",
+                                style={"display": "flex", "alignItems": "center"}),
+                        dbc.Col(
+                            html.Button(
+                                "🔒  Anonymize Names",
+                                id="btn-anon",
+                                n_clicks=0,
+                                style={
+                                    "backgroundColor": "transparent",
+                                    "color":           THEME["dark"]["muted"],
+                                    "border":    f"1px solid {THEME['dark']['border']}",
+                                    "borderRadius":    "8px",
+                                    "padding":         "5px 14px",
+                                    "fontSize":        "11px",
+                                    "fontWeight":      600,
+                                    "cursor":          "pointer",
+                                    "letterSpacing":   "0.04em",
+                                },
+                            ),
+                            width="auto",
+                            className="ms-auto",
+                        ),
+                    ], align="center", className="mb-2"),
+
+                    dbc.Collapse(
+                        html.Div([
+                            dbc.Row([
+                                dbc.Col(
+                                    html.Button("Select All", id="btn-select-all",
+                                                n_clicks=0, style={
+                                        "backgroundColor": THEME["dark"]["accent"],
+                                        "color":           THEME["dark"]["bg"],
+                                        "border":          "none",
+                                        "borderRadius":    "6px",
+                                        "padding":         "4px 12px",
+                                        "fontSize":        "11px",
+                                        "fontWeight":      700,
+                                        "cursor":          "pointer",
+                                    }),
+                                    width="auto",
+                                ),
+                                dbc.Col(
+                                    html.Button("Clear All", id="btn-clear-all",
+                                                n_clicks=0, style={
+                                        "backgroundColor": "transparent",
+                                        "color":           THEME["dark"]["muted"],
+                                        "border":    f"1px solid {THEME['dark']['border']}",
+                                        "borderRadius":    "6px",
+                                        "padding":         "4px 12px",
+                                        "fontSize":        "11px",
+                                        "fontWeight":      600,
+                                        "cursor":          "pointer",
+                                    }),
+                                    width="auto",
+                                ),
+                            ], className="g-2 mb-3"),
+                            dcc.Checklist(
+                                id="cohort-checklist",
+                                options=[],
+                                value=[],
+                                labelStyle={
+                                    "display":     "inline-flex",
+                                    "alignItems":  "center",
+                                    "marginRight": "18px",
+                                    "marginBottom":"6px",
+                                    "fontSize":    "12px",
+                                    "color":       THEME["dark"]["text"],
+                                    "cursor":      "pointer",
+                                },
+                                inputStyle={
+                                    "marginRight":      "6px",
+                                    "accentColor":      THEME["dark"]["accent"],
+                                    "width":            "14px",
+                                    "height":           "14px",
+                                },
+                                style={"display": "flex", "flexWrap": "wrap"},
+                            ),
+                        ], style={
+                            "backgroundColor": THEME["dark"]["surface"],
+                            "border":     f"1px solid {THEME['dark']['border']}",
+                            "borderRadius": "10px",
+                            "padding":    "14px 18px",
+                            "marginBottom": "4px",
+                        }),
+                        id="cohort-collapse",
+                        is_open=False,
+                    ),
+
                     html.Div(id="metric-cards"),
 
                     # Collapsible ranking
@@ -2194,13 +2322,14 @@ def process_uploads(contents_list, filenames, anchor_graph):
             error_banner, None, _OVERLAY_HIDE)
 
 
-# 2 — df-store or anchor-graph-dash change → rebuild four DISC metric tiles
+# 2 — df-store, anchor-graph-dash, or cohort selection → rebuild four DISC metric tiles
 @app.callback(
     Output("metric-cards", "children"),
     Input("df-store", "data"),
     Input("anchor-graph-dash", "value"),
+    Input("cohort-checklist", "value"),
 )
-def update_metric_cards(df_json, anchor_graph):
+def update_metric_cards(df_json, anchor_graph, selected_names):
     if not df_json:
         return html.P(
             "Upload Maxwell DISC PDFs to begin.",
@@ -2208,11 +2337,16 @@ def update_metric_cards(df_json, anchor_graph):
                    "paddingTop": "20px"},
         )
     df = pd.read_json(io.StringIO(df_json), orient="records")
+    if selected_names:
+        df = df[df["participant_name"].isin(selected_names)]
+    if df.empty:
+        return html.P("No participants selected.",
+                      style={"color": THEME["dark"]["muted"], "fontSize": "13px",
+                             "paddingTop": "20px"})
     return metric_cards(df, anchor_graph)
 
 
-# 3 — df-store, anchor-graph, or DISC filter button → rebuild ranking table
-#     also updates active button highlight style
+# 3 — df-store, anchor-graph, DISC filter button, or anon → rebuild ranking table
 @app.callback(
     Output("ranking-table",  "children"),
     Output("rank-btn-D",     "style"),
@@ -2225,8 +2359,10 @@ def update_metric_cards(df_json, anchor_graph):
     Input("rank-btn-I",         "n_clicks"),
     Input("rank-btn-S",         "n_clicks"),
     Input("rank-btn-C",         "n_clicks"),
+    Input("anon-store",         "data"),
+    State("profiles-store",     "data"),
 )
-def update_ranking(df_json, anchor_graph, nd, ni, ns, nc):
+def update_ranking(df_json, anchor_graph, nd, ni, ns, nc, is_anon, profiles_json):
     from dash import ctx
     triggered = ctx.triggered_id or "rank-btn-D"
     active = (triggered.replace("rank-btn-", "")
@@ -2250,7 +2386,8 @@ def update_ranking(df_json, anchor_graph, nd, ni, ns, nc):
     if not df_json:
         return None, *styles
     df = pd.read_json(io.StringIO(df_json), orient="records")
-    return ranking_table(df, anchor_graph, active), *styles
+    anon_map = make_anon_map(json.loads(profiles_json)) if is_anon and profiles_json else None
+    return ranking_table(df, anchor_graph, active, anon_map=anon_map), *styles
 
 
 # 4 — Ranking toggle button → open/close collapse, update chevron icon
@@ -2265,7 +2402,7 @@ def toggle_ranking(n, is_open):
     return new_open, ("▼ " if new_open else "▶ ")
 
 
-# 5 — Tab selection, data stores, anchor-graph-dash, or theme → render tab content
+# 5 — Tab selection, data stores, anchor-graph-dash, theme, or anon → render tab content
 @app.callback(
     Output("tab-content",      "children"),
     Input("tabs",              "active_tab"),
@@ -2273,14 +2410,19 @@ def toggle_ranking(n, is_open):
     Input("profiles-store",    "data"),
     Input("anchor-graph-dash", "value"),
     Input("theme-store",       "data"),
+    Input("anon-store",        "data"),
 )
-def render_tab(active_tab, df_json, profiles_json, anchor_graph, theme):
+def render_tab(active_tab, df_json, profiles_json, anchor_graph, theme, is_anon):
     theme = theme or "dark"
     if not df_json:
         return None
     df        = pd.read_json(io.StringIO(df_json), orient="records")
     profiles  = json.loads(profiles_json)
     all_names = df["participant_name"].tolist()
+    anon_map  = make_anon_map(profiles) if is_anon else None
+    # Build dropdown options: label shows anon name, value stays as real name
+    name_opts = [{"label": anon_map[n] if anon_map else n, "value": n}
+                 for n in all_names]
 
     # ── Team Dashboard ─────────────────────────────────────────
     if active_tab == "team":
@@ -2326,7 +2468,7 @@ def render_tab(active_tab, df_json, profiles_json, anchor_graph, theme):
                 html.Label("Select Participant", style=LABEL_STYLE),
                 dcc.Dropdown(
                     id="selected-participant",
-                    options=[{"label": n, "value": n} for n in all_names],
+                    options=name_opts,
                     value=all_names[0], clearable=False,
                     style=DROPDOWN_STYLE(),
                 ),
@@ -2357,8 +2499,7 @@ def render_tab(active_tab, df_json, profiles_json, anchor_graph, theme):
                     html.Label("Overlay Participants", style=LABEL_STYLE),
                     dcc.Dropdown(
                         id="radar-participants",
-                        options=[{"label": n, "value": n}
-                                 for n in all_names],
+                        options=name_opts,
                         value=[all_names[0]], multi=True,
                         style=DROPDOWN_STYLE(),
                     ),
@@ -2381,7 +2522,7 @@ def render_tab(active_tab, df_json, profiles_json, anchor_graph, theme):
             html.Label("Select Leaders", style=LABEL_STYLE),
             dcc.Dropdown(
                 id="comparison-participants",
-                options=[{"label": n, "value": n} for n in all_names],
+                options=name_opts,
                 value=(all_names[:2] if len(all_names) >= 2
                        else all_names),
                 multi=True, style=DROPDOWN_STYLE(),
@@ -2400,16 +2541,20 @@ def render_tab(active_tab, df_json, profiles_json, anchor_graph, theme):
     Input("df-store",            "data"),
     Input("anchor-graph-dash",   "value"),
     Input("theme-store",         "data"),
+    Input("anon-store",          "data"),
+    State("profiles-store",      "data"),
 )
-def update_letter_chart(letter, df_json, anchor_graph, theme):
+def update_letter_chart(letter, df_json, anchor_graph, theme, is_anon, profiles_json):
     theme = theme or "dark"
     if not df_json or not letter:
         return None
     df = pd.read_json(io.StringIO(df_json), orient="records")
+    anon_map = make_anon_map(json.loads(profiles_json)) if is_anon and profiles_json else None
     return _graph_card(
         dcc.Graph(
             figure=build_letter_mean_combo(df, letter,
-                                           anchor_graph, theme),
+                                           anchor_graph, theme,
+                                           anon_map=anon_map),
             config={"displayModeBar": False},
         ),
         theme=theme,
@@ -2420,15 +2565,19 @@ def update_letter_chart(letter, df_json, anchor_graph, theme):
 @app.callback(
     Output("participant-card-body", "children"),
     Input("selected-participant",   "value"),
+    Input("anon-store",             "data"),
     State("profiles-store",         "data"),
 )
-def update_participant_card(name, profiles_json):
+def update_participant_card(name, is_anon, profiles_json):
     if not name or not profiles_json:
         return None
     profiles       = json.loads(profiles_json)
     profile_lookup = {p["participant_name"]: p for p in profiles}
-    return (participant_card(profile_lookup[name])
-            if name in profile_lookup else None)
+    if name not in profile_lookup:
+        return None
+    anon_map     = make_anon_map(profiles) if is_anon else None
+    display_name = anon_map.get(name, name) if anon_map else None
+    return participant_card(profile_lookup[name], display_name=display_name)
 
 
 # 8 — Radar participant/graph selection or theme → rebuild radar chart
@@ -2436,10 +2585,11 @@ def update_participant_card(name, profiles_json):
     Output("radar-chart",       "figure"),
     Input("radar-participants", "value"),
     Input("radar-graph-choice", "value"),
+    Input("anon-store",         "data"),
     State("profiles-store",     "data"),
     State("theme-store",        "data"),
 )
-def update_radar(selected_names, graph_choice, profiles_json, theme):
+def update_radar(selected_names, graph_choice, is_anon, profiles_json, theme):
     theme = theme or "dark"
     c = _tc(theme)
     if not selected_names or not profiles_json:
@@ -2449,10 +2599,11 @@ def update_radar(selected_names, graph_choice, profiles_json, theme):
             font=dict(color=c["text"]),
         ))
     profiles       = json.loads(profiles_json)
+    anon_map       = make_anon_map(profiles) if is_anon else None
     profile_lookup = {p["participant_name"]: p for p in profiles}
     selected       = [profile_lookup[n]
                       for n in selected_names if n in profile_lookup]
-    return (build_multi_radar_chart(selected, graph_choice, theme)
+    return (build_multi_radar_chart(selected, graph_choice, theme, anon_map=anon_map)
             if selected else go.Figure())
 
 
@@ -2460,22 +2611,33 @@ def update_radar(selected_names, graph_choice, profiles_json, theme):
 @app.callback(
     Output("comparison-cards-body",   "children"),
     Input("comparison-participants",  "value"),
+    Input("anon-store",               "data"),
     State("profiles-store",           "data"),
 )
-def update_comparison_cards(selected_names, profiles_json):
+def update_comparison_cards(selected_names, is_anon, profiles_json):
     if not selected_names or not profiles_json:
         return html.P(
             "Select at least one leader above.",
             style={"color": THEME["dark"]["muted"], "fontSize": "12px"},
         )
     profiles       = json.loads(profiles_json)
+    anon_map       = make_anon_map(profiles) if is_anon else None
     profile_lookup = {p["participant_name"]: p for p in profiles}
     selected       = [profile_lookup[n]
                       for n in selected_names if n in profile_lookup]
     rows = []
     for i in range(0, len(selected), 2):
         pair = selected[i:i + 2]
-        cols = [dbc.Col(comparison_card(p), width=6) for p in pair]
+        cols = [
+            dbc.Col(
+                comparison_card(
+                    p,
+                    display_name=anon_map.get(p["participant_name"]) if anon_map else None,
+                ),
+                width=6,
+            )
+            for p in pair
+        ]
         rows.append(dbc.Row(cols, className="g-3 mb-2"))
     return html.Div(rows)
 
@@ -2708,6 +2870,88 @@ def delete_preset(n_clicks, selected, presets_json):
     presets.pop(selected, None)
     msg = f"Deleted '{selected}'" if selected else ""
     return json.dumps(presets), msg
+
+
+# ═══════════════════════════════════════════════════════════════
+# COHORT FILTER + ANONYMIZE CALLBACKS  (C1–C5)
+# ═══════════════════════════════════════════════════════════════
+
+# C1 — profiles-store changes → populate cohort checklist with all participant names
+@app.callback(
+    Output("cohort-checklist", "options"),
+    Output("cohort-checklist", "value"),
+    Input("profiles-store",    "data"),
+)
+def populate_cohort_checklist(profiles_json):
+    if not profiles_json:
+        return [], []
+    profiles = json.loads(profiles_json)
+    names = sorted({p["participant_name"] for p in profiles})
+    options = [{"label": n, "value": n} for n in names]
+    return options, names
+
+
+# C2 — cohort-toggle button → open/close cohort collapse panel
+@app.callback(
+    Output("cohort-collapse", "is_open"),
+    Input("cohort-toggle",    "n_clicks"),
+    State("cohort-collapse",  "is_open"),
+    prevent_initial_call=True,
+)
+def toggle_cohort_collapse(n_clicks, is_open):
+    return not is_open
+
+
+# C3 — Select All / Clear All → update checklist value
+@app.callback(
+    Output("cohort-checklist",  "value",   allow_duplicate=True),
+    Input("btn-select-all",     "n_clicks"),
+    Input("btn-clear-all",      "n_clicks"),
+    State("cohort-checklist",   "options"),
+    prevent_initial_call=True,
+)
+def select_clear_all(n_select, n_clear, options):
+    triggered = dash.callback_context.triggered[0]["prop_id"]
+    if "btn-select-all" in triggered:
+        return [o["value"] for o in options]
+    return []
+
+
+# C4 — checklist value or profiles → update cohort status text
+@app.callback(
+    Output("cohort-status",    "children"),
+    Input("cohort-checklist",  "value"),
+    State("cohort-checklist",  "options"),
+)
+def update_cohort_status(selected, options):
+    if not options:
+        return ""
+    total = len(options)
+    sel   = len(selected) if selected else 0
+    if sel == total:
+        return html.Span(
+            f"All {total} selected",
+            style={"fontSize": "11px", "color": THEME["dark"]["muted"]},
+        )
+    return html.Span(
+        f"{sel} of {total} selected",
+        style={"fontSize": "11px",
+               "color": THEME["dark"]["accent"] if sel < total else THEME["dark"]["muted"]},
+    )
+
+
+# C5 — anonymize button → toggle anon-store, update button label
+@app.callback(
+    Output("anon-store",  "data",     allow_duplicate=True),
+    Output("btn-anon",    "children"),
+    Input("btn-anon",     "n_clicks"),
+    State("anon-store",   "data"),
+    prevent_initial_call=True,
+)
+def toggle_anonymize(n_clicks, is_anon):
+    new_state = not bool(is_anon)
+    label = "🔓  Show Names" if new_state else "🔒  Anonymize Names"
+    return new_state, label
 
 
 if __name__ == "__main__":
