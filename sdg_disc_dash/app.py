@@ -1,6 +1,7 @@
 import base64
 import io
 import json
+import zipfile
 from collections import Counter
 from datetime import datetime
 from itertools import permutations
@@ -21,6 +22,9 @@ from utils.insights import (
     SUBSCALE_DISPLAY, STYLE_NAMES,
     SUBSCALE_DISC_MAP, COMPOSITE_SUBSCALE_ORDER,
 )
+from utils.roadmap_generator import generate_roadmap_document
+from utils.roadmap_pdf import render_pdf as render_roadmap_pdf
+from utils.roadmap_docx import render_docx as render_roadmap_docx
 
 # ─────────────────────────────────────────
 # Loading overlay — SDG diamond mark as a base64 data URI.
@@ -1489,6 +1493,7 @@ app.layout = html.Div(
         dcc.Store(id="anon-store",    data=False),
         dcc.Download(id="download-csv"),
         dcc.Download(id="download-json"),
+        dcc.Download(id="download-roadmap"),
 
         # ── PDF loading overlay (full-screen, shown during processing) ──
         html.Div(
@@ -1544,6 +1549,8 @@ app.layout = html.Div(
                                         tab_id="individual"),
                                 dbc.Tab(label="Comparisons",
                                         tab_id="comparisons"),
+                                dbc.Tab(label="Leadership Roadmap",
+                                        tab_id="leadership_roadmap"),
                             ],
                             style={"borderBottom": "none"},
                         ),
@@ -2191,6 +2198,57 @@ app.clientside_callback(
     Input("btn-load-preset",   "n_clicks"),
 )
 
+# 0e-b — Leadership Roadmap overlay show/hide.
+#
+# The roadmap button lives INSIDE tab-content (only rendered on its tab),
+# so it cannot be an Input of the primary 0e callback above — at page load
+# the component doesn't exist and Dash raises "nonexistent object used in
+# Input". Instead:
+#   SHOW — clientside on the button itself (registers when the tab renders;
+#          prevent_initial_call skips the mount-time firing).
+#   HIDE — clientside on roadmap-status.children, which the server callback
+#          (12, below) always updates when generation finishes or fails.
+# The server callback deliberately does NOT output loading-overlay.style:
+# sharing the same Input (btn-generate-roadmap.n_clicks) between two
+# allow_duplicate outputs would collide — the same hash bug documented
+# above for the former 0f callback.
+app.clientside_callback(
+    """
+    function(n_generate) {
+        if (!n_generate || n_generate < 1) {
+            return window.dash_clientside.no_update;
+        }
+        return {
+            display:         'flex',
+            position:        'fixed',
+            top:             '0',
+            left:            '0',
+            width:           '100%',
+            height:          '100%',
+            background:      'rgba(8,8,15,0.93)',
+            zIndex:          '9999',
+            alignItems:      'center',
+            justifyContent:  'center',
+            flexDirection:   'column'
+        };
+    }
+    """,
+    Output("loading-overlay",     "style", allow_duplicate=True),
+    Input("btn-generate-roadmap", "n_clicks"),
+    prevent_initial_call=True,
+)
+
+app.clientside_callback(
+    """
+    function(status_children) {
+        return { display: 'none' };
+    }
+    """,
+    Output("loading-overlay", "style", allow_duplicate=True),
+    Input("roadmap-status",   "children"),
+    prevent_initial_call=True,
+)
+
 
 # 0c — anchor-graph (landing) → sync to anchor-graph-dash (dashboard)
 @app.callback(
@@ -2571,6 +2629,72 @@ def render_tab(active_tab, df_json, profiles_json, anchor_graph, theme, is_anon,
                      style={"marginTop": "16px"}),
         ], className="tab-fade-in")
 
+    # ── Leadership Roadmap ─────────────────────────────────────
+    if active_tab == "leadership_roadmap":
+        # People without paired EQ-i data stay visible but disabled so the
+        # user understands why they can't be selected.
+        eqi_by_name = {p["participant_name"]: bool(p.get("eqi_scores"))
+                       for p in profiles}
+        roadmap_opts = []
+        default_names = []
+        for n in all_names:
+            label = anon_map[n] if anon_map else n
+            if eqi_by_name.get(n):
+                roadmap_opts.append({"label": label, "value": n})
+                if not default_names:
+                    default_names = [n]
+            else:
+                roadmap_opts.append({"label": f"{label}  (no EQ-i data)",
+                                     "value": n, "disabled": True})
+
+        return html.Div([
+            html.Div("Leadership Roadmap & Workshop Guide",
+                     className="section-title",
+                     style={"color": THEME["dark"]["text"],
+                            "fontWeight": 700, "fontSize": "14px",
+                            "marginBottom": "6px"}),
+            html.Div(
+                "Generate a personalized 24-page Leadership Roadmap & "
+                "Workshop Guide booklet for one or more team members. "
+                "Each booklet integrates the person's DISC profile, EQ-i "
+                "results, Flywheel placement, and Leadership Signature, "
+                "and downloads as a zip containing both PDF and Word "
+                "versions.",
+                style={"color": THEME["dark"]["muted"], "fontSize": "12px",
+                       "marginBottom": "18px", "maxWidth": "640px"},
+            ),
+            dbc.Row([dbc.Col([
+                html.Label("Select Team Members", style=LABEL_STYLE),
+                dcc.Dropdown(
+                    id="roadmap-participants",
+                    options=roadmap_opts,
+                    value=default_names,
+                    multi=True,
+                    placeholder="Select one or more people…",
+                    style=DROPDOWN_STYLE(),
+                ),
+            ], width=6)], className="mb-3"),
+            html.Button(
+                "⬇  Generate Roadmap Report(s)",
+                id="btn-generate-roadmap", n_clicks=0,
+                style={
+                    "backgroundColor": THEME["dark"]["accent"],
+                    "color":           THEME["dark"]["bg"],
+                    "border":          "none",
+                    "borderRadius":    "8px",
+                    "padding":         "10px 22px",
+                    "fontSize":        "12px",
+                    "fontWeight":      700,
+                    "cursor":          "pointer",
+                    "letterSpacing":   "0.04em",
+                },
+            ),
+            html.Div(id="roadmap-status", style={
+                "color": THEME["dark"]["muted"], "fontSize": "12px",
+                "marginTop": "12px",
+            }),
+        ], className="tab-fade-in")
+
     return None
 
 
@@ -2746,6 +2870,62 @@ def download_json(n_clicks, profiles_json):
         content=json.dumps(json.loads(profiles_json), indent=2),
         filename="sdg_disc_profiles.json",
     )
+
+
+# 12 — Leadership Roadmap generation → zip of PDF + DOCX per person.
+#      Always updates roadmap-status so the clientside hide callback (0e-b)
+#      dismisses the loading overlay whether generation succeeds or fails.
+@app.callback(
+    Output("download-roadmap",    "data"),
+    Output("roadmap-status",      "children"),
+    Input("btn-generate-roadmap", "n_clicks"),
+    State("roadmap-participants", "value"),
+    State("profiles-store",       "data"),
+    prevent_initial_call=True,
+)
+def generate_roadmaps(n_clicks, selected_names, profiles_json):
+    # Guard against the initial firing when the tab first renders
+    if not n_clicks:
+        return dash.no_update, dash.no_update
+    if not profiles_json:
+        return dash.no_update, "Upload PDFs first."
+    if not selected_names:
+        return dash.no_update, "Select at least one team member first."
+
+    profiles = json.loads(profiles_json)
+    selected = [p for p in profiles
+                if p["participant_name"] in selected_names]
+    if not selected:
+        return dash.no_update, "No matching profiles found for the selection."
+
+    try:
+        buf = io.BytesIO()
+        with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
+            for p in selected:
+                doc  = generate_roadmap_document(p)
+                safe = p["participant_name"].replace(" ", "_")
+                # One person: files at zip root. Several: one folder each.
+                prefix = f"{safe}/" if len(selected) > 1 else ""
+                zf.writestr(f"{prefix}{safe}_Leadership_Roadmap.pdf",
+                            render_roadmap_pdf(doc))
+                zf.writestr(f"{prefix}{safe}_Leadership_Roadmap.docx",
+                            render_roadmap_docx(doc))
+        zip_bytes = buf.getvalue()
+    except Exception as exc:
+        return dash.no_update, f"Roadmap generation failed: {exc}"
+
+    if len(selected) == 1:
+        fname  = (selected[0]["participant_name"].replace(" ", "_")
+                  + "_Leadership_Roadmap.zip")
+        status = (f"Generated roadmap for "
+                  f"{selected[0]['participant_name']} (PDF + Word).")
+    else:
+        fname  = "Leadership_Roadmaps.zip"
+        status = (f"Generated roadmaps for {len(selected)} people "
+                  f"(PDF + Word each).")
+
+    return (dcc.send_bytes(lambda b, data=zip_bytes: b.write(data), fname),
+            status)
 
 
 # ── Clientside: theme toggle button → swap data-theme on body,

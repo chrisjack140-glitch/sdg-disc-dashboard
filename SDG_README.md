@@ -164,3 +164,4 @@ python app.py
 | Date | Change |
 |---|---|
 | May 2026 | Added EQ-i 2.0 Leadership Report support to `eqi_parser.py` — multi-page scan, two-line subscale format, optional colon in Total EI |
+| Jul 2026 | Added Leadership Roadmap tab: generates a personalized 24-page Roadmap & Workshop Guide booklet (PDF + Word in a zip) per selected cohort member, from DISC + EQ-i + Flywheel + Leadership Signature. New modules: `utils/roadmap_content_model.py`, `roadmap_boilerplate.py`, `roadmap_generator.py`, `roadmap_pdf.py`, `roadmap_docx.py`, `flywheel_disc_reference.json` (41-style DISC→Flywheel lookup). New deps: `reportlab`, `python-docx`. People without paired EQ-i data appear disabled in the dropdown; their booklets substitute a "not yet assessed" notice if generated. |

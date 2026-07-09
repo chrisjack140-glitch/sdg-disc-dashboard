@@ -1,0 +1,2409 @@
+{
+  "version": "1.1",
+  "framework": "SDG Flywheel Leadership Diagnostic Reference",
+  "description": "Complete DISC style-to-Flywheel mapping for automated leadership report generation. Covers all 41 Maxwell DISC style patterns.",
+  "source_doc": "SDG_Flywheel_Methodology_and_Replication_Guide.docx",
+  "quadrant_labels": {
+    "direction": "Direction & Strategic Intent",
+    "culture": "Leadership Behavior & Culture",
+    "execution": "Execution & Accountability",
+    "learning": "Learning, Feedback & Adaptation"
+  },
+  "sub_dimension_labels": {
+    "culture_activation": "Culture Activation",
+    "culture_stabilization": "Culture Stabilization",
+    "operational_accountability": "Operational Accountability",
+    "performance_accountability": "Performance Accountability"
+  },
+  "placement_rules": {
+    "primary_logic": {
+      "D_dominant": "Direction & Strategic Intent; sometimes Performance Accountability in operational roles",
+      "I_dominant": "Leadership Behavior & Culture — Culture Activation",
+      "S_dominant": "Culture Stabilization or Operational Accountability — use role context to distinguish",
+      "C_dominant": "Operational Accountability, Performance Accountability, or Learning/Adaptation — use role context"
+    },
+    "sub_dimension_required": [
+      "When anchor is 'culture', always specify culture_activation or culture_stabilization",
+      "When anchor is 'execution', always specify operational_accountability or performance_accountability",
+      "Exception: SI/Advisor is a blend that does not require a sub-dimension — document in role_note"
+    ],
+    "role_override": "If a leader with an S- or C-dominant style holds a senior strategic role with organizational authority, consider Direction as an alternative anchor and document the reasoning in the generation notes.",
+    "blend_logic": "Two- and three-letter blends are placed by dominant letter logic, refined by secondary letters. D+C shifts execution toward performance accountability. S+C shifts execution toward operational accountability. I+S shifts culture toward a blend of activation and stabilization."
+  },
+  "styles": [
+    {
+      "code": "D",
+      "name": "Dominant",
+      "anchor_quadrant": "direction",
+      "anchor_sub_dimension": null,
+      "role_note": "Direction anchor holds across most roles. In operational roles may also express through Performance Accountability in Q3.",
+      "behavioral_keywords": [
+        "decisive",
+        "direct",
+        "challenge-oriented",
+        "results-focused",
+        "urgent",
+        "assertive"
+      ],
+      "quadrants": {
+        "direction": {
+          "label": "Direction & Strategic Intent",
+          "strengths": [
+            "Creates clear direction with authority and speed; sets priorities and moves forward without over-deliberating.",
+            "Drives urgency and challenges complacency; holds the team accountable to where the organization must go.",
+            "Makes leadership calls under ambiguity; defines strategic course with confidence when others hesitate."
+          ],
+          "risk": "May move faster than team alignment or trust can support; direction may feel imposed rather than co-created.",
+          "leadership_shift": "Move from unilateral direction → intentional alignment that brings the team into strategic ownership."
+        },
+        "culture": {
+          "label": "Leadership Behavior & Culture",
+          "sub_dimension": null,
+          "strengths": [
+            "Sets a high-performance cultural tone through direct, expectation-driven leadership.",
+            "Creates role clarity and reduces organizational ambiguity through confident leadership presence."
+          ],
+          "risk": "May create a compliance-based culture rather than trust-based connection; relational investment may feel secondary to results.",
+          "leadership_shift": "Move from directive authority → trust-building presence that fosters psychological safety alongside accountability."
+        },
+        "execution": {
+          "label": "Execution & Accountability",
+          "sub_dimension": "performance_accountability",
+          "strengths": [
+            "Holds people to commitments with directness and clarity; does not easily accept drift or underperformance.",
+            "Creates urgency around follow-through and results standards."
+          ],
+          "risk": "May focus on outcomes without building the execution infrastructure needed for sustainable accountability.",
+          "leadership_shift": "Move from results pressure → structured accountability systems and shared team ownership of performance."
+        },
+        "learning": {
+          "label": "Learning, Feedback & Adaptation",
+          "strengths": [
+            "Acts decisively under ambiguity; learns through action rather than extended analysis.",
+            "Embraces change readily when it accelerates results and organizational momentum."
+          ],
+          "risk": "May dismiss feedback or reflection that appears to slow momentum; learning inputs may be filtered through certainty bias.",
+          "leadership_shift": "Move from action-first → reflective decisiveness that integrates team input and organizational learning."
+        }
+      },
+      "flywheel_activation_focus": "Relational trust-building and strategic alignment without sacrificing urgency or directional authority.",
+      "growth_tension": "Moving from directive speed to inclusive momentum that the team co-owns and sustains."
+    },
+    {
+      "code": "DI",
+      "name": "Pioneering",
+      "anchor_quadrant": "direction",
+      "anchor_sub_dimension": null,
+      "role_note": "D-primary, I-secondary. Anchors in Direction with strong Culture Activation energy. May support both quadrants in senior roles.",
+      "behavioral_keywords": [
+        "visionary",
+        "inspirational",
+        "decisive",
+        "engaging",
+        "motivating",
+        "bold"
+      ],
+      "quadrants": {
+        "direction": {
+          "label": "Direction & Strategic Intent",
+          "strengths": [
+            "Creates bold, inspiring direction that mobilizes people through both authority and enthusiasm.",
+            "Communicates vision compellingly; generates shared excitement about where the organization is going.",
+            "Sets priorities with decisiveness and then activates people toward them with relational energy."
+          ],
+          "risk": "May generate more initiatives than the team can execute; pace and enthusiasm may outstrip execution capacity.",
+          "leadership_shift": "Move from ambitious inspiration → disciplined, focused direction with follow-through accountability."
+        },
+        "culture": {
+          "label": "Leadership Behavior & Culture",
+          "sub_dimension": "culture_activation",
+          "strengths": [
+            "Energizes people through visible leadership presence; inspires forward movement and team commitment.",
+            "Builds relational engagement by combining decisiveness with authentic enthusiasm and connection."
+          ],
+          "risk": "May avoid accountability conversations that threaten team enthusiasm or relational harmony.",
+          "leadership_shift": "Move from inspirational engagement → expectation-setting and accountability follow-through."
+        },
+        "execution": {
+          "label": "Execution & Accountability",
+          "sub_dimension": "performance_accountability",
+          "strengths": [
+            "Creates urgency around results; holds teams to commitments with energy and visible standards.",
+            "Mobilizes execution through both authority and people energy."
+          ],
+          "risk": "May undervalue process discipline and operational reliability in favor of speed and motivational energy.",
+          "leadership_shift": "Move from results energy → sustainable execution discipline and process accountability."
+        },
+        "learning": {
+          "label": "Learning, Feedback & Adaptation",
+          "strengths": [
+            "Enthusiastically embraces change and new ideas; models optimism in the face of challenge.",
+            "Motivates the team to adapt through visible enthusiasm for growth and forward movement."
+          ],
+          "risk": "May move on to new ideas before fully capturing learning from current work; novelty-seeking may replace systematic learning.",
+          "leadership_shift": "Move from enthusiasm for change → disciplined learning integration and adaptive follow-through."
+        }
+      },
+      "flywheel_activation_focus": "Execution discipline and accountability depth beneath strong vision energy and people activation.",
+      "growth_tension": "Moving from inspirational acceleration to accountable execution that sustains momentum beyond initial enthusiasm."
+    },
+    {
+      "code": "DC",
+      "name": "Challenger",
+      "anchor_quadrant": "direction",
+      "anchor_sub_dimension": null,
+      "role_note": "D-primary, C-secondary. Confirmed anchor from SDG methodology. Combines decisive direction with analytical quality. May express through Performance Accountability in operational roles.",
+      "behavioral_keywords": [
+        "decisive",
+        "analytical",
+        "challenge-oriented",
+        "results-focused",
+        "quality-driven",
+        "strategic"
+      ],
+      "quadrants": {
+        "direction": {
+          "label": "Direction & Strategic Intent",
+          "strengths": [
+            "Creates clear, analytically grounded direction; combines decisiveness with rigorous strategic thinking.",
+            "Challenges assumptions and identifies gaps in plans before committing to course.",
+            "Sets high expectations for where the organization must go; refuses to accept strategic complacency."
+          ],
+          "risk": "May move faster than team trust or alignment can support; may challenge without sufficiently building relational confidence.",
+          "leadership_shift": "Move from forceful challenge → intentional alignment that builds trust and buy-in alongside strategic clarity."
+        },
+        "culture": {
+          "label": "Leadership Behavior & Culture",
+          "sub_dimension": null,
+          "strengths": [
+            "Sets high standards for how the team operates; creates a culture of precision and performance expectations.",
+            "Models directness and intellectual honesty as organizational norms."
+          ],
+          "risk": "May create culture of pressure without sufficient trust or psychological safety; relational warmth may be underdeveloped.",
+          "leadership_shift": "Move from standards-driven culture → trust-building and relational culture leadership."
+        },
+        "execution": {
+          "label": "Execution & Accountability",
+          "sub_dimension": "performance_accountability",
+          "strengths": [
+            "Holds teams to quality and performance standards with directness and analytical rigor.",
+            "Identifies execution gaps and addresses them with urgency and precision."
+          ],
+          "risk": "May be stronger at identifying what is wrong than building systems and relationships that support sustained improvement.",
+          "leadership_shift": "Move from gap identification → developmental accountability that builds team capacity alongside standards."
+        },
+        "learning": {
+          "label": "Learning, Feedback & Adaptation",
+          "strengths": [
+            "Highly analytical; integrates data and evidence into decisions systematically.",
+            "Challenges assumptions rigorously; pushes for evidence-based feedback on what is working."
+          ],
+          "risk": "May be critical of new ideas before they can be tested; analytical challenge can stall experimentation and innovation.",
+          "leadership_shift": "Move from analytical critique → structured experimentation that tolerates imperfect early attempts."
+        }
+      },
+      "flywheel_activation_focus": "Relational trust-building and culture calibration to match strong directional authority and analytical rigor.",
+      "growth_tension": "Moving from challenge-first direction to alignment-building leadership that sustains team confidence under pressure."
+    },
+    {
+      "code": "DS",
+      "name": "Producing",
+      "anchor_quadrant": "direction",
+      "anchor_sub_dimension": null,
+      "role_note": "D-primary, S-secondary. Senior roles: anchor in Direction. Operational roles: anchor may shift to Operational Accountability. D drives urgency; S drives persistent follow-through.",
+      "behavioral_keywords": [
+        "results-oriented",
+        "persistent",
+        "steady drive",
+        "production-focused",
+        "dependable",
+        "committed"
+      ],
+      "quadrants": {
+        "direction": {
+          "label": "Direction & Strategic Intent",
+          "strengths": [
+            "Creates direction through determined, results-focused leadership; sets clear goals and drives toward them steadily.",
+            "Reliable in committing to direction and following through without losing focus.",
+            "Combines D urgency with S persistence; maintains strategic focus over time."
+          ],
+          "risk": "May focus on near-term production results rather than visionary strategic direction; directional authority may not be proactively projected.",
+          "leadership_shift": "Move from steady production results → strategic leadership visibility and bold organizational direction."
+        },
+        "culture": {
+          "label": "Leadership Behavior & Culture",
+          "sub_dimension": "culture_stabilization",
+          "strengths": [
+            "Creates steady, predictable cultural presence; builds team confidence through reliable leadership.",
+            "Demonstrates commitment and loyalty through consistent action, which fosters team trust."
+          ],
+          "risk": "May avoid relational tension or difficult conversations that threaten team harmony or disrupt steady performance.",
+          "leadership_shift": "Move from reliable presence → active culture leadership that names tension and drives development."
+        },
+        "execution": {
+          "label": "Execution & Accountability",
+          "sub_dimension": "operational_accountability",
+          "strengths": [
+            "Drives consistent, reliable execution through steady determination and commitment to follow-through.",
+            "Combines results urgency (D) with patience to build lasting operational systems (S)."
+          ],
+          "risk": "May focus on activity and effort rather than outcomes and standards; may not escalate performance issues quickly enough.",
+          "leadership_shift": "Move from steady effort → visible performance accountability and urgency around results."
+        },
+        "learning": {
+          "label": "Learning, Feedback & Adaptation",
+          "strengths": [
+            "Learns through persistence and methodical application; improves through consistent effort rather than rapid pivots.",
+            "Committed to steady improvement once shown a clear path to better results."
+          ],
+          "risk": "May resist change that disrupts proven patterns; adaptation pace may lag organizational need.",
+          "leadership_shift": "Move from proven methods → adaptive experimentation and more rapid adjustment to new conditions."
+        }
+      },
+      "flywheel_activation_focus": "Visible strategic authority and culture engagement beyond steady production drive and operational reliability.",
+      "growth_tension": "Moving from reliable execution contributor to visible organizational leader with strategic presence."
+    },
+    {
+      "code": "I",
+      "name": "Inspiring",
+      "anchor_quadrant": "culture",
+      "anchor_sub_dimension": "culture_activation",
+      "role_note": "I-dominant. Culture Activation is the consistent anchor across roles. Strengths are relational, motivational, and engagement-driven.",
+      "behavioral_keywords": [
+        "enthusiastic",
+        "optimistic",
+        "motivating",
+        "relational",
+        "engaging",
+        "expressive"
+      ],
+      "quadrants": {
+        "direction": {
+          "label": "Direction & Strategic Intent",
+          "strengths": [
+            "Communicates direction with energy and enthusiasm; creates excitement about the organizational future.",
+            "Inspires buy-in through compelling vision and storytelling; moves people toward goals through relationship."
+          ],
+          "risk": "May lack strategic precision; directional focus can shift with enthusiasm rather than strategic analysis.",
+          "leadership_shift": "Move from inspirational energy → structured strategic clarity and disciplined follow-through on direction."
+        },
+        "culture": {
+          "label": "Leadership Behavior & Culture",
+          "sub_dimension": "culture_activation",
+          "strengths": [
+            "Highly engaging; creates enthusiasm, positive energy, and relational momentum across the team.",
+            "Motivates people through authentic connection and visible optimism; models a culture of possibility and forward movement.",
+            "Activates engagement at individual and team levels; inspires people to bring their best."
+          ],
+          "risk": "May over-invest in harmony and positive energy at the expense of accountability; may avoid tension that would improve performance.",
+          "leadership_shift": "Move from activation energy → accountability partnership that holds performance standards with warmth."
+        },
+        "execution": {
+          "label": "Execution & Accountability",
+          "sub_dimension": null,
+          "strengths": [
+            "Creates energy and urgency around execution milestones; motivates team through relational enthusiasm.",
+            "Mobilizes effort through relationship and inspiration when the team needs momentum."
+          ],
+          "risk": "May undervalue structure, process discipline, and operational follow-through; execution may depend on motivation rather than systems.",
+          "leadership_shift": "Move from enthusiasm → execution reliability, process discipline, and structural accountability."
+        },
+        "learning": {
+          "label": "Learning, Feedback & Adaptation",
+          "strengths": [
+            "Open to new ideas and change; models optimism and forward orientation in the face of challenge.",
+            "Embraces growth and learning through relationship and shared experience."
+          ],
+          "risk": "May move on to new ideas before capturing and applying learning from current work; learning may be relational rather than systematic.",
+          "leadership_shift": "Move from enthusiasm for change → systematic learning integration and disciplined application."
+        }
+      },
+      "flywheel_activation_focus": "Accountability discipline and execution consistency beneath strong relational energy and culture activation.",
+      "growth_tension": "Moving from inspiration-led engagement to accountability-enabled team performance."
+    },
+    {
+      "code": "ID",
+      "name": "Motivating",
+      "anchor_quadrant": "culture",
+      "anchor_sub_dimension": "culture_activation",
+      "role_note": "I-primary, D-secondary. Culture Activation is the anchor. In senior roles with organizational authority, may also support Direction. More people-energy-first than DI.",
+      "behavioral_keywords": [
+        "motivating",
+        "persuasive",
+        "engaging",
+        "results-oriented",
+        "decisive when needed",
+        "influential"
+      ],
+      "quadrants": {
+        "direction": {
+          "label": "Direction & Strategic Intent",
+          "strengths": [
+            "Can create inspiring direction with decisiveness when needed; leads through vision and mobilizes quickly.",
+            "Combines relational influence with authority to move the team toward goals."
+          ],
+          "risk": "May generate direction from enthusiasm rather than strategic analysis; may not provide structural follow-through that direction requires.",
+          "leadership_shift": "Move from motivated vision → decisive, structured directional leadership with clear follow-through accountability."
+        },
+        "culture": {
+          "label": "Leadership Behavior & Culture",
+          "sub_dimension": "culture_activation",
+          "strengths": [
+            "Builds enthusiasm and engagement through relational energy and motivational leadership.",
+            "Activates team movement through influence and authentic connection; inspires people to commit and contribute.",
+            "Creates forward momentum in the culture by modeling optimism and interpersonal energy."
+          ],
+          "risk": "May avoid accountability conversations that threaten relational harmony or team enthusiasm.",
+          "leadership_shift": "Move from engagement focus → accountability and performance partnership."
+        },
+        "execution": {
+          "label": "Execution & Accountability",
+          "sub_dimension": null,
+          "strengths": [
+            "Creates energy and urgency around execution; can rally people around milestones and commitments.",
+            "Drives results through relationship and motivational pressure when the team needs activation."
+          ],
+          "risk": "May rely on motivation rather than execution systems for follow-through; may not address chronic underperformance with sufficient directness.",
+          "leadership_shift": "Move from relational motivation → structural execution accountability with clear standards."
+        },
+        "learning": {
+          "label": "Learning, Feedback & Adaptation",
+          "strengths": [
+            "Enthusiastic about growth and change; learns well through relationships and feedback conversations.",
+            "Models optimism and forward orientation in the face of learning challenges."
+          ],
+          "risk": "May not institutionalize learning before moving to new initiatives; systemic learning loops may be underdeveloped.",
+          "leadership_shift": "Move from relational change enthusiasm → disciplined learning systems and feedback integration."
+        }
+      },
+      "flywheel_activation_focus": "Structural execution discipline and performance accountability to match strong motivational and engagement energy.",
+      "growth_tension": "Moving from inspiration-led culture energy to accountability-enabled team performance."
+    },
+    {
+      "code": "IS",
+      "name": "Counseling",
+      "anchor_quadrant": "culture",
+      "anchor_sub_dimension": "culture_activation",
+      "role_note": "I-primary, S-secondary. Similar to SI/Advisor but with I as the lead. More visible engagement energy than SI. Anchor is Culture Activation with strong relational stability support.",
+      "behavioral_keywords": [
+        "warm",
+        "encouraging",
+        "relational",
+        "steady engagement",
+        "supportive",
+        "connective"
+      ],
+      "quadrants": {
+        "direction": {
+          "label": "Direction & Strategic Intent",
+          "strengths": [
+            "Creates direction through relational influence; brings people along through consultative vision.",
+            "Communicates with warmth and connection; builds enthusiasm for shared goals."
+          ],
+          "risk": "May seek consensus before committing to direction; leadership authority may be understated under pressure.",
+          "leadership_shift": "Move from consultative direction → decisive leadership that sets course while maintaining relational trust."
+        },
+        "culture": {
+          "label": "Leadership Behavior & Culture",
+          "sub_dimension": "culture_activation",
+          "strengths": [
+            "Engages people authentically; creates a relational culture of trust, warmth, and visible support.",
+            "Activates team energy through genuine care and steady encouragement; builds psychological safety alongside movement.",
+            "Builds loyalty and connection; sustains morale through consistent relational presence."
+          ],
+          "risk": "May over-invest in relational harmony; accountability conversations may be softened or delayed.",
+          "leadership_shift": "Move from relational warmth → expectation-setting and performance accountability delivered with care."
+        },
+        "execution": {
+          "label": "Execution & Accountability",
+          "sub_dimension": null,
+          "strengths": [
+            "Reliable follow-through driven by relational commitment; sustains execution through care for the people involved.",
+            "Maintains team engagement through execution challenges by providing steady support and encouragement."
+          ],
+          "risk": "May not sustain urgency or press for results; execution may depend on relational motivation rather than accountability systems.",
+          "leadership_shift": "Move from supportive follow-through → operational consistency and visible performance accountability."
+        },
+        "learning": {
+          "label": "Learning, Feedback & Adaptation",
+          "strengths": [
+            "Open to feedback when delivered relationally; learns well through collaborative reflection.",
+            "Creates safe learning environments where team members feel comfortable sharing what is not working."
+          ],
+          "risk": "May avoid feedback that disrupts relational harmony; learning loops may not include difficult performance truths.",
+          "leadership_shift": "Move from relational learning → systematic feedback integration that includes difficult performance signals."
+        }
+      },
+      "flywheel_activation_focus": "Accountability depth and execution follow-through beneath strong relational engagement and culture warmth.",
+      "growth_tension": "Moving from relational care to performance partnership that develops people through standards, not only support."
+    },
+    {
+      "code": "IC",
+      "name": "Appraising",
+      "anchor_quadrant": "culture",
+      "anchor_sub_dimension": "culture_activation",
+      "role_note": "I-primary, C-secondary. Culture Activation is anchor in people-facing roles. Learning/Adaptation is anchor in analytical or quality-focused roles. Use role context to determine.",
+      "behavioral_keywords": [
+        "engaging",
+        "analytical",
+        "quality-conscious",
+        "assessment-oriented",
+        "thoughtful influence",
+        "precise communicator"
+      ],
+      "quadrants": {
+        "direction": {
+          "label": "Direction & Strategic Intent",
+          "strengths": [
+            "Creates direction through thoughtful influence and analytical credibility; combines vision with precision.",
+            "Presents direction with evidence and relational buy-in; persuades through both data and connection."
+          ],
+          "risk": "May seek too much input and analysis before committing to direction; consensus-orientation can delay decisive leadership.",
+          "leadership_shift": "Move from analytical consultation → decisive directional authority when the team needs clarity and movement."
+        },
+        "culture": {
+          "label": "Leadership Behavior & Culture",
+          "sub_dimension": "culture_activation",
+          "strengths": [
+            "Engages people through intellectual energy and relational warmth; creates culture of curiosity and quality.",
+            "Models thoughtful, precise communication while maintaining genuine relational connection."
+          ],
+          "risk": "May intellectualize relational dynamics; emotional needs of the team may be addressed analytically rather than interpersonally.",
+          "leadership_shift": "Move from analytical engagement → emotionally present culture leadership that responds to relational needs directly."
+        },
+        "execution": {
+          "label": "Execution & Accountability",
+          "sub_dimension": null,
+          "strengths": [
+            "Attentive to quality and accuracy in execution; ensures work meets analytical and organizational standards.",
+            "Brings analytical discipline to follow-through and process evaluation."
+          ],
+          "risk": "May prioritize quality assessment over consistent execution urgency; perfectionism can slow throughput.",
+          "leadership_shift": "Move from quality evaluation → sustained execution accountability with results urgency."
+        },
+        "learning": {
+          "label": "Learning, Feedback & Adaptation",
+          "strengths": [
+            "Strong capacity for reflection and analysis; naturally seeks feedback and integrates it rigorously.",
+            "Builds learning loops through both data analysis and relational inquiry.",
+            "Creates culture of intellectual curiosity and continuous quality improvement."
+          ],
+          "risk": "May over-analyze learning insights before applying them; reflection can become a substitute for action.",
+          "leadership_shift": "Move from analytical reflection → rapid application of learning in organizational behavior and decision-making."
+        }
+      },
+      "flywheel_activation_focus": "Decisiveness and execution follow-through beneath strong analytical and relational engagement capacity.",
+      "growth_tension": "Moving from quality-conscious consultation to visible, decisive leadership with execution urgency."
+    },
+    {
+      "code": "S",
+      "name": "Steady",
+      "anchor_quadrant": "culture",
+      "anchor_sub_dimension": "culture_stabilization",
+      "role_note": "S-dominant. Culture Stabilization is the anchor in people-facing and relational roles. Operational Accountability is the anchor in process or operational roles. Role context is decisive.",
+      "behavioral_keywords": [
+        "patient",
+        "loyal",
+        "supportive",
+        "consistent",
+        "reliable",
+        "harmony-oriented"
+      ],
+      "quadrants": {
+        "direction": {
+          "label": "Direction & Strategic Intent",
+          "strengths": [
+            "Provides steady, thoughtful input to direction-setting; reliable voice in planning conversations.",
+            "Creates continuity and organizational memory that grounds strategic execution."
+          ],
+          "risk": "May defer to others rather than asserting directional authority; may avoid visibility in strategic conversations.",
+          "leadership_shift": "Move from quiet input → visible, courageous directional leadership that the team can follow."
+        },
+        "culture": {
+          "label": "Leadership Behavior & Culture",
+          "sub_dimension": "culture_stabilization",
+          "strengths": [
+            "Creates psychological safety through consistent, trustworthy presence; team members feel secure in the relationship.",
+            "Preserves team cohesion and relational stability; advocates for people during periods of change or pressure.",
+            "Builds deep loyalty through steadiness and genuine care; sustains morale through consistent and reliable presence."
+          ],
+          "risk": "May over-protect relational harmony at the expense of accountability; may absorb team tension rather than addressing it.",
+          "leadership_shift": "Move from protector → performance developer who addresses tension constructively and directly."
+        },
+        "execution": {
+          "label": "Execution & Accountability",
+          "sub_dimension": "operational_accountability",
+          "strengths": [
+            "Sustains reliable, consistent operational follow-through; maintains stability during execution pressure.",
+            "Trusted to complete commitments; builds operational trust through dependability and steady presence."
+          ],
+          "risk": "May avoid escalation or performance accountability conversations; reliability can mask weak performance standards.",
+          "leadership_shift": "Move from steady execution → visible accountability standards that hold the team to performance expectations."
+        },
+        "learning": {
+          "label": "Learning, Feedback & Adaptation",
+          "strengths": [
+            "Reflects carefully; integrates learning steadily over time rather than through rapid pivots.",
+            "Creates stable learning environments where people feel safe to try and improve."
+          ],
+          "risk": "May resist change that disrupts established patterns and proven approaches; adaptation pace may lag organizational need.",
+          "leadership_shift": "Move from careful, slow integration → active adaptation and visible change leadership."
+        }
+      },
+      "flywheel_activation_focus": "Visible directional authority and accountability courage beneath steady, loyal, and reliable leadership presence.",
+      "growth_tension": "Moving from consistency and safety to the courageous action required for team growth and organizational momentum."
+    },
+    {
+      "code": "SI",
+      "name": "Advisor",
+      "anchor_quadrant": "culture",
+      "anchor_sub_dimension": null,
+      "role_note": "S-primary, I-secondary. Confirmed anchor from SDG methodology. The SI blend creates a counseling, advisory leadership style. No sub-dimension applied — reflects a blend of activation and stabilization that is difficult to separate in this style.",
+      "behavioral_keywords": [
+        "advisory",
+        "supportive",
+        "warm",
+        "connecting",
+        "reflective",
+        "steady engagement"
+      ],
+      "quadrants": {
+        "direction": {
+          "label": "Direction & Strategic Intent",
+          "strengths": [
+            "Brings wisdom and relational insight to direction; leads through inclusive, thoughtful consultation.",
+            "Creates direction that people trust because it reflects careful listening and genuine consideration."
+          ],
+          "risk": "May avoid decisive authority; direction may emerge from relationship and consensus rather than clear leadership commitment.",
+          "leadership_shift": "Move from advisory influence → decisive directional leadership that the team can follow with confidence."
+        },
+        "culture": {
+          "label": "Leadership Behavior & Culture",
+          "sub_dimension": null,
+          "strengths": [
+            "Deeply relational; builds trust through steady care, warmth, and genuine listening.",
+            "Inspires through connection and creates a culture of belonging and mutual support.",
+            "Balances engagement with stability; provides both relational energy and emotional safety."
+          ],
+          "risk": "May avoid difficult conversations that might disrupt relationships or create tension in the team.",
+          "leadership_shift": "Move from relational support → expectation enforcement and performance accountability delivered with care."
+        },
+        "execution": {
+          "label": "Execution & Accountability",
+          "sub_dimension": null,
+          "strengths": [
+            "Follows through on commitments reliably; sustains execution through relational responsibility.",
+            "Builds operational trust through consistent presence and genuine care for the team's work experience."
+          ],
+          "risk": "May not escalate performance failures; accountability may be softened by relational protectiveness.",
+          "leadership_shift": "Move from relational accountability → structural follow-through that holds people to clear performance standards."
+        },
+        "learning": {
+          "label": "Learning, Feedback & Adaptation",
+          "strengths": [
+            "Open to learning through relationship; creates environments where people share feedback and reflect together.",
+            "Brings wisdom and experience to organizational learning conversations."
+          ],
+          "risk": "May avoid feedback that surfaces interpersonal tension; learning may be filtered through harmony-preserving lens.",
+          "leadership_shift": "Move from relational learning → systematic feedback integration including difficult performance signals."
+        }
+      },
+      "flywheel_activation_focus": "Accountability depth and visible leadership authority beneath advisory warmth and relational wisdom.",
+      "growth_tension": "Moving from trusted counselor to accountable performance leader who develops people through standards, not only care."
+    },
+    {
+      "code": "SC",
+      "name": "Peacemaker",
+      "anchor_quadrant": "execution",
+      "anchor_sub_dimension": "operational_accountability",
+      "role_note": "S-primary, C-secondary. Confirmed anchor from SDG methodology. Operational Accountability is the typical anchor in process/operational roles. Culture Stabilization is appropriate in people-facing roles. Role context is decisive.",
+      "behavioral_keywords": [
+        "steady",
+        "careful",
+        "consistent",
+        "harmony-seeking",
+        "process-oriented",
+        "quality-conscious"
+      ],
+      "quadrants": {
+        "direction": {
+          "label": "Direction & Strategic Intent",
+          "strengths": [
+            "Provides reliable, thoughtful input to direction; ensures plans are grounded and feasible.",
+            "Creates consistency in direction; sustains organizational focus once priorities are set."
+          ],
+          "risk": "May avoid asserting visible directional authority; may defer to others under pressure.",
+          "leadership_shift": "Move from steady support of others' direction → courageous directional leadership with visible authority."
+        },
+        "culture": {
+          "label": "Leadership Behavior & Culture",
+          "sub_dimension": "culture_stabilization",
+          "strengths": [
+            "Creates deep psychological safety through consistent, trustworthy presence and care.",
+            "Protects relational harmony and team cohesion; advocates for people's needs quietly and steadily."
+          ],
+          "risk": "May over-protect harmony; accountability conversations may be avoided to preserve relational safety.",
+          "leadership_shift": "Move from relational protection → performance development that holds people to standards with care."
+        },
+        "execution": {
+          "label": "Execution & Accountability",
+          "sub_dimension": "operational_accountability",
+          "strengths": [
+            "Creates reliable operational systems and consistent follow-through; sustains execution stability.",
+            "Ensures quality and process discipline through methodical, dependable work.",
+            "Maintains standards quietly and consistently; builds trust through steady operational reliability."
+          ],
+          "risk": "May avoid escalation or performance pressure conversations; quiet reliability can mask weak accountability culture.",
+          "leadership_shift": "Move from quiet reliability → visible accountability standards and courageous performance conversations."
+        },
+        "learning": {
+          "label": "Learning, Feedback & Adaptation",
+          "strengths": [
+            "Reflects carefully and integrates learning methodically; ensures changes are grounded and sustainable.",
+            "Values proven approaches and steady improvement over rapid, disruptive change."
+          ],
+          "risk": "May resist change that disrupts operational stability or relational harmony; adaptation pace may lag organizational need.",
+          "leadership_shift": "Move from methodical stability → active change leadership and adaptive experimentation."
+        }
+      },
+      "flywheel_activation_focus": "Decision courage and visible accountability beneath steady, reliable, and harmony-oriented operational leadership.",
+      "growth_tension": "Moving from peacekeeping to performance-enabling leadership that addresses tension and drives improvement."
+    },
+    {
+      "code": "SD",
+      "name": "Achieving",
+      "anchor_quadrant": "execution",
+      "anchor_sub_dimension": "operational_accountability",
+      "role_note": "S-primary, D-secondary. S drives the style; D adds results urgency. Operational Accountability is the typical anchor. In senior roles with authority, Direction may be more appropriate.",
+      "behavioral_keywords": [
+        "determined",
+        "persistent",
+        "results-focused",
+        "steady drive",
+        "dependable",
+        "task-oriented"
+      ],
+      "quadrants": {
+        "direction": {
+          "label": "Direction & Strategic Intent",
+          "strengths": [
+            "Results-oriented; drives toward clear goals with steady determination and commitment.",
+            "Sets direction through demonstrated follow-through and reliable achievement of priorities."
+          ],
+          "risk": "May focus on operational results rather than strategic vision; directional authority may not be proactively projected.",
+          "leadership_shift": "Move from production results → strategic leadership direction with visible authority."
+        },
+        "culture": {
+          "label": "Leadership Behavior & Culture",
+          "sub_dimension": "culture_stabilization",
+          "strengths": [
+            "Creates steady, dependable cultural presence; builds team confidence through reliability and results.",
+            "Demonstrates commitment through consistent action, which builds team trust and stability."
+          ],
+          "risk": "May be task-focused at the expense of relational culture development; team experience may not be actively shaped.",
+          "leadership_shift": "Move from reliable task focus → active culture leadership and relational engagement."
+        },
+        "execution": {
+          "label": "Execution & Accountability",
+          "sub_dimension": "operational_accountability",
+          "strengths": [
+            "Drives consistent, results-focused execution through steady determination and follow-through.",
+            "Combines results urgency (D) with operational reliability (S); sustains momentum over time.",
+            "Committed to outcomes; builds team confidence through demonstrable, persistent progress."
+          ],
+          "risk": "May push for individual results without building team accountability systems or sharing execution ownership.",
+          "leadership_shift": "Move from personal execution drive → team accountability systems and shared ownership of performance."
+        },
+        "learning": {
+          "label": "Learning, Feedback & Adaptation",
+          "strengths": [
+            "Applies learning persistently; improves through steady, methodical practice and iteration.",
+            "Determined to improve when shown a clear path to better results."
+          ],
+          "risk": "May rely on proven methods when conditions require more rapid or experimental adaptation.",
+          "leadership_shift": "Move from reliable methods → adaptive experimentation and faster pivots when needed."
+        }
+      },
+      "flywheel_activation_focus": "Strategic visibility and culture engagement beyond steady execution results and operational determination.",
+      "growth_tension": "Moving from individual production contributor to visible leader who builds team capacity and organizational momentum."
+    },
+    {
+      "code": "C",
+      "name": "Conscientious",
+      "anchor_quadrant": "learning",
+      "anchor_sub_dimension": null,
+      "role_note": "C-dominant. In analytical or quality roles, anchor in Learning/Adaptation. In operational roles, anchor in Operational Accountability. Quality, precision, and analysis are the defining leadership contributions across both.",
+      "behavioral_keywords": [
+        "analytical",
+        "precise",
+        "systematic",
+        "quality-oriented",
+        "thorough",
+        "careful"
+      ],
+      "quadrants": {
+        "direction": {
+          "label": "Direction & Strategic Intent",
+          "strengths": [
+            "Brings analytical rigor and precision to direction-setting; ensures plans are data-grounded and feasible.",
+            "Identifies strategic risks and blind spots before the team commits to a course."
+          ],
+          "risk": "May delay direction-setting while seeking additional data or full certainty; may not project visible directional authority.",
+          "leadership_shift": "Move from thorough analysis → directional confidence under ambiguity with leadership courage."
+        },
+        "culture": {
+          "label": "Leadership Behavior & Culture",
+          "sub_dimension": null,
+          "strengths": [
+            "Models precision, intellectual integrity, and quality as cultural standards.",
+            "Creates culture of careful thinking and quality output; holds the team to analytical rigor."
+          ],
+          "risk": "May create distance through overly precise or technical communication; relational connection and emotional safety may be underdeveloped.",
+          "leadership_shift": "Move from precision standards → relational culture leadership that builds trust alongside quality."
+        },
+        "execution": {
+          "label": "Execution & Accountability",
+          "sub_dimension": "operational_accountability",
+          "strengths": [
+            "Builds systematic, process-disciplined execution; protects quality and accuracy in operational systems.",
+            "Ensures follow-through meets standards; reliable in process creation and quality monitoring."
+          ],
+          "risk": "May over-engineer processes or slow execution with perfectionism; process discipline can delay results.",
+          "leadership_shift": "Move from perfect process → timely, results-focused execution that accepts iterative progress."
+        },
+        "learning": {
+          "label": "Learning, Feedback & Adaptation",
+          "strengths": [
+            "Deep analytical learner; builds systematic feedback loops and integrates learning rigorously.",
+            "Reflects extensively and ensures organizational learning is captured, documented, and applied.",
+            "Creates quality learning infrastructure through structured review, analysis, and process improvement."
+          ],
+          "risk": "May over-analyze rather than apply; reflection can create analysis paralysis or delay action.",
+          "leadership_shift": "Move from systematic analysis → rapid learning application and iterative organizational experimentation."
+        }
+      },
+      "flywheel_activation_focus": "Decisiveness and relational engagement beneath strong analytical, quality, and process leadership capacity.",
+      "growth_tension": "Moving from precise analysis to confident leadership action that moves the organization forward despite imperfect information."
+    },
+    {
+      "code": "CS",
+      "name": "Precisionist",
+      "anchor_quadrant": "execution",
+      "anchor_sub_dimension": "operational_accountability",
+      "role_note": "C-primary, S-secondary. Confirmed anchor from SDG methodology. Operational Accountability is the primary anchor. The CS blend creates the most reliable, process-disciplined execution profile.",
+      "behavioral_keywords": [
+        "precise",
+        "structured",
+        "systematic",
+        "quality-focused",
+        "steady",
+        "reliable"
+      ],
+      "quadrants": {
+        "direction": {
+          "label": "Direction & Strategic Intent",
+          "strengths": [
+            "Brings precision, structure, and quality thinking to direction; ensures strategic plans are grounded and executable.",
+            "Provides analytical rigor that protects the team from poorly considered commitments."
+          ],
+          "risk": "May delay direction-setting while seeking full certainty; may hesitate to assert visible strategic authority.",
+          "leadership_shift": "Move from perfect clarity → directional confidence under ambiguity."
+        },
+        "culture": {
+          "label": "Leadership Behavior & Culture",
+          "sub_dimension": null,
+          "strengths": [
+            "Models precision and quality as cultural standards; creates structured, reliable culture.",
+            "Builds team trust through consistent follow-through and meticulous attention to commitments."
+          ],
+          "risk": "May create distance through perfectionism or precise communication; emotional safety and relational warmth may be underdeveloped.",
+          "leadership_shift": "Move from precision culture → inclusive culture that balances quality with psychological safety and relational trust."
+        },
+        "execution": {
+          "label": "Execution & Accountability",
+          "sub_dimension": "operational_accountability",
+          "strengths": [
+            "Creates reliable operational systems; ensures process discipline, accuracy, and quality follow-through.",
+            "Protects execution standards; builds operational trust through meticulous, consistent delivery.",
+            "Sustains execution stability through careful planning and methodical follow-through."
+          ],
+          "risk": "May prioritize process quality over urgency and throughput; precision can slow pace under pressure.",
+          "leadership_shift": "Move from perfect process → timely execution with acceptable standards when pace is required."
+        },
+        "learning": {
+          "label": "Learning, Feedback & Adaptation",
+          "strengths": [
+            "Systematic learner; integrates feedback carefully and methodically.",
+            "Documents and applies learning through disciplined analysis and process improvement."
+          ],
+          "risk": "May resist rapid adaptation or experimentation that bypasses quality standards; change may be slow when it disrupts established process.",
+          "leadership_shift": "Move from methodical learning → active experimentation and adaptive learning agility."
+        }
+      },
+      "flywheel_activation_focus": "Directional confidence and visible leadership authority beneath strong operational precision and quality accountability.",
+      "growth_tension": "Moving from process certainty to decisive leadership action and organizational momentum under ambiguity."
+    },
+    {
+      "code": "CD",
+      "name": "Analyzing",
+      "anchor_quadrant": "direction",
+      "anchor_sub_dimension": null,
+      "role_note": "C-primary, D-secondary. In senior or strategic roles, anchor in Direction as C's analytical depth combines with D's results drive. In operational roles with quality emphasis, Performance Accountability may be more appropriate.",
+      "behavioral_keywords": [
+        "analytical",
+        "decisive",
+        "quality-driven",
+        "challenge-oriented",
+        "systematic",
+        "evidence-based"
+      ],
+      "quadrants": {
+        "direction": {
+          "label": "Direction & Strategic Intent",
+          "strengths": [
+            "Creates analytically grounded, evidence-based direction; combines strategic rigor with results decisiveness.",
+            "Challenges weak strategic thinking and insists on analytical clarity before committing to course.",
+            "Sets high expectations for where the organization must go, backed by rigorous justification."
+          ],
+          "risk": "May delay decisions while seeking complete analytical certainty; rigorous standard-setting can slow urgent strategic action.",
+          "leadership_shift": "Move from analysis-first → evidence-informed decisive direction with organizational urgency."
+        },
+        "culture": {
+          "label": "Leadership Behavior & Culture",
+          "sub_dimension": null,
+          "strengths": [
+            "Sets clear expectations and intellectual standards for how the team operates.",
+            "Models precision and constructive challenge as cultural norms; pushes the team to think rigorously."
+          ],
+          "risk": "May prioritize standards and precision over trust-building and psychological safety; relational investment may feel secondary.",
+          "leadership_shift": "Move from standard-setting → trust and relational culture leadership alongside intellectual rigor."
+        },
+        "execution": {
+          "label": "Execution & Accountability",
+          "sub_dimension": "performance_accountability",
+          "strengths": [
+            "Enforces quality standards and execution expectations with analytical precision.",
+            "Identifies execution gaps quickly and addresses underperformance with analytical clarity and directness."
+          ],
+          "risk": "May focus on quality standards compliance rather than developmental accountability; can create pressure without sufficient support.",
+          "leadership_shift": "Move from analytical standards enforcement → developmental performance accountability."
+        },
+        "learning": {
+          "label": "Learning, Feedback & Adaptation",
+          "strengths": [
+            "Highly analytical learner; builds systematic understanding of what works and why.",
+            "Integrates evidence rigorously into organizational decisions and strategic adjustments."
+          ],
+          "risk": "May use ongoing analysis as a reason to delay action; perfectionism can prevent rapid learning application.",
+          "leadership_shift": "Move from systematic understanding → applied experimentation and learning agility."
+        }
+      },
+      "flywheel_activation_focus": "Relational trust-building and urgency beneath strong analytical direction and quality standards leadership.",
+      "growth_tension": "Moving from evidence-first analysis to organizationally urgent decisiveness that builds trust alongside precision."
+    },
+    {
+      "code": "CI",
+      "name": "Assessing",
+      "anchor_quadrant": "learning",
+      "anchor_sub_dimension": null,
+      "role_note": "C-primary, I-secondary. Learning/Adaptation is the anchor in analytical or quality-focused roles. Culture Activation is appropriate in relational or engagement-focused roles. Use role context to determine.",
+      "behavioral_keywords": [
+        "analytical",
+        "engaging",
+        "assessment-oriented",
+        "thoughtful",
+        "quality-conscious",
+        "reflective influencer"
+      ],
+      "quadrants": {
+        "direction": {
+          "label": "Direction & Strategic Intent",
+          "strengths": [
+            "Provides thoughtful, analytical direction with relational influence; combines evidence with persuasion.",
+            "Creates direction the team trusts because it reflects both data and inclusive consultation."
+          ],
+          "risk": "May over-consult and over-analyze before committing to direction; consensus-seeking can delay leadership.",
+          "leadership_shift": "Move from analytical consultation → decisive directional authority with analytical grounding."
+        },
+        "culture": {
+          "label": "Leadership Behavior & Culture",
+          "sub_dimension": "culture_activation",
+          "strengths": [
+            "Engages through intellectual curiosity and relational warmth; builds culture of thoughtful, high-quality engagement.",
+            "Creates energy around ideas and analytical exploration; invites people into intellectual discovery."
+          ],
+          "risk": "May intellectualize relational or emotional dynamics; emotional responsiveness may be filtered through analytical framing.",
+          "leadership_shift": "Move from analytical engagement → emotionally present culture leadership."
+        },
+        "execution": {
+          "label": "Execution & Accountability",
+          "sub_dimension": null,
+          "strengths": [
+            "Brings quality consciousness and analytical rigor to execution; ensures work meets standards.",
+            "Attentive to assessment of what is working and why during execution."
+          ],
+          "risk": "May prioritize quality evaluation over execution urgency; assessment can delay throughput.",
+          "leadership_shift": "Move from quality assessment → sustained execution accountability with results urgency."
+        },
+        "learning": {
+          "label": "Learning, Feedback & Adaptation",
+          "strengths": [
+            "Deep analytical learner with relational curiosity; creates culture of inquiry and continuous learning.",
+            "Combines rigorous analysis with relational learning to build comprehensive organizational understanding.",
+            "Builds strong feedback loops through both data analysis and meaningful conversation."
+          ],
+          "risk": "May over-analyze before applying; reflective depth can become a substitute for rapid action.",
+          "leadership_shift": "Move from deep analysis → rapid learning application and iterative organizational experimentation."
+        }
+      },
+      "flywheel_activation_focus": "Decisiveness and execution follow-through beneath strong analytical and relational engagement capacity.",
+      "growth_tension": "Moving from quality-conscious assessment to confident, action-oriented leadership with organizational urgency."
+    },
+    {
+      "code": "DIS",
+      "name": "Motivating / Engaging",
+      "anchor_quadrant": "direction",
+      "anchor_sub_dimension": null,
+      "role_note": "D-primary with I and S secondary. Direction is the anchor; I provides relational activation energy and S provides steady follow-through. A highly adaptive, people-mobilizing direction style.",
+      "behavioral_keywords": [
+        "decisive",
+        "engaging",
+        "steady",
+        "visionary",
+        "mobilizing",
+        "persuasive",
+        "persistent"
+      ],
+      "quadrants": {
+        "direction": {
+          "label": "Direction & Strategic Intent",
+          "strengths": [
+            "Creates compelling, energizing direction backed by decisiveness and relational buy-in.",
+            "Mobilizes people toward goals through a combination of authority, enthusiasm, and steady follow-through.",
+            "Sets direction confidently and maintains focus on priorities over time."
+          ],
+          "risk": "May generate too many initiatives; breadth of engagement and adaptability can dilute strategic focus.",
+          "leadership_shift": "Move from broad adaptive direction → focused strategic leadership with disciplined follow-through."
+        },
+        "culture": {
+          "label": "Leadership Behavior & Culture",
+          "sub_dimension": "culture_activation",
+          "strengths": [
+            "Builds strong engagement through authority, relational warmth, and steady reliability.",
+            "Activates trust and enthusiasm simultaneously; creates culture of commitment and forward movement."
+          ],
+          "risk": "May prioritize harmony and engagement over accountability; may soften performance expectations to preserve relational energy.",
+          "leadership_shift": "Move from relational activation → performance accountability that maintains high standards."
+        },
+        "execution": {
+          "label": "Execution & Accountability",
+          "sub_dimension": "performance_accountability",
+          "strengths": [
+            "Drives execution through both authority and relational motivation; mobilizes team effort with decisiveness.",
+            "Sustains momentum through steady relational commitment (S) and results urgency (D)."
+          ],
+          "risk": "May rely on motivational energy rather than structural accountability systems for execution follow-through.",
+          "leadership_shift": "Move from relational execution energy → systematic accountability infrastructure."
+        },
+        "learning": {
+          "label": "Learning, Feedback & Adaptation",
+          "strengths": [
+            "Adaptable learner; integrates feedback through relationship and action-oriented experience.",
+            "Open to change; models flexibility and forward orientation for the team."
+          ],
+          "risk": "May not institutionalize learning before moving to new priorities; learning may follow enthusiasm rather than system.",
+          "leadership_shift": "Move from adaptive flexibility → systematic learning integration and organizational feedback loops."
+        }
+      },
+      "flywheel_activation_focus": "Execution discipline and structural accountability beneath strong directional energy and people-mobilizing presence.",
+      "growth_tension": "Moving from adaptable engagement to focused, accountable leadership that sustains momentum through systems, not only energy."
+    },
+    {
+      "code": "DIC",
+      "name": "Strategic Engaging",
+      "anchor_quadrant": "direction",
+      "anchor_sub_dimension": null,
+      "role_note": "D-primary with I and C secondary. Direction is the anchor. Analytical quality (C) and relational engagement (I) provide depth and credibility to direction. A highly credible, analytically grounded style.",
+      "behavioral_keywords": [
+        "decisive",
+        "analytically credible",
+        "engaging",
+        "quality-driven",
+        "strategic",
+        "influential"
+      ],
+      "quadrants": {
+        "direction": {
+          "label": "Direction & Strategic Intent",
+          "strengths": [
+            "Creates analytically grounded, compellingly communicated direction; combines evidence, decisiveness, and persuasion.",
+            "Sets high strategic expectations with analytical credibility that the team respects.",
+            "Balances bold strategic direction with rigorous quality thinking."
+          ],
+          "risk": "May over-communicate direction with insufficient execution follow-through; may rely on credibility rather than accountability systems.",
+          "leadership_shift": "Move from strategic articulation → operational accountability and follow-through."
+        },
+        "culture": {
+          "label": "Leadership Behavior & Culture",
+          "sub_dimension": "culture_activation",
+          "strengths": [
+            "Engages through intellectual influence and visible leadership energy; builds analytically rigorous and relationally connected culture.",
+            "Creates credibility-based culture where ideas are tested and people feel intellectually respected."
+          ],
+          "risk": "May create culture that values analytical precision over emotional safety; relational warmth may be underdeveloped.",
+          "leadership_shift": "Move from intellectual engagement → trust-building that addresses emotional and relational needs alongside rigor."
+        },
+        "execution": {
+          "label": "Execution & Accountability",
+          "sub_dimension": "performance_accountability",
+          "strengths": [
+            "Holds quality standards with directness and analytical precision.",
+            "Combines D's results focus with C's quality consciousness to create rigorous execution accountability."
+          ],
+          "risk": "May prioritize quality over pace; analytical rigor can slow execution urgency.",
+          "leadership_shift": "Move from quality precision → performance urgency that tolerates iterative progress."
+        },
+        "learning": {
+          "label": "Learning, Feedback & Adaptation",
+          "strengths": [
+            "Combines analytical learning (C) with relational curiosity (I); integrates feedback through both data and conversation.",
+            "Challenges learning conclusions that do not meet analytical standards."
+          ],
+          "risk": "May over-analyze rather than apply; learning loops can become intellectually satisfying substitutes for action.",
+          "leadership_shift": "Move from analytical learning depth → rapid application and organizational experimentation."
+        }
+      },
+      "flywheel_activation_focus": "Operational follow-through and execution accountability beneath strong analytical direction and credibility-based engagement.",
+      "growth_tension": "Moving from strategic credibility to execution urgency and team accountability."
+    },
+    {
+      "code": "DSC",
+      "name": "Producing / Precise",
+      "anchor_quadrant": "execution",
+      "anchor_sub_dimension": "operational_accountability",
+      "role_note": "D-primary with S and C secondary. Operational Accountability is the typical anchor due to strong S-C operational and quality orientation. D provides results drive and authority. In senior roles, Direction may be appropriate.",
+      "behavioral_keywords": [
+        "results-driven",
+        "steady",
+        "quality-focused",
+        "process-disciplined",
+        "production-oriented",
+        "reliable"
+      ],
+      "quadrants": {
+        "direction": {
+          "label": "Direction & Strategic Intent",
+          "strengths": [
+            "Creates direction through production results and reliable follow-through; sets priorities grounded in operational reality.",
+            "Combines results drive with operational and quality discipline in planning."
+          ],
+          "risk": "May focus on operational results over strategic vision; directional authority may not be visibly projected.",
+          "leadership_shift": "Move from production-focused priorities → strategic leadership direction with visible authority."
+        },
+        "culture": {
+          "label": "Leadership Behavior & Culture",
+          "sub_dimension": "culture_stabilization",
+          "strengths": [
+            "Creates steady, structured cultural presence; builds team confidence through reliability and quality standards.",
+            "Models commitment through consistent behavior; builds trust through follow-through and operational integrity."
+          ],
+          "risk": "May prioritize structure over relational connection; team culture may feel procedural rather than personally engaging.",
+          "leadership_shift": "Move from structural reliability → active culture engagement that builds relational trust alongside quality."
+        },
+        "execution": {
+          "label": "Execution & Accountability",
+          "sub_dimension": "operational_accountability",
+          "strengths": [
+            "Creates disciplined, reliable operational systems with strong quality consciousness (C) and steady follow-through (S).",
+            "Drives results through structured, methodical execution; D urgency maintains pace.",
+            "Protects execution quality while sustaining operational reliability over time."
+          ],
+          "risk": "May prioritize thoroughness over urgency; the combination of quality and steady pace can slow results under pressure.",
+          "leadership_shift": "Move from thorough execution → performance accountability urgency when results require it."
+        },
+        "learning": {
+          "label": "Learning, Feedback & Adaptation",
+          "strengths": [
+            "Methodical learner; integrates learning through systematic analysis and steady application.",
+            "Reliable in capturing and applying lessons from operational experience."
+          ],
+          "risk": "May resist rapid change that disrupts operational stability or quality standards; adaptation pace may lag need.",
+          "leadership_shift": "Move from methodical integration → adaptive experimentation when conditions require faster pivots."
+        }
+      },
+      "flywheel_activation_focus": "Strategic visibility and relational culture engagement beyond steady, quality-focused operational production.",
+      "growth_tension": "Moving from reliable operational excellence to strategic leadership that shapes direction and drives organizational growth."
+    },
+    {
+      "code": "ISC",
+      "name": "Counseling / Analytical",
+      "anchor_quadrant": "culture",
+      "anchor_sub_dimension": "culture_stabilization",
+      "role_note": "I-primary with S and C secondary. Culture Stabilization is the anchor given the blend of relational engagement (I), steady loyalty (S), and quality consciousness (C). Learning/Adaptation is a strong secondary contribution.",
+      "behavioral_keywords": [
+        "warm",
+        "reflective",
+        "analytical",
+        "stable",
+        "quality-conscious",
+        "connective",
+        "counseling"
+      ],
+      "quadrants": {
+        "direction": {
+          "label": "Direction & Strategic Intent",
+          "strengths": [
+            "Creates direction through inclusive consultation and analytical evidence; brings people along thoughtfully.",
+            "Communicates direction with warmth and precision; creates broad buy-in through thorough engagement."
+          ],
+          "risk": "May avoid decisive directional authority; direction may emerge from consensus rather than clear leadership commitment.",
+          "leadership_shift": "Move from consultative direction → decisive leadership authority that the team can follow with confidence."
+        },
+        "culture": {
+          "label": "Leadership Behavior & Culture",
+          "sub_dimension": "culture_stabilization",
+          "strengths": [
+            "Creates strong relational culture of trust, safety, and quality engagement.",
+            "Combines relational warmth (I, S) with analytical standards (C); people feel valued and held to quality expectations.",
+            "Sustains team cohesion through steady care and intellectual rigor."
+          ],
+          "risk": "May over-protect relational harmony; accountability conversations may be softened to preserve safety and connection.",
+          "leadership_shift": "Move from relational stabilization → performance development that addresses gaps while preserving trust."
+        },
+        "execution": {
+          "label": "Execution & Accountability",
+          "sub_dimension": "operational_accountability",
+          "strengths": [
+            "Reliable execution through steady care (S) and quality focus (C); supports the team through process challenges.",
+            "Sustains operational reliability through methodical, relationship-driven follow-through."
+          ],
+          "risk": "May avoid escalation or performance pressure conversations; operational reliability can mask accountability gaps.",
+          "leadership_shift": "Move from reliable support → visible accountability standards and direct performance conversations."
+        },
+        "learning": {
+          "label": "Learning, Feedback & Adaptation",
+          "strengths": [
+            "Strong reflective learner; integrates analytical (C), relational (I), and experiential (S) learning effectively.",
+            "Creates safe environments where people feel secure enough to share feedback and try new approaches.",
+            "Builds comprehensive organizational understanding through multiple learning channels."
+          ],
+          "risk": "May delay adaptation to preserve stability; learning may prioritize thoroughness over speed of application.",
+          "leadership_shift": "Move from reflective integration → rapid adaptive action when organizational conditions require it."
+        }
+      },
+      "flywheel_activation_focus": "Decisive directional authority and performance accountability beneath strong relational and analytical stabilizing capacity.",
+      "growth_tension": "Moving from trusted counselor to performance-enabling leader who drives growth through standards and accountability."
+    },
+    {
+      "code": "SDI",
+      "name": "Attainer",
+      "anchor_quadrant": "culture",
+      "anchor_sub_dimension": "culture_activation",
+      "role_note": "S-primary with D and I secondary. Confirmed anchor from SDG methodology. Culture Activation is the anchor. In some senior roles may provide direction support. Combines inclusive energy with steady persistence.",
+      "behavioral_keywords": [
+        "engaging",
+        "steady",
+        "inclusive",
+        "motivating",
+        "connected",
+        "forward-moving",
+        "relational"
+      ],
+      "quadrants": {
+        "direction": {
+          "label": "Direction & Strategic Intent",
+          "strengths": [
+            "Creates direction through inclusion and relationship; leads people toward goals through engaged consultation and vision-sharing.",
+            "Builds forward-moving momentum through a combination of relational energy and steady leadership presence."
+          ],
+          "risk": "May delay decisive direction-setting to build consensus; leadership authority may be understated under pressure.",
+          "leadership_shift": "Move from consensus-building → decisive leadership direction and visible authority."
+        },
+        "culture": {
+          "label": "Leadership Behavior & Culture",
+          "sub_dimension": "culture_activation",
+          "strengths": [
+            "Motivates and activates people through relational energy, warmth, and forward movement.",
+            "Creates inclusive, engaging culture that mobilizes people toward shared goals with authentic connection.",
+            "Builds trust and enthusiasm simultaneously; activates broad participation in organizational direction."
+          ],
+          "risk": "May delay accountability to preserve engagement and relational harmony; performance expectations may be softened.",
+          "leadership_shift": "Move from consensus-driven engagement → accountability leadership that holds standards with relational warmth."
+        },
+        "execution": {
+          "label": "Execution & Accountability",
+          "sub_dimension": null,
+          "strengths": [
+            "Drives execution through relational motivation and steady follow-through (S); sustains team effort through engagement.",
+            "Combines relational motivation (I) with steady commitment (S) to maintain execution momentum."
+          ],
+          "risk": "May rely on relational motivation rather than structural accountability; chronic performance gaps may not be addressed directly.",
+          "leadership_shift": "Move from relational follow-through → structural execution accountability with clear standards."
+        },
+        "learning": {
+          "label": "Learning, Feedback & Adaptation",
+          "strengths": [
+            "Open and engaged learner; integrates feedback through relationship and shared experience.",
+            "Adapts through inclusive conversations and collaborative reflection."
+          ],
+          "risk": "May avoid feedback that disrupts relational harmony; learning may be filtered through group dynamics rather than individual performance data.",
+          "leadership_shift": "Move from relational learning → systematic feedback loops that include difficult performance signals."
+        }
+      },
+      "flywheel_activation_focus": "Accountability depth and decisive directional authority beneath strong culture activation and relational momentum.",
+      "growth_tension": "Moving from consensus-building engagement to decisive, accountable leadership that drives performance through standards as well as relationship."
+    },
+    {
+      "code": "SCI",
+      "name": "Advocate",
+      "anchor_quadrant": "culture",
+      "anchor_sub_dimension": "culture_stabilization",
+      "role_note": "S-primary with C and I secondary. Confirmed anchor from SDG methodology. Culture Stabilization is the anchor. Advocacy, trust-protection, and quality consciousness define the leadership contribution.",
+      "behavioral_keywords": [
+        "advocacy",
+        "trust-building",
+        "steady",
+        "quality-conscious",
+        "protective",
+        "relational",
+        "safety-oriented"
+      ],
+      "quadrants": {
+        "direction": {
+          "label": "Direction & Strategic Intent",
+          "strengths": [
+            "Ensures direction is inclusive and considers people's needs; advocates for thoughtful, grounded planning.",
+            "Creates consistency once direction is set; reliable in maintaining organizational focus over time."
+          ],
+          "risk": "May avoid asserting directional leadership; may focus on advocating for people rather than setting strategic course.",
+          "leadership_shift": "Move from advocate → strategic direction-setter who leads with authority alongside care."
+        },
+        "culture": {
+          "label": "Leadership Behavior & Culture",
+          "sub_dimension": "culture_stabilization",
+          "strengths": [
+            "Creates deep trust and psychological safety; advocates for people during change, pressure, or uncertainty.",
+            "Preserves relational cohesion and protects the team's emotional safety during difficult periods.",
+            "Builds steady, deeply trusted leadership presence through advocacy, loyalty, and quality standards."
+          ],
+          "risk": "May over-protect people or soften accountability to preserve safety and relationships.",
+          "leadership_shift": "Move from protector → performance developer who holds people accountable for growth and standards."
+        },
+        "execution": {
+          "label": "Execution & Accountability",
+          "sub_dimension": "operational_accountability",
+          "strengths": [
+            "Sustains reliable, quality-conscious operational execution through steady commitment and care.",
+            "Maintains execution standards through methodical, people-centered follow-through."
+          ],
+          "risk": "May avoid escalation or performance pressure that creates tension or disrupts the team.",
+          "leadership_shift": "Move from quiet operational reliability → visible accountability standards and courageous performance conversations."
+        },
+        "learning": {
+          "label": "Learning, Feedback & Adaptation",
+          "strengths": [
+            "Reflects carefully and integrates learning through a lens of team wellbeing and quality improvement.",
+            "Creates safe learning environments; builds cultures where people are willing to share what is not working."
+          ],
+          "risk": "May resist learning applications that require rapid change or disrupt established relational norms.",
+          "leadership_shift": "Move from protective reflection → active adaptation and visible learning leadership."
+        }
+      },
+      "flywheel_activation_focus": "Performance development and directional authority beneath strong culture stabilization and advocacy.",
+      "growth_tension": "Moving from trusted protector to performance-enabling leader who develops people through standards as well as safety."
+    },
+    {
+      "code": "CSI",
+      "name": "Practitioner",
+      "anchor_quadrant": "execution",
+      "anchor_sub_dimension": "performance_accountability",
+      "role_note": "C-primary with S and I secondary. Confirmed anchor from SDG methodology. Performance Accountability is the default anchor when C's standards focus dominates; Operational Accountability when S's steady reliability is more prominent. Role context is decisive.",
+      "behavioral_keywords": [
+        "precise",
+        "standards-focused",
+        "reliable",
+        "analytical",
+        "quality-protecting",
+        "methodical"
+      ],
+      "quadrants": {
+        "direction": {
+          "label": "Direction & Strategic Intent",
+          "strengths": [
+            "Brings precision and quality consciousness to strategic direction; ensures plans are analytically grounded.",
+            "Applies careful, systematic thinking to organizational priorities; protects against strategic overreach."
+          ],
+          "risk": "May delay direction-setting while seeking analytical certainty; may not project visible strategic authority.",
+          "leadership_shift": "Move from analytical input → confident directional leadership under ambiguity."
+        },
+        "culture": {
+          "label": "Leadership Behavior & Culture",
+          "sub_dimension": null,
+          "strengths": [
+            "Models quality, precision, and reliability as cultural expectations.",
+            "Creates steady, structured culture where commitments are honored and standards are respected."
+          ],
+          "risk": "May create culture that prioritizes standards over relational warmth; emotional safety and belonging may be underdeveloped.",
+          "leadership_shift": "Move from standards-based culture → inclusive culture that builds trust and relational engagement alongside quality."
+        },
+        "execution": {
+          "label": "Execution & Accountability",
+          "sub_dimension": "performance_accountability",
+          "strengths": [
+            "Protects quality standards, execution integrity, and commitment follow-through with analytical discipline.",
+            "Notices when expectations are not being met; addresses performance gaps with precision and evidence.",
+            "Maintains steady operational reliability (S) while enforcing standards (C) and engaging the team (I)."
+          ],
+          "risk": "May prioritize standards precision in ways that slow urgency or delay escalation when needed.",
+          "leadership_shift": "Move from standards protection → visible, urgent performance accountability leadership."
+        },
+        "learning": {
+          "label": "Learning, Feedback & Adaptation",
+          "strengths": [
+            "Systematic and methodical learner; captures organizational learning through careful analysis and steady application.",
+            "Builds reliable feedback loops through both data and careful observation of team performance."
+          ],
+          "risk": "May be resistant to rapid change or experimentation that bypasses quality standards; adaptation may lag organizational pace.",
+          "leadership_shift": "Move from methodical learning → adaptive learning agility and willingness to experiment."
+        }
+      },
+      "flywheel_activation_focus": "Visible performance accountability urgency and directional confidence beneath strong analytical standards and operational precision.",
+      "growth_tension": "Moving from precise standards protection to visible, urgent accountability leadership that drives organizational performance."
+    },
+    {
+      "code": "DISC",
+      "name": "Balanced / Adaptive",
+      "anchor_quadrant": "varies",
+      "anchor_sub_dimension": null,
+      "role_note": "Balanced across all four dimensions. Anchor is determined entirely by role context, team need, and organizational moment. The defining strength is adaptability across all four quadrants. Always use role context and organizational purpose to set the anchor at report generation time.",
+      "behavioral_keywords": [
+        "adaptable",
+        "flexible",
+        "context-sensitive",
+        "multi-modal",
+        "broadly capable",
+        "situational"
+      ],
+      "quadrants": {
+        "direction": {
+          "label": "Direction & Strategic Intent",
+          "strengths": [
+            "Can flex into directional leadership when the team or situation requires it; reads organizational need and steps in.",
+            "Provides strategic input across contexts; credible in multiple directional roles."
+          ],
+          "risk": "May not project consistent directional leadership; adaptability can read as lack of clear strategic identity.",
+          "leadership_shift": "Move from situational direction → consistent, identifiable directional presence the team can rely on."
+        },
+        "culture": {
+          "label": "Leadership Behavior & Culture",
+          "sub_dimension": null,
+          "strengths": [
+            "Adapts relational style to meet the needs of diverse team members; creates broad engagement.",
+            "Can shift between activation and stabilization as team dynamics require."
+          ],
+          "risk": "May not build deep relational trust through a consistent, identifiable leadership style; adaptability may feel like inconsistency.",
+          "leadership_shift": "Move from adaptive presence → authentic, consistent relational leadership identity."
+        },
+        "execution": {
+          "label": "Execution & Accountability",
+          "sub_dimension": null,
+          "strengths": [
+            "Can adapt execution style to meet diverse operational contexts; provides broad accountability capacity.",
+            "Able to flex between operational reliability and performance accountability depending on organizational need."
+          ],
+          "risk": "May not build deep execution systems or consistently hold standards; adaptability can undermine accountability consistency.",
+          "leadership_shift": "Move from adaptive accountability → systematic, reliable accountability presence with identifiable standards."
+        },
+        "learning": {
+          "label": "Learning, Feedback & Adaptation",
+          "strengths": [
+            "Highly adaptive learner; integrates feedback from multiple perspectives and sources readily.",
+            "Comfortable with change and new approaches; pivots when learning signals a need to shift."
+          ],
+          "risk": "May adapt so readily that organizational learning is not systematically captured or applied; learning may lack depth.",
+          "leadership_shift": "Move from reactive adaptation → proactive, systematic learning leadership."
+        }
+      },
+      "flywheel_activation_focus": "Building a consistent, identifiable leadership contribution anchor beneath strong adaptability and contextual flexibility.",
+      "growth_tension": "Moving from adaptive multi-style flexibility to distinctive, consistent leadership that the organization can count on and build around."
+    },
+    {
+      "code": "DSI",
+      "name": "Driving Motivator",
+      "anchor_quadrant": "direction",
+      "anchor_sub_dimension": null,
+      "role_note": "D-primary, S-secondary, I-tertiary. Direction is the anchor. Combines D urgency with S persistent follow-through and I relational warmth. Similar to DS/Producing but more people-present. No analytical overlay — direction is experiential and relational rather than evidence-driven.",
+      "behavioral_keywords": [
+        "determined",
+        "motivating",
+        "persistent",
+        "people-present",
+        "results-driven",
+        "steady urgency"
+      ],
+      "quadrants": {
+        "direction": {
+          "label": "Direction & Strategic Intent",
+          "strengths": [
+            "Creates direction with determined authority; combines D decisiveness with S persistence to maintain strategic focus over time.",
+            "Engages people toward goals through visible relational presence (I tertiary); direction is both driven and humanized.",
+            "Sets priorities with urgency and sustains focus without losing sight of the people doing the work."
+          ],
+          "risk": "May set direction faster than team relationships or alignment can support; pace may exceed the team's capacity to follow confidently.",
+          "leadership_shift": "Move from urgent drive → aligned direction that builds relational confidence alongside momentum."
+        },
+        "culture": {
+          "label": "Leadership Behavior & Culture",
+          "sub_dimension": "culture_stabilization",
+          "strengths": [
+            "Creates reliable, steady cultural presence that the team can count on through pressure and change.",
+            "Combines decisive leadership tone (D) with genuine care for people (S, I); team feels both led and supported."
+          ],
+          "risk": "May use relational warmth to manage rather than develop; accountability conversations may be softened to protect team morale.",
+          "leadership_shift": "Move from reliable motivating presence → active performance development that raises standards with care."
+        },
+        "execution": {
+          "label": "Execution & Accountability",
+          "sub_dimension": "performance_accountability",
+          "strengths": [
+            "Drives results through steady determination (S) and decisive accountability (D); sustains execution pressure over time.",
+            "I tertiary adds relational engagement to follow-through; team members feel the accountability is personal, not just procedural."
+          ],
+          "risk": "May drive individual performance without building shared team accountability systems or distributing ownership.",
+          "leadership_shift": "Move from personal accountability pressure → team-owned performance standards and shared execution ownership."
+        },
+        "learning": {
+          "label": "Learning, Feedback & Adaptation",
+          "strengths": [
+            "Adapts through persistent effort and steady application; learns by doing and adjusting over time.",
+            "I tertiary brings openness to relational feedback; team members can influence direction through relationship."
+          ],
+          "risk": "May prioritize steady progress over broader systemic adaptation; may resist change that disrupts momentum or proven patterns.",
+          "leadership_shift": "Move from persistent application of known methods → adaptive experimentation when conditions require new approaches."
+        }
+      },
+      "flywheel_activation_focus": "Relational trust-building and strategic alignment beneath strong directional drive and steady results persistence.",
+      "growth_tension": "Moving from results-driven urgency to people-centered momentum that the team co-owns and sustains over time."
+    },
+    {
+      "code": "IDS",
+      "name": "Energizing Driver",
+      "anchor_quadrant": "culture",
+      "anchor_sub_dimension": "culture_activation",
+      "role_note": "I-primary, D-secondary, S-tertiary. Culture Activation is the anchor. More results-oriented than pure I or ID; S tertiary provides persistence and follow-through. Can activate decisive authority (D) when urgency is needed.",
+      "behavioral_keywords": [
+        "energizing",
+        "motivating",
+        "decisive when needed",
+        "persistent",
+        "results-present",
+        "relationally urgent"
+      ],
+      "quadrants": {
+        "direction": {
+          "label": "Direction & Strategic Intent",
+          "strengths": [
+            "Creates energizing direction through vision and relational momentum; can activate decisive leadership authority when needed (D secondary).",
+            "S tertiary provides persistence; maintains directional focus over time once committed."
+          ],
+          "risk": "May default to enthusiasm and inclusion before decisiveness; may delay commitment to direction while building consensus.",
+          "leadership_shift": "Move from energizing consultation → decisive directional commitment that the team can follow with confidence."
+        },
+        "culture": {
+          "label": "Leadership Behavior & Culture",
+          "sub_dimension": "culture_activation",
+          "strengths": [
+            "Activates engagement through authentic enthusiasm and relational connection; inspires people toward shared goals.",
+            "D secondary adds authority and results urgency to activation; team feels both inspired and expected to perform.",
+            "S tertiary sustains relational commitment over time; engagement is consistent, not just episodic."
+          ],
+          "risk": "May avoid accountability that disrupts team energy or relational comfort; performance expectations may be softened.",
+          "leadership_shift": "Move from sustained engagement → performance accountability partnership that holds high standards with warmth."
+        },
+        "execution": {
+          "label": "Execution & Accountability",
+          "sub_dimension": "performance_accountability",
+          "strengths": [
+            "Creates execution momentum through relational energy (I) and steady follow-through (S); sustains team effort through genuine connection.",
+            "D secondary provides authority and accountability when urgency is needed."
+          ],
+          "risk": "May rely on relationships and enthusiasm rather than structural accountability systems; may not sustain performance pressure long enough.",
+          "leadership_shift": "Move from motivated follow-through → structural execution accountability with clear performance standards."
+        },
+        "learning": {
+          "label": "Learning, Feedback & Adaptation",
+          "strengths": [
+            "Open learner; integrates feedback through relationship (I) and steady, persistent application (S).",
+            "D secondary adds willingness to act on learning decisively when the path is clear."
+          ],
+          "risk": "May not build systematic learning loops; learning may follow enthusiasm and relationship rather than rigorous reflection.",
+          "leadership_shift": "Move from relational and experiential learning → systematic feedback integration and disciplined adaptation."
+        }
+      },
+      "flywheel_activation_focus": "Accountability discipline and execution systems beneath strong relational energy, activation capacity, and people motivation.",
+      "growth_tension": "Moving from engagement-led leadership to performance-enabled team results."
+    },
+    {
+      "code": "ISD",
+      "name": "Supportive Motivator",
+      "anchor_quadrant": "culture",
+      "anchor_sub_dimension": "culture_activation",
+      "role_note": "I-primary, S-secondary, D-tertiary. Culture Activation is the anchor, with strong stabilization support from S secondary. Similar to IS/Counseling but with D tertiary providing some urgency and decisive authority when needed. The warmest of the I-primary three-letter blends.",
+      "behavioral_keywords": [
+        "warm",
+        "motivating",
+        "supportive",
+        "steady engagement",
+        "people-first",
+        "relationally safe"
+      ],
+      "quadrants": {
+        "direction": {
+          "label": "Direction & Strategic Intent",
+          "strengths": [
+            "Creates inclusive, relationally warm direction; brings people along through genuine engagement (I) and steady care (S).",
+            "D tertiary can activate decisive authority when organizational urgency clearly demands it."
+          ],
+          "risk": "May avoid asserting direction; may wait for relational readiness or consensus before committing to course.",
+          "leadership_shift": "Move from inclusive, consultative direction → decisive leadership authority when the organization needs clarity and forward movement."
+        },
+        "culture": {
+          "label": "Leadership Behavior & Culture",
+          "sub_dimension": "culture_activation",
+          "strengths": [
+            "Engages through genuine warmth and consistent relational care; creates culture of belonging and forward movement.",
+            "Balances activation energy (I) with relational safety (S); people feel both inspired and supported.",
+            "Creates sustained engagement through consistent relational presence — activation is not just episodic."
+          ],
+          "risk": "May prioritize relational harmony over accountability; performance expectations may be softened to protect relationships.",
+          "leadership_shift": "Move from relational engagement → expectation-setting and performance accountability delivered with authentic care."
+        },
+        "execution": {
+          "label": "Execution & Accountability",
+          "sub_dimension": null,
+          "strengths": [
+            "Reliable follow-through through relational commitment (S) and genuine motivation (I); sustains execution through care for the people involved.",
+            "D tertiary provides authority and urgency when accountability conversations are required."
+          ],
+          "risk": "May not escalate performance issues; accountability may depend on relational motivation rather than structural standards.",
+          "leadership_shift": "Move from relational reliability → structural accountability with clear performance expectations."
+        },
+        "learning": {
+          "label": "Learning, Feedback & Adaptation",
+          "strengths": [
+            "Open and warm learner; creates safe learning environments through relational presence (I) and steady patience (S).",
+            "D tertiary provides willingness to act decisively once learning points toward a clear direction."
+          ],
+          "risk": "May avoid feedback that disrupts relational comfort; learning may lag when it surfaces difficult interpersonal truths.",
+          "leadership_shift": "Move from relational learning → systematic feedback integration that includes challenging performance signals."
+        }
+      },
+      "flywheel_activation_focus": "Accountability depth and decisive authority beneath strong relational engagement and supportive culture presence.",
+      "growth_tension": "Moving from warmth-centered leadership to performance-enabling accountability that develops people through standards as well as care."
+    },
+    {
+      "code": "SID",
+      "name": "Steady Activator",
+      "anchor_quadrant": "culture",
+      "anchor_sub_dimension": "culture_stabilization",
+      "role_note": "S-primary, I-secondary, D-tertiary. Culture Stabilization is the anchor because S drives the style and I secondary creates relational engagement rather than directional urgency. Distinguish from SDI/Attainer: SID is more internally focused on relational safety and belonging, with I as engagement rather than outward activation. D tertiary provides drive when needed.",
+      "behavioral_keywords": [
+        "steady",
+        "relationally warm",
+        "protective",
+        "engaging",
+        "trust-building",
+        "quietly motivating"
+      ],
+      "quadrants": {
+        "direction": {
+          "label": "Direction & Strategic Intent",
+          "strengths": [
+            "Creates steady, inclusive direction through relational engagement (I) and reliable follow-through (S).",
+            "D tertiary provides decisiveness and urgency when the organizational situation requires visible authority."
+          ],
+          "risk": "May avoid visible directional authority; may lead through consensus and relationship rather than clear leadership commitment.",
+          "leadership_shift": "Move from steady relational direction → visible, courageous leadership authority that the team can follow with confidence."
+        },
+        "culture": {
+          "label": "Leadership Behavior & Culture",
+          "sub_dimension": "culture_stabilization",
+          "strengths": [
+            "Creates psychological safety and relational stability through consistent care (S) and genuine engagement (I).",
+            "Builds trust through steady, warm leadership presence; team members feel both supported and connected.",
+            "D tertiary provides accountability capacity when needed; can address performance while preserving relational safety."
+          ],
+          "risk": "May over-protect relational harmony; accountability may be delayed to preserve safety and engagement.",
+          "leadership_shift": "Move from relational stabilization → performance development that addresses gaps directly while protecting trust."
+        },
+        "execution": {
+          "label": "Execution & Accountability",
+          "sub_dimension": "operational_accountability",
+          "strengths": [
+            "Reliable, steady follow-through through S; I secondary sustains team engagement during execution.",
+            "D tertiary provides urgency and authority when execution gaps need to be addressed directly."
+          ],
+          "risk": "May rely on relational motivation and steady effort rather than structural accountability; may not escalate performance issues.",
+          "leadership_shift": "Move from steady reliability → visible accountability standards that the team clearly understands."
+        },
+        "learning": {
+          "label": "Learning, Feedback & Adaptation",
+          "strengths": [
+            "Patient, steady learner; creates safe environments where team members feel secure enough to reflect and share.",
+            "I secondary brings openness to collaborative feedback and new perspectives."
+          ],
+          "risk": "May resist rapid change; adaptation may be slow when it disrupts established relational norms or proven patterns.",
+          "leadership_shift": "Move from steady integration of learning → active adaptation and visible change leadership."
+        }
+      },
+      "flywheel_activation_focus": "Visible directional authority and performance accountability beneath strong relational stability and genuine engagement.",
+      "growth_tension": "Moving from trusted relational leader to performance-enabling director who holds standards with care."
+    },
+    {
+      "code": "DCI",
+      "name": "Precise Pioneer",
+      "anchor_quadrant": "direction",
+      "anchor_sub_dimension": null,
+      "role_note": "D-primary, C-secondary, I-tertiary. Direction is the anchor. Functionally similar to DC/Challenger but I tertiary makes this style more relationally accessible — can engage people around strategic direction rather than only challenging it. Analytically rigorous and decisive, with more interpersonal warmth than DC.",
+      "behavioral_keywords": [
+        "decisive",
+        "analytically rigorous",
+        "persuasive",
+        "quality-driven",
+        "relationally present",
+        "strategic challenger"
+      ],
+      "quadrants": {
+        "direction": {
+          "label": "Direction & Strategic Intent",
+          "strengths": [
+            "Creates analytically rigorous, decisive direction; D urgency and C precision combine to set high-quality strategic expectations.",
+            "I tertiary enables relational persuasion; can engage people around direction more warmly than pure DC.",
+            "Challenges weak strategic thinking while using interpersonal energy to bring the team along."
+          ],
+          "risk": "May move faster than team trust can support; analytical challenge may not always land with relational warmth.",
+          "leadership_shift": "Move from analytically precise challenge → alignment-building that uses relational energy alongside rigorous direction."
+        },
+        "culture": {
+          "label": "Leadership Behavior & Culture",
+          "sub_dimension": null,
+          "strengths": [
+            "Sets intellectual and quality standards for how the team operates (C, D); models precision and challenge as cultural norms.",
+            "I tertiary provides relational engagement; can shift into culture activation when the situation warrants it."
+          ],
+          "risk": "May create culture of intellectual pressure without sufficient emotional safety; relational connection may be underdeveloped without the steady warmth of S.",
+          "leadership_shift": "Move from precision-driven standards → trust-building that balances analytical rigor with relational safety."
+        },
+        "execution": {
+          "label": "Execution & Accountability",
+          "sub_dimension": "performance_accountability",
+          "strengths": [
+            "Holds teams to quality and performance standards with directness (D) and analytical precision (C).",
+            "I tertiary brings some developmental warmth to accountability conversations."
+          ],
+          "risk": "May focus on standards and quality without building team execution capacity or sustainable ownership.",
+          "leadership_shift": "Move from quality enforcement → developmental accountability that builds team capacity alongside standards."
+        },
+        "learning": {
+          "label": "Learning, Feedback & Adaptation",
+          "strengths": [
+            "Analytically rigorous learner; integrates evidence and challenges learning conclusions that lack data support.",
+            "I tertiary brings openness to relational feedback and diverse perspectives."
+          ],
+          "risk": "May be critical of new ideas before they are fully tested; analytical challenge can stall experimentation.",
+          "leadership_shift": "Move from analytical critique → structured experimentation that tolerates imperfect early attempts."
+        }
+      },
+      "flywheel_activation_focus": "Relational trust-building and culture warmth beneath strong analytical direction, decisiveness, and quality standards.",
+      "growth_tension": "Moving from challenge-first direction to alignment-building leadership that engages people alongside analytical precision."
+    },
+    {
+      "code": "IDC",
+      "name": "Motivating Analyst",
+      "anchor_quadrant": "culture",
+      "anchor_sub_dimension": "culture_activation",
+      "role_note": "I-primary, D-secondary, C-tertiary. Culture Activation is the anchor. Similar to ID/Motivating but C tertiary adds analytical quality and precision consciousness. More evidence-conscious than pure ID; can ground enthusiasm in analytical credibility.",
+      "behavioral_keywords": [
+        "motivating",
+        "decisive",
+        "analytically grounded",
+        "quality-aware",
+        "influential",
+        "credible engager"
+      ],
+      "quadrants": {
+        "direction": {
+          "label": "Direction & Strategic Intent",
+          "strengths": [
+            "Creates inspiring direction with analytical grounding (C tertiary); vision is both engaging and evidence-informed.",
+            "D secondary provides decisive authority when organizational clarity and urgency are required."
+          ],
+          "risk": "May generate direction from enthusiasm before ensuring analytical rigor; may commit to course before sufficient analysis.",
+          "leadership_shift": "Move from inspired direction → evidence-grounded strategic clarity with disciplined follow-through."
+        },
+        "culture": {
+          "label": "Leadership Behavior & Culture",
+          "sub_dimension": "culture_activation",
+          "strengths": [
+            "Activates engagement through relational energy (I) and motivational authority (D); inspires people with both connection and credibility.",
+            "C tertiary adds intellectual quality to culture engagement; models both enthusiasm and precision."
+          ],
+          "risk": "May avoid accountability conversations that threaten relational harmony or team enthusiasm.",
+          "leadership_shift": "Move from engagement focus → accountability and performance partnership."
+        },
+        "execution": {
+          "label": "Execution & Accountability",
+          "sub_dimension": "performance_accountability",
+          "strengths": [
+            "Creates urgency through relational energy (I) and decisive authority (D); C tertiary adds quality consciousness to execution.",
+            "Combines motivation with standards; team feels both energized and held to expectations."
+          ],
+          "risk": "May rely on motivation and analytical credibility rather than structural execution systems; follow-through may depend on enthusiasm.",
+          "leadership_shift": "Move from motivated analytical drive → structural execution accountability with consistent standards."
+        },
+        "learning": {
+          "label": "Learning, Feedback & Adaptation",
+          "strengths": [
+            "Enthusiastic and analytically curious learner; combines relational openness (I) with analytical depth (C).",
+            "D secondary adds willingness to act on learning quickly when direction is clear."
+          ],
+          "risk": "May not sustain systematic learning loops when moving to new priorities; C tertiary's rigor may not be applied consistently.",
+          "leadership_shift": "Move from analytical enthusiasm → systematic learning integration and disciplined feedback loops."
+        }
+      },
+      "flywheel_activation_focus": "Structural execution discipline and analytical grounding beneath strong motivational energy and culture activation.",
+      "growth_tension": "Moving from engaging persuasion to analytically grounded, accountable leadership with execution follow-through."
+    },
+    {
+      "code": "ICD",
+      "name": "Energetic Appraiser",
+      "anchor_quadrant": "culture",
+      "anchor_sub_dimension": "culture_activation",
+      "role_note": "I-primary, C-secondary, D-tertiary. Similar to IC/Appraising but with D tertiary adding results urgency and decisive capacity. Culture Activation is the anchor in people-facing roles; Learning/Adaptation in analytical roles. D tertiary distinguishes this from IC — more willing to act decisively on analytical insights.",
+      "behavioral_keywords": [
+        "engaging",
+        "analytically precise",
+        "quality-conscious",
+        "decisive when needed",
+        "relational",
+        "curious"
+      ],
+      "quadrants": {
+        "direction": {
+          "label": "Direction & Strategic Intent",
+          "strengths": [
+            "Creates direction through intellectual influence (I, C) with decisive authority available when needed (D tertiary).",
+            "Combines vision and analytical precision; persuades through both evidence and relational connection."
+          ],
+          "risk": "May over-consult and analyze before committing; D tertiary urgency may not activate soon enough.",
+          "leadership_shift": "Move from analytical consultation → decisive directional authority when the team needs clarity and forward movement."
+        },
+        "culture": {
+          "label": "Leadership Behavior & Culture",
+          "sub_dimension": "culture_activation",
+          "strengths": [
+            "Engages through intellectual energy and genuine relational warmth; creates culture of curiosity and quality.",
+            "D tertiary adds some authority and urgency to culture activation; not purely consensus-seeking."
+          ],
+          "risk": "May intellectualize relational dynamics; emotional needs of the team may be addressed analytically rather than directly.",
+          "leadership_shift": "Move from analytical engagement → emotionally present culture leadership that responds to relational needs directly."
+        },
+        "execution": {
+          "label": "Execution & Accountability",
+          "sub_dimension": "performance_accountability",
+          "strengths": [
+            "Quality-conscious follow-through (I, C); D tertiary provides decisive urgency and accountability when needed.",
+            "Attentive to standards and team experience simultaneously."
+          ],
+          "risk": "May prioritize quality assessment over execution urgency; D tertiary urgency may not compensate for I+C caution.",
+          "leadership_shift": "Move from quality evaluation → sustained execution urgency and performance accountability."
+        },
+        "learning": {
+          "label": "Learning, Feedback & Adaptation",
+          "strengths": [
+            "Deep analytical learner with relational curiosity (I) and decisive application available (D tertiary).",
+            "Builds comprehensive organizational understanding through data, relationship, and iterative action."
+          ],
+          "risk": "May over-analyze before applying; D tertiary may not be sufficient to convert reflection into decisive organizational action.",
+          "leadership_shift": "Move from reflective analytical depth → rapid, decisive learning application."
+        }
+      },
+      "flywheel_activation_focus": "Decisiveness and execution urgency beneath strong analytical precision and relational engagement capacity.",
+      "growth_tension": "Moving from quality-conscious consultation to confident, action-oriented leadership with organizational momentum."
+    },
+    {
+      "code": "CDI",
+      "name": "Challenging Analyst",
+      "anchor_quadrant": "direction",
+      "anchor_sub_dimension": null,
+      "role_note": "C-primary, D-secondary, I-tertiary. Functionally very similar to CD/Analyzing but with I tertiary adding relational warmth and persuasion capacity. Direction or Performance Accountability is the anchor. The I tertiary makes this style more interpersonally accessible than CD — analytical challenge is delivered with more relational connection.",
+      "behavioral_keywords": [
+        "analytical",
+        "decisive",
+        "relationally present",
+        "quality-driven",
+        "challenging",
+        "evidence-based direction"
+      ],
+      "quadrants": {
+        "direction": {
+          "label": "Direction & Strategic Intent",
+          "strengths": [
+            "Creates analytically grounded, decisive direction; C precision and D authority combine for rigorous strategic leadership.",
+            "I tertiary brings relational persuasion; can engage people around analytical direction more warmly than pure CD."
+          ],
+          "risk": "May still delay decisive direction while seeking analytical certainty; C primary reinforces thorough analysis before commitment.",
+          "leadership_shift": "Move from analysis-first → evidence-informed decisive direction with relational engagement alongside it."
+        },
+        "culture": {
+          "label": "Leadership Behavior & Culture",
+          "sub_dimension": "culture_activation",
+          "strengths": [
+            "Sets intellectual standards while maintaining genuine relational connection (I tertiary).",
+            "Models analytical rigor and challenge as cultural norms with more interpersonal warmth than CD."
+          ],
+          "risk": "May still prioritize precision and standards over emotional safety; I tertiary may not fully compensate without S steady presence.",
+          "leadership_shift": "Move from intellectual standards → trust-building culture leadership that balances rigor with relational safety."
+        },
+        "execution": {
+          "label": "Execution & Accountability",
+          "sub_dimension": "performance_accountability",
+          "strengths": [
+            "Enforces quality and performance standards with analytical precision (C) and decisive urgency (D).",
+            "I tertiary brings some developmental capacity to accountability conversations; standards feel less purely punitive."
+          ],
+          "risk": "May focus on standards compliance rather than developmental growth; accountability may be intellectually framed rather than relationally engaged.",
+          "leadership_shift": "Move from analytical standards enforcement → developmental accountability with relational engagement."
+        },
+        "learning": {
+          "label": "Learning, Feedback & Adaptation",
+          "strengths": [
+            "Rigorous analytical learner; integrates evidence systematically and challenges learning conclusions that lack data support.",
+            "I tertiary adds openness to relational feedback and diverse perspectives."
+          ],
+          "risk": "May over-analyze before applying; perfectionism can delay learning application even with D secondary urgency.",
+          "leadership_shift": "Move from systematic analytical understanding → applied experimentation and adaptive action."
+        }
+      },
+      "flywheel_activation_focus": "Relational trust-building and engagement beneath strong analytical direction, decisiveness, and performance standards.",
+      "growth_tension": "Moving from analytically precise challenge to warm, inclusive leadership that develops people alongside quality expectations."
+    },
+    {
+      "code": "CID",
+      "name": "Precise Motivator",
+      "anchor_quadrant": "learning",
+      "anchor_sub_dimension": null,
+      "role_note": "C-primary, I-secondary, D-tertiary. Similar to CI/Assessing but with D tertiary adding results urgency and decisive capacity. Learning/Adaptation is the anchor in analytical roles; Culture Activation is appropriate in people-facing roles. D tertiary distinguishes this from CI — more willing to act on analytical insights with urgency.",
+      "behavioral_keywords": [
+        "analytical",
+        "engaging",
+        "quality-conscious",
+        "decisive when needed",
+        "assessment-oriented",
+        "relational precision"
+      ],
+      "quadrants": {
+        "direction": {
+          "label": "Direction & Strategic Intent",
+          "strengths": [
+            "Creates analytically grounded direction with relational influence (I) and some decisive urgency available (D tertiary).",
+            "Can assert directional authority when analysis and relational input have converged on a path."
+          ],
+          "risk": "May seek too much input and analysis before committing to direction; I+C combination reinforces consultation over decisive leadership.",
+          "leadership_shift": "Move from analytical-relational consultation → decisive directional authority with analytical grounding."
+        },
+        "culture": {
+          "label": "Leadership Behavior & Culture",
+          "sub_dimension": "culture_activation",
+          "strengths": [
+            "Engages through intellectual curiosity (C) and authentic relational warmth (I); creates culture of thoughtful, high-quality engagement.",
+            "D tertiary adds some authority and performance edge to culture activation."
+          ],
+          "risk": "May intellectualize relational dynamics; emotional responsiveness may be filtered through analytical framing.",
+          "leadership_shift": "Move from analytically engaged culture → emotionally present leadership that responds directly to team needs."
+        },
+        "execution": {
+          "label": "Execution & Accountability",
+          "sub_dimension": "performance_accountability",
+          "strengths": [
+            "Quality-conscious and relationally engaged in execution; D tertiary provides urgency and accountability when needed.",
+            "Attentive to both performance standards and team experience simultaneously."
+          ],
+          "risk": "May prioritize quality assessment over execution urgency; C+I combination can slow throughput.",
+          "leadership_shift": "Move from quality evaluation → execution accountability with results urgency."
+        },
+        "learning": {
+          "label": "Learning, Feedback & Adaptation",
+          "strengths": [
+            "Strong analytical learner with relational curiosity (I) and decisive action available (D tertiary).",
+            "Builds comprehensive organizational understanding by combining evidence, relationship, and iterative application.",
+            "D tertiary adds willingness to act on insights with urgency once a learning path is clear."
+          ],
+          "risk": "May over-analyze; I secondary can create too many relational perspectives without converging on decisive application.",
+          "leadership_shift": "Move from deep analytical and relational reflection → rapid, decisive learning application."
+        }
+      },
+      "flywheel_activation_focus": "Decisiveness and execution follow-through beneath strong analytical precision and relational engagement capacity.",
+      "growth_tension": "Moving from quality-conscious consultation to confident, action-oriented leadership with organizational urgency."
+    },
+    {
+      "code": "DCS",
+      "name": "Driving Analyst",
+      "anchor_quadrant": "direction",
+      "anchor_sub_dimension": null,
+      "role_note": "D-primary, C-secondary, S-tertiary. Direction is the anchor. Similar to DC/Challenger but S tertiary adds operational stability and patient persistence. Less impulsive than pure D or DI; C secondary ensures analytical grounding and S tertiary sustains follow-through. No relational engagement factor — this style is highly task and quality focused.",
+      "behavioral_keywords": [
+        "decisive",
+        "analytically rigorous",
+        "persistently focused",
+        "quality-driven",
+        "operationally stable",
+        "results-oriented"
+      ],
+      "quadrants": {
+        "direction": {
+          "label": "Direction & Strategic Intent",
+          "strengths": [
+            "Creates decisive, analytically rigorous direction; combines D urgency with C precision and S persistent follow-through.",
+            "Less impulsive than pure D; C secondary ensures plans are analytically grounded before committing to course.",
+            "Sustains strategic focus over time — S tertiary prevents losing sight of priorities amid new pressures."
+          ],
+          "risk": "May delay direction while seeking analytical certainty; S tertiary can reinforce caution and patience over speed.",
+          "leadership_shift": "Move from analytically certain direction → directional confidence under ambiguity with sufficient urgency."
+        },
+        "culture": {
+          "label": "Leadership Behavior & Culture",
+          "sub_dimension": "culture_stabilization",
+          "strengths": [
+            "Creates steady, structured cultural presence; sets quality expectations through consistent behavior.",
+            "S tertiary provides some relational stability and reliability; team trusts the predictability of this leader."
+          ],
+          "risk": "May create culture of intellectual standards and precision without relational warmth; engagement may be task-focused rather than people-centered.",
+          "leadership_shift": "Move from precision-driven cultural standards → trust-building that includes relational safety alongside quality."
+        },
+        "execution": {
+          "label": "Execution & Accountability",
+          "sub_dimension": "performance_accountability",
+          "strengths": [
+            "Combines analytical precision (C) with decisive urgency (D) and steady follow-through (S); strong execution accountability.",
+            "Holds standards with rigor and sustains accountability pressure over time without losing focus."
+          ],
+          "risk": "May prioritize quality thoroughness over urgency; C and S can slow pace even when D is the primary driver.",
+          "leadership_shift": "Move from rigorous, measured standards → performance urgency that accepts iterative progress under pressure."
+        },
+        "learning": {
+          "label": "Learning, Feedback & Adaptation",
+          "strengths": [
+            "Methodical, analytically rigorous learner; S tertiary provides steady, persistent application of learning over time.",
+            "Combines analytical insight (C) with D's willingness to act and S's patient implementation."
+          ],
+          "risk": "May over-analyze and under-experiment; C and S reinforce caution over rapid pivots or bold adaptation.",
+          "leadership_shift": "Move from methodical analysis → adaptive experimentation and willingness to adjust before certainty is achieved."
+        }
+      },
+      "flywheel_activation_focus": "Relational trust-building and leadership urgency beneath strong analytical direction, decisiveness, and steady operational focus.",
+      "growth_tension": "Moving from analytically cautious direction to decisive, relationally grounded leadership momentum."
+    },
+    {
+      "code": "SDC",
+      "name": "Steady Challenger",
+      "anchor_quadrant": "execution",
+      "anchor_sub_dimension": "operational_accountability",
+      "role_note": "S-primary, D-secondary, C-tertiary. Operational Accountability is the typical anchor; S drives steady follow-through, D adds results urgency, C adds quality focus. Similar to SD/Achieving but C tertiary adds analytical quality consciousness. In senior roles, Direction may be appropriate.",
+      "behavioral_keywords": [
+        "steady",
+        "determined",
+        "quality-conscious",
+        "persistently results-driven",
+        "reliable",
+        "analytically grounded"
+      ],
+      "quadrants": {
+        "direction": {
+          "label": "Direction & Strategic Intent",
+          "strengths": [
+            "Creates reliable, grounded direction through steady persistence (S) and results urgency (D secondary).",
+            "C tertiary adds analytical quality to direction-setting; ensures plans are feasible and evidence-informed."
+          ],
+          "risk": "May focus on operational results over strategic vision; may not project bold, visible directional authority.",
+          "leadership_shift": "Move from steady operational results → strategic direction with visible authority and organizational presence."
+        },
+        "culture": {
+          "label": "Leadership Behavior & Culture",
+          "sub_dimension": "culture_stabilization",
+          "strengths": [
+            "Creates steady, trustworthy cultural presence; team feels secure and supported through consistent behavior.",
+            "C tertiary adds quality standards to the cultural environment; models reliable, careful performance."
+          ],
+          "risk": "May be task- and quality-focused at the expense of relational warmth and genuine engagement.",
+          "leadership_shift": "Move from reliable structural presence → active culture engagement and relational investment."
+        },
+        "execution": {
+          "label": "Execution & Accountability",
+          "sub_dimension": "operational_accountability",
+          "strengths": [
+            "Reliable, quality-conscious operational follow-through; combines steady persistence (S), results urgency (D), and analytical precision (C).",
+            "Creates durable operational systems with built-in quality standards and sustained accountability pressure."
+          ],
+          "risk": "May prioritize process thoroughness over urgency; all three letters together can reinforce caution and quality over speed.",
+          "leadership_shift": "Move from thorough, steady execution → performance accountability urgency when results require escalation."
+        },
+        "learning": {
+          "label": "Learning, Feedback & Adaptation",
+          "strengths": [
+            "Methodical learner; applies learning through steady, quality-conscious iteration and persistent effort.",
+            "D secondary adds willingness to act decisively when learning points toward a clear direction."
+          ],
+          "risk": "May resist change that disrupts operational stability; C tertiary reinforces thoroughness over rapid pivots.",
+          "leadership_shift": "Move from methodical quality improvement → adaptive experimentation and faster organizational pivots."
+        }
+      },
+      "flywheel_activation_focus": "Strategic visibility and directional authority beyond reliable, quality-focused operational execution.",
+      "growth_tension": "Moving from stable, quality-driven execution to bold strategic leadership with organizational presence."
+    },
+    {
+      "code": "SCD",
+      "name": "Methodical Achiever",
+      "anchor_quadrant": "execution",
+      "anchor_sub_dimension": "operational_accountability",
+      "role_note": "S-primary, C-secondary, D-tertiary. Functionally very similar to SC/Peacemaker but with D tertiary adding some results drive and decisive capacity. Operational Accountability is the anchor. S+C drives the style toward reliability and quality; D tertiary provides urgency when organizational conditions require it.",
+      "behavioral_keywords": [
+        "steady",
+        "methodical",
+        "quality-focused",
+        "reliable",
+        "results-capable",
+        "patient achiever"
+      ],
+      "quadrants": {
+        "direction": {
+          "label": "Direction & Strategic Intent",
+          "strengths": [
+            "Creates careful, grounded direction through steady focus (S) and analytical rigor (C).",
+            "D tertiary provides urgency and authority when direction-setting requires visible leadership."
+          ],
+          "risk": "May avoid asserting directional authority; S and C reinforce caution and consensus-seeking over bold direction.",
+          "leadership_shift": "Move from careful steady input → courageous directional leadership with visible authority when the organization needs it."
+        },
+        "culture": {
+          "label": "Leadership Behavior & Culture",
+          "sub_dimension": "culture_stabilization",
+          "strengths": [
+            "Deep psychological safety through steady care (S) and quality standards (C); team trusts both the relationship and the process.",
+            "D tertiary adds some performance edge and accountability capacity to culture."
+          ],
+          "risk": "May over-protect harmony and avoid accountability; D tertiary urgency may not activate soon enough.",
+          "leadership_shift": "Move from relational and quality protection → active performance development with directness."
+        },
+        "execution": {
+          "label": "Execution & Accountability",
+          "sub_dimension": "operational_accountability",
+          "strengths": [
+            "Highly reliable operational execution; S provides steady follow-through, C provides analytical precision, D tertiary adds urgency.",
+            "Sustains execution stability through methodical, quality-conscious work over time."
+          ],
+          "risk": "May avoid escalation; D tertiary urgency may be insufficient to address performance gaps or accountability conversations.",
+          "leadership_shift": "Move from quiet, methodical reliability → visible accountability standards and courageous performance conversations."
+        },
+        "learning": {
+          "label": "Learning, Feedback & Adaptation",
+          "strengths": [
+            "Careful, methodical learner; S and C reinforce systematic, grounded learning and steady application.",
+            "D tertiary adds willingness to act on learning with urgency when the path is clearly justified."
+          ],
+          "risk": "May resist rapid change that disrupts established operational patterns or quality standards.",
+          "leadership_shift": "Move from methodical stability → active change leadership and willingness to experiment."
+        }
+      },
+      "flywheel_activation_focus": "Decision courage and visible accountability leadership beneath steady, quality-focused operational reliability.",
+      "growth_tension": "Moving from methodical reliability to decisive performance leadership."
+    },
+    {
+      "code": "CDS",
+      "name": "Systematic Driver",
+      "anchor_quadrant": "direction",
+      "anchor_sub_dimension": null,
+      "role_note": "C-primary, D-secondary, S-tertiary. Functionally similar to CD/Analyzing but S tertiary adds steady persistence and patience to the analytical-decisive combination. Direction or Performance Accountability is the anchor. More patient and operationally grounded than CD; S tertiary sustains accountability follow-through over time.",
+      "behavioral_keywords": [
+        "analytical",
+        "decisive",
+        "persistently systematic",
+        "quality-driven",
+        "operational discipline",
+        "measured urgency"
+      ],
+      "quadrants": {
+        "direction": {
+          "label": "Direction & Strategic Intent",
+          "strengths": [
+            "Creates analytically grounded, decisive direction with steady persistence (S tertiary) that sustains strategic focus.",
+            "Similar to CD/Analyzing but more patient; S tertiary means direction is sustained, not just set."
+          ],
+          "risk": "May delay direction while seeking analytical certainty; S tertiary reinforces patience over urgency when both C and S point toward caution.",
+          "leadership_shift": "Move from analysis-first → decisive, evidence-informed direction with sufficient urgency."
+        },
+        "culture": {
+          "label": "Leadership Behavior & Culture",
+          "sub_dimension": "culture_stabilization",
+          "strengths": [
+            "Creates steady, structured cultural presence; models quality, precision, and reliability consistently.",
+            "S tertiary provides genuine relational stability and trustworthiness alongside intellectual standards."
+          ],
+          "risk": "May prioritize standards and structure over relational warmth; culture may feel procedural rather than personally engaging.",
+          "leadership_shift": "Move from precision-based standards → trust-building culture leadership with genuine relational investment."
+        },
+        "execution": {
+          "label": "Execution & Accountability",
+          "sub_dimension": "performance_accountability",
+          "strengths": [
+            "Protects performance standards with analytical precision (C) and decisive urgency (D); S tertiary provides persistent follow-through.",
+            "Sustained accountability over time — doesn't just set standards but maintains them persistently."
+          ],
+          "risk": "May focus on quality and thoroughness rather than urgency; S tertiary can slow escalation when speed is needed.",
+          "leadership_shift": "Move from methodical standards → urgent performance accountability that acts decisively on gaps."
+        },
+        "learning": {
+          "label": "Learning, Feedback & Adaptation",
+          "strengths": [
+            "Systematic, analytical learner; S tertiary provides steady, patient application of learning over time.",
+            "D secondary adds willingness to act decisively when learning converges on a clear direction."
+          ],
+          "risk": "May over-analyze and under-adapt; S reinforces proven methods and C reinforces thoroughness over rapid experimentation.",
+          "leadership_shift": "Move from systematic analysis → adaptive experimentation and willingness to act before certainty is achieved."
+        }
+      },
+      "flywheel_activation_focus": "Relational trust-building and leadership urgency beneath strong analytical precision, decisive standards, and steady operational discipline.",
+      "growth_tension": "Moving from patient analytical precision to urgent, relationally grounded performance leadership."
+    },
+    {
+      "code": "CSD",
+      "name": "Precise Achiever",
+      "anchor_quadrant": "execution",
+      "anchor_sub_dimension": "operational_accountability",
+      "role_note": "C-primary, S-secondary, D-tertiary. Functionally very similar to CS/Precisionist but with D tertiary adding results urgency and decisive capacity when needed. Operational Accountability is the anchor. C+S drives the style toward reliability and quality; D tertiary distinguishes this from CS — more willing to act on insights and hold performance with urgency.",
+      "behavioral_keywords": [
+        "precise",
+        "reliable",
+        "quality-focused",
+        "results-capable",
+        "methodical",
+        "analytically driven"
+      ],
+      "quadrants": {
+        "direction": {
+          "label": "Direction & Strategic Intent",
+          "strengths": [
+            "Brings precision and steady focus to direction; ensures plans are grounded and analytically feasible.",
+            "D tertiary provides decisiveness and urgency when direction-setting cannot wait for full certainty."
+          ],
+          "risk": "May delay direction-setting while seeking complete certainty; C and S reinforce caution even when D tertiary is available.",
+          "leadership_shift": "Move from perfect analytical clarity → directional confidence under ambiguity."
+        },
+        "culture": {
+          "label": "Leadership Behavior & Culture",
+          "sub_dimension": null,
+          "strengths": [
+            "Models precision and quality as cultural standards; creates structured, reliable culture.",
+            "S secondary provides steady relational trust; D tertiary adds a performance edge to cultural expectations."
+          ],
+          "risk": "May create distance through precision and process focus; emotional safety and relational warmth may be underdeveloped.",
+          "leadership_shift": "Move from precision-based culture → inclusive culture that builds relational trust alongside quality standards."
+        },
+        "execution": {
+          "label": "Execution & Accountability",
+          "sub_dimension": "operational_accountability",
+          "strengths": [
+            "Highly reliable operational execution through analytical precision (C) and steady follow-through (S).",
+            "D tertiary provides urgency and accountability pressure when execution gaps or performance issues require it.",
+            "Protects operational quality while sustaining consistent delivery; D adds results drive beneath the steady base."
+          ],
+          "risk": "May prioritize process quality over urgency; C and S can slow pace even when D tertiary urgency is available.",
+          "leadership_shift": "Move from careful, quality-focused process → timely execution with performance urgency when results require it."
+        },
+        "learning": {
+          "label": "Learning, Feedback & Adaptation",
+          "strengths": [
+            "Systematic, methodical learner; captures and applies learning carefully through analytical rigor and steady effort.",
+            "D tertiary adds willingness to act decisively on insights when the path is analytically justified."
+          ],
+          "risk": "May resist rapid change; C and S reinforce proven methods and careful analysis over experimental adaptation.",
+          "leadership_shift": "Move from methodical learning → adaptive learning agility and willingness to experiment."
+        }
+      },
+      "flywheel_activation_focus": "Directional confidence and performance urgency beneath strong operational precision and steady analytical follow-through.",
+      "growth_tension": "Moving from reliable analytical execution to decisive leadership that drives organizational momentum."
+    },
+    {
+      "code": "ICS",
+      "name": "Reflective Activator",
+      "anchor_quadrant": "culture",
+      "anchor_sub_dimension": "culture_activation",
+      "role_note": "I-primary, C-secondary, S-tertiary. Similar to IC/Appraising but S tertiary adds steady relational stability and persistent follow-through. Culture Activation is the anchor in people-facing roles; Learning/Adaptation in analytical roles. No D factor — this style lacks the decisiveness and results urgency of the other I-primary blends.",
+      "behavioral_keywords": [
+        "engaging",
+        "analytically precise",
+        "relationally stable",
+        "quality-conscious",
+        "curious",
+        "steady activator"
+      ],
+      "quadrants": {
+        "direction": {
+          "label": "Direction & Strategic Intent",
+          "strengths": [
+            "Creates direction through relational influence (I) and analytical credibility (C); S tertiary adds steady commitment once direction is set.",
+            "Brings both vision and precision to direction; persuades through evidence and connection."
+          ],
+          "risk": "May seek too much input before committing; without D, decisive authority may not be readily available under pressure.",
+          "leadership_shift": "Move from analytical-relational consultation → decisive directional authority, activating urgency that does not rely on D energy."
+        },
+        "culture": {
+          "label": "Leadership Behavior & Culture",
+          "sub_dimension": "culture_activation",
+          "strengths": [
+            "Engages through intellectual energy and genuine warmth; S tertiary adds relational stability to activation.",
+            "Creates culture of curiosity, quality, and belonging simultaneously; people feel intellectually respected and relationally safe."
+          ],
+          "risk": "May intellectualize relational needs; S tertiary may reinforce harmony avoidance without decisive challenge.",
+          "leadership_shift": "Move from analytical engagement → emotionally present, accountable culture leadership with direct performance conversations."
+        },
+        "execution": {
+          "label": "Execution & Accountability",
+          "sub_dimension": null,
+          "strengths": [
+            "Quality-conscious and relationally engaged in execution (I, C); S tertiary provides steady reliability and consistent follow-through.",
+            "Team trusts both the standards and the relationship; follow-through is both precise and care-driven."
+          ],
+          "risk": "May prioritize quality and relational experience over urgency; without D, performance pressure may not be maintained.",
+          "leadership_shift": "Move from engaged quality follow-through → execution urgency and accountability without reliance on a D-style driver."
+        },
+        "learning": {
+          "label": "Learning, Feedback & Adaptation",
+          "strengths": [
+            "Strong analytical learner with relational warmth (I) and steady application (S); builds comprehensive, sustained learning.",
+            "Creates safe learning environments where people are willing to reflect and share honest feedback."
+          ],
+          "risk": "May over-analyze or delay adaptation; without D urgency, I+S can reinforce comfort and stability over necessary disruption.",
+          "leadership_shift": "Move from reflective analytical depth → rapid learning application and active adaptation."
+        }
+      },
+      "flywheel_activation_focus": "Decisiveness and accountability discipline beneath strong analytical and relational engagement capacity.",
+      "growth_tension": "Moving from quality-conscious relational leadership to decisive, performance-enabling accountability without a natural D-energy driver."
+    },
+    {
+      "code": "SIC",
+      "name": "Steady Advisor",
+      "anchor_quadrant": "culture",
+      "anchor_sub_dimension": "culture_stabilization",
+      "role_note": "S-primary, I-secondary, C-tertiary. Similar to SI/Advisor but with C tertiary adding analytical quality focus. Culture Stabilization is the anchor. Distinguish from SCI/Advocate: SIC has I secondary and C tertiary — more engagement energy and less quality-protection focus than SCI. No D factor — leadership is driven by relationship and quality, not urgency.",
+      "behavioral_keywords": [
+        "steady",
+        "relationally warm",
+        "analytical",
+        "trust-building",
+        "quality-conscious",
+        "advisory"
+      ],
+      "quadrants": {
+        "direction": {
+          "label": "Direction & Strategic Intent",
+          "strengths": [
+            "Creates steady, inclusive direction through relational engagement (I) and thoughtful analytical planning (C tertiary).",
+            "Reliable in maintaining organizational focus once direction is established."
+          ],
+          "risk": "May avoid visible directional authority; without D, asserting direction under pressure requires deliberate effort.",
+          "leadership_shift": "Move from advisory relational influence → decisive directional leadership that the team can follow with confidence."
+        },
+        "culture": {
+          "label": "Leadership Behavior & Culture",
+          "sub_dimension": "culture_stabilization",
+          "strengths": [
+            "Creates psychological safety and relational stability through steady care (S) and genuine engagement (I).",
+            "C tertiary adds quality standards to cultural expectations; models reliable, thoughtful performance alongside relational warmth."
+          ],
+          "risk": "May over-protect harmony; C tertiary may reinforce perfectionism alongside relational protectiveness.",
+          "leadership_shift": "Move from relational stabilization → performance development that holds people to standards directly."
+        },
+        "execution": {
+          "label": "Execution & Accountability",
+          "sub_dimension": "operational_accountability",
+          "strengths": [
+            "Reliable follow-through through steady commitment (S) and relational responsibility (I); C tertiary adds quality consciousness.",
+            "Creates operational trust through consistent, quality-focused, people-centered accountability."
+          ],
+          "risk": "May not escalate performance issues; quality focus and relational protection can both slow accountability conversations.",
+          "leadership_shift": "Move from reliable quality follow-through → visible performance accountability standards."
+        },
+        "learning": {
+          "label": "Learning, Feedback & Adaptation",
+          "strengths": [
+            "Steady, reflective learner; integrates feedback through relationship (I) and analytical reflection (C).",
+            "Creates environments where people feel safe enough to share what is not working."
+          ],
+          "risk": "May resist change that disrupts relational norms; without D, C tertiary reinforces caution over rapid adaptation.",
+          "leadership_shift": "Move from steady, careful integration → active adaptation and visible change leadership."
+        }
+      },
+      "flywheel_activation_focus": "Directional authority and performance accountability beneath strong relational stability, analytical quality, and genuine engagement.",
+      "growth_tension": "Moving from trusted relational advisor to performance-enabling leader who holds standards with care and urgency."
+    },
+    {
+      "code": "CIS",
+      "name": "Analytical Supporter",
+      "anchor_quadrant": "learning",
+      "anchor_sub_dimension": null,
+      "role_note": "C-primary, I-secondary, S-tertiary. Similar to CI/Assessing but S tertiary adds steady relational stability and patient follow-through. Learning/Adaptation is the anchor in analytical roles; Culture Activation in people-facing roles. Distinguish from CSI/Practitioner: CIS has I secondary and S tertiary — more relational engagement and less operational accountability than CSI. No D factor — lacks decisive urgency.",
+      "behavioral_keywords": [
+        "analytical",
+        "engaging",
+        "steady",
+        "quality-conscious",
+        "reflective",
+        "relationally supportive"
+      ],
+      "quadrants": {
+        "direction": {
+          "label": "Direction & Strategic Intent",
+          "strengths": [
+            "Creates analytically grounded direction with relational persuasion (I) and steady commitment (S tertiary).",
+            "Balances evidence with influence and sustained follow-through; direction is both credible and relationally built."
+          ],
+          "risk": "May over-consult and analyze before committing; without D, asserting directional authority requires deliberate activation.",
+          "leadership_shift": "Move from analytical-relational consultation → decisive directional authority independent of full consensus."
+        },
+        "culture": {
+          "label": "Leadership Behavior & Culture",
+          "sub_dimension": "culture_activation",
+          "strengths": [
+            "Engages through analytical credibility (C) and genuine relational warmth (I); S tertiary adds steady relational stability.",
+            "Models precision and connection simultaneously; people feel intellectually respected and interpersonally safe."
+          ],
+          "risk": "May intellectualize relational dynamics; I+S combination reinforces harmony protection alongside analytical framing.",
+          "leadership_shift": "Move from analytically engaged relational culture → emotionally direct, accountable culture leadership."
+        },
+        "execution": {
+          "label": "Execution & Accountability",
+          "sub_dimension": "operational_accountability",
+          "strengths": [
+            "Quality-conscious and relationally engaged follow-through; S tertiary adds steady operational reliability.",
+            "Creates execution environments where standards are held and people feel supported simultaneously."
+          ],
+          "risk": "May prioritize quality and relational experience over urgency; without D, performance gaps may not be escalated directly.",
+          "leadership_shift": "Move from quality reliability → execution urgency and visible performance accountability."
+        },
+        "learning": {
+          "label": "Learning, Feedback & Adaptation",
+          "strengths": [
+            "Deep analytical learner with relational curiosity (I) and steady, persistent application (S).",
+            "Combines C's rigor with I's openness and S's patience; thorough, comprehensive, and sustainable learning.",
+            "Creates psychologically safe learning environments where difficult feedback can be shared and integrated."
+          ],
+          "risk": "May over-analyze; without D urgency, I+S can reinforce comfort and stability over necessary adaptation and disruption.",
+          "leadership_shift": "Move from deep reflective learning → rapid, decisive application of learning in organizational behavior."
+        }
+      },
+      "flywheel_activation_focus": "Decisiveness and execution urgency beneath strong analytical precision, relational engagement, and steady support.",
+      "growth_tension": "Moving from quality-conscious relational analysis to confident, action-oriented leadership without a natural D-energy driver."
+    }
+  ]
+}
