@@ -247,9 +247,14 @@ def scrub_template(document):
         for tr in list(block._tbl.tr_lst[keep:]):
             block._tbl.remove(tr)
             scrubbed += 1
-        for row in block.rows[keep - 1:]:
+        # `block.rows` builds fresh wrappers on each call, so compare by
+        # index — an identity test against block.rows[0] is never true and
+        # would blank the marker cell the filler looks for, leaving the
+        # table un-rebuilt and its bars unlabelled.
+        rows = list(block.rows)
+        for row_index, row in enumerate(rows[keep - 1:], start=keep - 1):
             for index, cell in enumerate(row.cells):
-                if index == 0 and row is block.rows[0]:
+                if index == 0 and row_index == 0:
                     continue          # the marker the filler looks for
                 for p in cell.paragraphs:
                     if p.text.strip():

@@ -1149,11 +1149,23 @@ def build_template_values(profile: dict, org_name: str = ""):
             dimension_rows.append(
                 (label, str(score), meaning.format(name=first)))
         if development:
+            # One sentence per subscale reads fine for three or four, but a
+            # profile can put twelve here and concatenating them all fills
+            # the cell with an unreadable block. Quote the lowest few and
+            # let the chart above carry the full list.
+            NARRATED = 3
+            narrated = " ".join(
+                EQI_DEVELOPMENT_SENTENCES.get(reverse.get(label), "")
+                for label, _s, _b in development[:NARRATED]).strip()
+            if len(development) > NARRATED:
+                narrated += (f" The remaining "
+                             f"{len(development) - NARRATED} are charted "
+                             f"above and follow the same pattern: make the "
+                             f"capacity visible in the moment it is needed.")
             dimension_rows.append((
                 "Development Areas",
                 "; ".join(f"{l} {s}" for l, s, _ in development),
-                " ".join(EQI_DEVELOPMENT_SENTENCES.get(reverse.get(l), "")
-                         for l, _s, _b in development).strip(),
+                narrated,
             ))
 
     # Narrative paragraphs
