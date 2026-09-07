@@ -102,6 +102,28 @@ def _set_paragraph_text(paragraph, text):
         anchor = new_r
 
 
+def _content_paragraph(cell):
+    """The paragraph in a cell that carries the formatting.
+
+    Cells in the reference booklet routinely open with an empty,
+    unformatted paragraph before the one holding the styled text. Writing
+    into `paragraphs[0]` therefore drops the font, size and colour — which
+    is how the EQ Dimension header came out small and black instead of
+    white Georgia bold.
+    """
+    paragraphs = cell.paragraphs
+    if not paragraphs:
+        return cell.add_paragraph()
+    for p in paragraphs:
+        if p.text.strip():
+            return p
+    for p in paragraphs:
+        runs = p.runs
+        if runs and runs[0]._r.find(qn("w:rPr")) is not None:
+            return p
+    return paragraphs[0]
+
+
 def _paragraph_token(paragraph):
     text = "".join(r.text or "" for r in paragraph.runs).strip()
     match = _TOKEN_RE.fullmatch(text)
@@ -122,8 +144,8 @@ def _bar_track_width(row):
 
 def _fill_bar_row(row, label, score, track):
     """Point one cloned bar row at a different subscale."""
-    _set_paragraph_text(row.cells[0].paragraphs[0], label)
-    _set_paragraph_text(row.cells[2].paragraphs[0], str(score))
+    _set_paragraph_text(_content_paragraph(row.cells[0]), label)
+    _set_paragraph_text(_content_paragraph(row.cells[2]), str(score))
 
     gauge = row.cells[1]._tc.find(qn("w:tbl"))
     if gauge is None or track is None:
@@ -254,7 +276,8 @@ def _rebuild_text_table(table, entries, header_label=None):
     table._tbl.append(header)
     if header_label is not None:
         # the rebuild marker lives in the header's first cell
-        _set_paragraph_text(table.rows[0].cells[0].paragraphs[0], header_label)
+        _set_paragraph_text(_content_paragraph(table.rows[0].cells[0]),
+                            header_label)
 
     if not entries:
         table._tbl.getparent().remove(table._tbl)
@@ -266,7 +289,7 @@ def _rebuild_text_table(table, entries, header_label=None):
         row = table.rows[-1]
         for i, text in enumerate(cells):
             if i < len(row.cells):
-                _set_paragraph_text(row.cells[i].paragraphs[0], str(text))
+                _set_paragraph_text(_content_paragraph(row.cells[i]), str(text))
 
 
 # ─────────────────────────────────────────

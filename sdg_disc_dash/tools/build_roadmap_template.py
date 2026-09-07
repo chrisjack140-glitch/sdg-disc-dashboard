@@ -325,6 +325,17 @@ def pull_up_boxes(document, headings):
     return pulled
 
 
+def _caption_run_format(document, caption_text):
+    """The run properties of an existing caption, to copy onto another."""
+    for p in iter_paragraphs(document):
+        if " ".join(p.text.split()).upper() == caption_text.upper():
+            for run in p.runs:
+                rPr = run._r.find(qn("w:rPr"))
+                if rPr is not None:
+                    return rPr
+    return None
+
+
 def restyle_development_page(document):
     """Rename the development caption, recolour it, and add its framing copy.
 
@@ -341,18 +352,18 @@ def restyle_development_page(document):
         # python-docx builds fresh Run wrappers on every `.runs` call, so
         # capture the list once — an identity test against p.runs[0] inside
         # the loop is never true and would blank the caption.
+        # Take the strengths caption's run formatting wholesale so the two
+        # match exactly — copying only the colour left this one without the
+        # letter-spacing its counterpart has.
+        model = _caption_run_format(document, "CORE EQ-I STRENGTHS")
         runs = p.runs
         for index, run in enumerate(runs):
             run.text = DEV_CAPTION_NEW if index == 0 else ""
-            rPr = run._r.find(qn("w:rPr"))
-            if rPr is None:
-                rPr = docx.oxml.OxmlElement("w:rPr")
-                run._r.insert(0, rPr)
-            for col in rPr.findall(qn("w:color")):
-                rPr.remove(col)
-            col = docx.oxml.OxmlElement("w:color")
-            col.set(qn("w:val"), STRENGTH_GOLD)
-            rPr.append(col)
+            old = run._r.find(qn("w:rPr"))
+            if old is not None:
+                run._r.remove(old)
+            if model is not None:
+                run._r.insert(0, copy.deepcopy(model))
         done["caption"] += 1
 
         # disclaimer: first paragraph on the page, i.e. above the note that
@@ -583,10 +594,17 @@ def main(source: Path):
             # clear the whole cell first: a header split across two
             # paragraphs would otherwise leave its label beside the marker,
             # and the filler's lookup would miss the table entirely
+            # Put the marker in the paragraph that holds the styled text,
+            # not simply the first: these cells open with an empty,
+            # unformatted paragraph, and keeping that one drops the white
+            # Georgia bold the header is meant to render in.
             cell = block.rows[0].cells[0]
-            for extra in cell.paragraphs[1:]:
-                extra._p.getparent().remove(extra._p)
-            set_text(cell.paragraphs[0], marker)
+            target = next((p for p in cell.paragraphs if p.text.strip()),
+                          cell.paragraphs[0])
+            for extra in cell.paragraphs:
+                if extra._p is not target._p:
+                    extra._p.getparent().remove(extra._p)
+            set_text(target, marker)
             counts[marker] = counts.get(marker, 0) + 1
 
     # 7. make pagination explicit, and keep the two EQ charts apart
