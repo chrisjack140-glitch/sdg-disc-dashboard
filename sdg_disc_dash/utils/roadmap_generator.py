@@ -10,6 +10,7 @@ framed as overuse of strength with "may" language, "from -> to" leadership
 shifts, never raw DISC jargon ("High C") in prose.
 """
 import json
+import re
 from pathlib import Path
 
 from utils.eqi_benchmarks import split_subscales
@@ -57,41 +58,41 @@ EQI_SUBSCALE_DISPLAY = {
 }
 
 # Per-subscale leadership interpretation sentences.
-# {name} = first name. Strength phrasing (score is a top strength).
+# Written in second person: the booklet addresses the participant
+# directly everywhere except the title page.
 EQI_STRENGTH_SENTENCES = {
-    "self_regard": "{name} has a strong sense of capability and can lead "
+    "self_regard": "You have a strong sense of capability and can lead "
                    "with more visible authority.",
-    "self_actualization": "{name} is driven by growth and purpose, which "
+    "self_actualization": "You are driven by growth and purpose, which "
                           "fuels sustained leadership energy.",
-    "emotional_self_awareness": "{name} can recognize what they are "
-                                "feeling and what the moment requires. The "
-                                "next step is to express that awareness "
-                                "clearly.",
-    "emotional_expression": "{name} communicates feeling and conviction "
+    "emotional_self_awareness": "You can recognize what you are feeling "
+                                "and what the moment requires. The next "
+                                "step is to express that awareness clearly.",
+    "emotional_expression": "You communicate feeling and conviction "
                             "openly, which makes leadership direction easy "
                             "to read.",
-    "assertiveness": "{name} has the internal confidence to state "
+    "assertiveness": "You have the internal confidence to state "
                      "expectations, concerns, and recommendations.",
-    "independence": "{name} forms judgments independently and can hold a "
+    "independence": "You form judgments independently and can hold a "
                     "position under group pressure.",
-    "interpersonal_relationships": "{name} builds mutually satisfying "
+    "interpersonal_relationships": "You build mutually satisfying "
                                    "relationships that create trust and "
                                    "coaching credibility.",
-    "empathy": "{name} can understand what others may need; the growth "
+    "empathy": "You can understand what others may need; the growth "
                "step is to make connection more intentional.",
-    "social_responsibility": "{name} contributes to the wider team and "
-                             "models organizational citizenship.",
-    "problem_solving": "{name} brings disciplined thinking and can help "
+    "social_responsibility": "You contribute to the wider team and "
+                             "model organizational citizenship.",
+    "problem_solving": "You bring disciplined thinking and can help "
                        "supervisors work through issues with clarity.",
-    "reality_testing": "{name} sees situations objectively, which grounds "
+    "reality_testing": "You see situations objectively, which grounds "
                        "coaching conversations in evidence.",
-    "impulse_control": "{name} stays measured before acting, which builds "
+    "impulse_control": "You stay measured before acting, which builds "
                        "credibility in high-pressure moments.",
-    "flexibility": "{name} adapts thinking and behavior readily as "
+    "flexibility": "You adapt thinking and behavior readily as "
                    "conditions change.",
-    "stress_tolerance": "{name} stays steady under pressure, which anchors "
+    "stress_tolerance": "You stay steady under pressure, which anchors "
                         "the team during difficult periods.",
-    "optimism": "{name} maintains a resilient, positive outlook that "
+    "optimism": "You maintain a resilient, positive outlook that "
                 "helps the team persist through setbacks.",
 }
 
@@ -380,7 +381,7 @@ def build_flywheel_section(profile: dict) -> dict:
 
     name = first_name(profile["participant_name"])
     diagnostic = (
-        f"{name} naturally strengthens {primary_q['label']}. "
+        f"You naturally strengthen {primary_q['label']}. "
         f"{primary_q['strengths'][0]} "
         f"Under pressure, this may shift: "
         f"{primary_q['risk'][0].lower()}{primary_q['risk'][1:]} "
@@ -490,7 +491,7 @@ def build_roadmap_snapshot_rows(profile, disc_text, eqi_text,
     if eqi_text:
         eq_strength_cells = (
             eqi_text["strengths_inline"] + ".",
-            f"{name} has strong internal capacity. The workshop focus is "
+            f"You have strong internal capacity. The workshop focus is "
             "to express it visibly through leadership presence and "
             "coaching.",
         )
@@ -1172,7 +1173,37 @@ def build_template_values(profile: dict, org_name: str = ""):
     summary = build_executive_summary(profile, disc, eqi, flywheel, signature)
     values.update(_summary_paragraphs(profile, disc, eqi, flywheel, summary))
 
+    _assert_second_person(values, dimension_rows, name)
     return values, profile.get("eqi_scores") or {}, dimension_rows
+
+
+def _assert_second_person(values: dict, dimension_rows, full_name: str):
+    """The booklet addresses the reader directly everywhere but the cover.
+
+    Sentence banks are written in second person, but a name can creep back
+    in through a phrase bank edit. Catching it here beats shipping a
+    booklet that switches between "you" and the person's name mid-page.
+    """
+    parts = [p for p in (full_name or "").split() if len(p) > 2]
+    if not parts:
+        return
+    strays = []
+    for key, text in values.items():
+        if key == "NAME" or not isinstance(text, str):
+            continue
+        for part in parts:
+            if re.search(rf"\b{re.escape(part)}\b", text):
+                strays.append((key, part))
+    for row in dimension_rows or []:
+        for cell in row:
+            for part in parts:
+                if isinstance(cell, str) and re.search(
+                        rf"\b{re.escape(part)}\b", cell):
+                    strays.append((row[0], part))
+    if strays:
+        raise ValueError(
+            "Roadmap prose must be second person outside the title page; "
+            f"found the participant's name in: {sorted(set(strays))}")
 
 
 def _describe_pressure_shift(mirror, stress) -> str:
