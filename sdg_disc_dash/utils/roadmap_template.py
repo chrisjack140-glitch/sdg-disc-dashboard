@@ -142,7 +142,16 @@ def _bar_track_width(row):
     return sum(int(g.get(qn("w:w"))) for g in grid.findall(qn("w:gridCol")))
 
 
-def _fill_bar_row(row, label, score, track):
+# In the Leadership Capacities chart a score can sit below its leadership
+# bar while still being at or above the population average of 100. Those
+# read as range to extend rather than shortfalls, so their bar is drawn in
+# the strengths green. The subscale stays where it is — only the bar colour
+# changes.
+ABOVE_AVERAGE = 100
+ABOVE_AVERAGE_FILL = "1A6B4A"     # the Core EQ-i Strengths green
+
+
+def _fill_bar_row(row, label, score, track, fill_color=None):
     """Point one cloned bar row at a different subscale."""
     _set_paragraph_text(_content_paragraph(row.cells[0]), label)
     _set_paragraph_text(_content_paragraph(row.cells[2]), str(score))
@@ -157,6 +166,12 @@ def _fill_bar_row(row, label, score, track):
     cells = gauge.find(qn("w:tr")).findall(qn("w:tc"))
     for tc, width in zip(cells, (fill, track - fill)):
         tc.find(qn("w:tcPr")).find(qn("w:tcW")).set(qn("w:w"), str(width))
+
+    if fill_color:
+        # only the filled portion — the grey remainder stays as it is
+        shd = cells[0].find(qn("w:tcPr")).find(qn("w:shd"))
+        if shd is not None:
+            shd.set(qn("w:fill"), fill_color)
 
 
 def _clear_break_before(paragraph_el):
@@ -228,7 +243,8 @@ def _tighten_bar_row(row):
                 el.set(qn("w:w"), str(max(10, int(el.get(qn("w:w")) or 0) // 3)))
 
 
-def _rebuild_bar_table(table, entries, caption_prefix=None):
+def _rebuild_bar_table(table, entries, caption_prefix=None,
+                       recolour_above_average=False):
     """Re-point a marked bar table at this person's subscales.
 
     The first row is the prototype: it is cloned for each entry so the
@@ -253,7 +269,10 @@ def _rebuild_bar_table(table, entries, caption_prefix=None):
         tr = copy.deepcopy(prototype)
         table._tbl.append(tr)
         row = table.rows[-1]
-        _fill_bar_row(row, label, score, track)
+        colour = (ABOVE_AVERAGE_FILL
+                  if recolour_above_average and score > ABOVE_AVERAGE
+                  else None)
+        _fill_bar_row(row, label, score, track, fill_color=colour)
         if tighten:
             _tighten_bar_row(row)
 
@@ -336,7 +355,10 @@ def render_from_template(values: dict, eqi_scores: dict,
                        if m in cell_text), None)
         if marker in bar_tables:
             rows, caption = bar_tables[marker]
-            _rebuild_bar_table(table, rows, caption_prefix=caption)
+            _rebuild_bar_table(
+                table, rows, caption_prefix=caption,
+                recolour_above_average=(marker
+                                        == "{{TABLE:EQ_DEVELOPMENT_BARS}}"))
         elif marker in text_tables:
             rows, label = text_tables[marker]
             _rebuild_text_table(table, rows, header_label=label)
