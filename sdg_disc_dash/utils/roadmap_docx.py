@@ -9,14 +9,15 @@ Cell shading uses raw OOXML (w:shd) since python-docx has no shading API.
 import io
 
 from docx import Document
-from docx.enum.table import WD_TABLE_ALIGNMENT
+from docx.enum.table import WD_TABLE_ALIGNMENT, WD_ALIGN_VERTICAL
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 from docx.shared import Pt, RGBColor, Inches
 
 from utils.roadmap_content_model import (
-    PALETTE, PageBreak, HeaderBand, Paragraph, BulletList, CalloutBox,
+    PALETTE, DISC_COLORS, ScoreStrip, BarChart,
+    PageBreak, HeaderBand, Paragraph, BulletList, CalloutBox,
     DataTable, BlankWorksheetTable, ShadedGroup, Divider, RoadmapDocument,
 )
 
@@ -65,9 +66,9 @@ def _light_table_borders(table):
     for edge in ("top", "left", "bottom", "right", "insideH", "insideV"):
         el = OxmlElement(f"w:{edge}")
         el.set(qn("w:val"), "single")
-        el.set(qn("w:sz"), "4")
+        el.set(qn("w:sz"), "6")
         el.set(qn("w:space"), "0")
-        el.set(qn("w:color"), "D8DEE6")
+        el.set(qn("w:color"), PALETTE["table_grid"].lstrip("#"))
         borders.append(el)
     tbl_pr.append(borders)
 
@@ -189,6 +190,107 @@ def _r_callout(document, block: CalloutBox):
     document.add_paragraph()
 
 
+def _r_score_strip(document, block: ScoreStrip):
+    """DISC D/I/S/C band: colored letter cells over a cream score row."""
+    if block.caption:
+        p = document.add_paragraph()
+        p.paragraph_format.space_before = Pt(8)
+        p.paragraph_format.space_after = Pt(3)
+        _add_run(p, block.caption.upper(), size=7.5, bold=True,
+                 color=PALETTE["gold_accent"])
+
+    n = len(block.scores) or 1
+    tbl = document.add_table(rows=2, cols=n)
+    tbl.alignment = WD_TABLE_ALIGNMENT.CENTER
+    _hide_table_borders(tbl)
+    for i, (letter, score) in enumerate(block.scores):
+        color = DISC_COLORS.get(letter, PALETTE["slate_header"])
+
+        top = tbl.cell(0, i)
+        top.width = Inches(_CONTENT_W_IN / n)
+        _shade_cell(top, color)
+        _set_cell_margins(top, 70, 60, 70, 60)
+        _cell_text(top, letter, size=11, bold=True,
+                   color=PALETTE["white"], align=WD_ALIGN_PARAGRAPH.CENTER)
+
+        bot = tbl.cell(1, i)
+        bot.width = Inches(_CONTENT_W_IN / n)
+        _shade_cell(bot, PALETTE["score_cell_fill"])
+        _set_cell_margins(bot, 60, 60, 60, 60)
+        _cell_text(bot, f"{score:+.2f}", size=9, bold=True,
+                   color=color, align=WD_ALIGN_PARAGRAPH.CENTER)
+    document.add_paragraph()
+
+
+def _r_bar_chart(document, block: BarChart):
+    """Horizontal score bars — label, filled track, value."""
+    if block.caption:
+        p = document.add_paragraph()
+        p.paragraph_format.space_before = Pt(8)
+        p.paragraph_format.space_after = Pt(4)
+        _add_run(p, block.caption.upper(), size=7.5, bold=True,
+                 color=block.color)
+
+    label_w, track_w, value_w = 0.32, 0.58, 0.10
+    tbl = document.add_table(rows=len(block.rows), cols=3)
+    tbl.alignment = WD_TABLE_ALIGNMENT.CENTER
+    _hide_table_borders(tbl)
+
+    for r, (label, score) in enumerate(block.rows):
+        cell = tbl.cell(r, 0)
+        cell.width = Inches(_CONTENT_W_IN * label_w)
+        _set_cell_margins(cell, 50, 0, 50, 120)
+        _cell_text(cell, label, size=9.5, color="#444444", align=WD_ALIGN_PARAGRAPH.RIGHT)
+
+        # The gauge is a nested two-cell table: filled portion + remainder.
+        # A cell must end with a paragraph, so the one python-docx starts
+        # the cell with is moved below the table and collapsed to a hairline
+        # — left in place it pushes the bar onto its own line.
+        gauge_cell = tbl.cell(r, 1)
+        gauge_cell.width = Inches(_CONTENT_W_IN * track_w)
+        _set_cell_margins(gauge_cell, 60, 0, 60, 0)
+        fill = max(0.02, min(1.0, score / block.scale))
+        inner = gauge_cell.add_table(rows=1, cols=2)
+        spacer = gauge_cell.paragraphs[0]
+        gauge_cell._tc.remove(spacer._p)
+        gauge_cell._tc.append(spacer._p)
+        spacer.paragraph_format.space_before = Pt(0)
+        spacer.paragraph_format.space_after = Pt(0)
+        spacer.paragraph_format.line_spacing = Pt(1)
+        # the paragraph mark itself still reserves a full line at the
+        # document's 10pt default, so shrink the mark too
+        pPr = spacer._p.get_or_add_pPr()
+        mark = pPr.find(qn("w:rPr"))
+        if mark is None:
+            mark = OxmlElement("w:rPr")
+            pPr.append(mark)
+        for tag in ("w:sz", "w:szCs"):
+            el = OxmlElement(tag)
+            el.set(qn("w:val"), "2")
+            mark.append(el)
+        _hide_table_borders(inner)
+        left = inner.cell(0, 0)
+        left.width = Inches(_CONTENT_W_IN * track_w * fill)
+        _shade_cell(left, block.color)
+        _set_cell_margins(left, 0, 0, 0, 0)
+        right = inner.cell(0, 1)
+        right.width = Inches(_CONTENT_W_IN * track_w * (1 - fill))
+        _shade_cell(right, block.track)
+        _set_cell_margins(right, 0, 0, 0, 0)
+        for c in (left, right):
+            c.paragraphs[0].paragraph_format.space_after = Pt(0)
+            _add_run(c.paragraphs[0], " ", size=6)
+
+        val = tbl.cell(r, 2)
+        val.width = Inches(_CONTENT_W_IN * value_w)
+        _set_cell_margins(val, 50, 120, 50, 0)
+        _cell_text(val, str(score), size=9.5, bold=True, color=block.color)
+
+        for c in (cell, gauge_cell, val):
+            c.vertical_alignment = WD_ALIGN_VERTICAL.CENTER
+    document.add_paragraph()
+
+
 def _r_data_table(document, block: DataTable):
     n_cols = (len(block.header_row) if block.header_row
               else max(len(r.cells) for r in block.rows))
@@ -267,6 +369,8 @@ _RENDERERS = {
     HeaderBand:          _r_header_band,
     ShadedGroup:         _r_shaded_group,
     Divider:             _r_divider,
+    ScoreStrip:          _r_score_strip,
+    BarChart:            _r_bar_chart,
     Paragraph:           _r_paragraph,
     BulletList:          _r_bullets,
     CalloutBox:          _r_callout,

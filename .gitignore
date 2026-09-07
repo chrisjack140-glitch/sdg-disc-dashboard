@@ -1,0 +1,11 @@
+# Python
+__pycache__/
+*.py[cod]
+
+# Runtime artifacts
+sdg_disc_dash/app_log.txt
+
+# Generated participant booklets — these contain real assessment data
+*_Leadership_Roadmap.docx
+*_Leadership_Roadmap.pdf
+*_Leadership_Roadmap.zip

@@ -22,9 +22,8 @@ from utils.insights import (
     SUBSCALE_DISPLAY, STYLE_NAMES,
     SUBSCALE_DISC_MAP, COMPOSITE_SUBSCALE_ORDER,
 )
-from utils.roadmap_generator import generate_roadmap_document
-from utils.roadmap_pdf import render_pdf as render_roadmap_pdf
-from utils.roadmap_docx import render_docx as render_roadmap_docx
+from utils.roadmap_generator import build_template_values
+from utils.roadmap_template import render_from_template
 
 # ─────────────────────────────────────────
 # Loading overlay — SDG diamond mark as a base64 data URI.
@@ -2654,26 +2653,54 @@ def render_tab(active_tab, df_json, profiles_json, anchor_graph, theme, is_anon,
                             "fontWeight": 700, "fontSize": "14px",
                             "marginBottom": "6px"}),
             html.Div(
-                "Generate a personalized 24-page Leadership Roadmap & "
+                "Generate a personalized Leadership Roadmap & "
                 "Workshop Guide booklet for one or more team members. "
                 "Each booklet integrates the person's DISC profile, EQ-i "
                 "results, Flywheel placement, and Leadership Signature, "
-                "and downloads as a zip containing both PDF and Word "
-                "versions.",
+                "and downloads as a zip of Word documents matching the "
+                "current booklet design exactly. "
+                "document.",
                 style={"color": THEME["dark"]["muted"], "fontSize": "12px",
                        "marginBottom": "18px", "maxWidth": "640px"},
             ),
-            dbc.Row([dbc.Col([
-                html.Label("Select Team Members", style=LABEL_STYLE),
-                dcc.Dropdown(
-                    id="roadmap-participants",
-                    options=roadmap_opts,
-                    value=default_names,
-                    multi=True,
-                    placeholder="Select one or more people…",
-                    style=DROPDOWN_STYLE(),
-                ),
-            ], width=6)], className="mb-3"),
+            dbc.Row([
+                dbc.Col([
+                    html.Label("Select Team Members", style=LABEL_STYLE),
+                    dcc.Dropdown(
+                        id="roadmap-participants",
+                        options=roadmap_opts,
+                        value=default_names,
+                        multi=True,
+                        placeholder="Select one or more people…",
+                        style=DROPDOWN_STYLE(),
+                    ),
+                ], width=6),
+                dbc.Col([
+                    html.Label("Organization", style=LABEL_STYLE),
+                    dcc.Input(
+                        id="roadmap-org",
+                        type="text",
+                        value="",
+                        debounce=True,
+                        placeholder="e.g. City of Austin",
+                        style={
+                            "width":           "100%",
+                            "backgroundColor": "rgba(17,24,39,0.85)",
+                            "color":           THEME["dark"]["text"],
+                            "border":          f"1px solid {THEME['dark']['border']}",
+                            "borderRadius":    "6px",
+                            "padding":         "7px 10px",
+                            "fontSize":        "13px",
+                        },
+                    ),
+                    html.Div(
+                        "Replaces the client name throughout the booklet. "
+                        "Leave blank to keep the default wording.",
+                        style={"color": THEME["dark"]["muted"],
+                               "fontSize": "11px", "marginTop": "5px"},
+                    ),
+                ], width=6),
+            ], className="mb-3"),
             html.Button(
                 "⬇  Generate Roadmap Report(s)",
                 id="btn-generate-roadmap", n_clicks=0,
@@ -2880,10 +2907,11 @@ def download_json(n_clicks, profiles_json):
     Output("roadmap-status",      "children"),
     Input("btn-generate-roadmap", "n_clicks"),
     State("roadmap-participants", "value"),
+    State("roadmap-org",          "value"),
     State("profiles-store",       "data"),
     prevent_initial_call=True,
 )
-def generate_roadmaps(n_clicks, selected_names, profiles_json):
+def generate_roadmaps(n_clicks, selected_names, org_name, profiles_json):
     # Guard against the initial firing when the tab first renders
     if not n_clicks:
         return dash.no_update, dash.no_update
@@ -2902,14 +2930,11 @@ def generate_roadmaps(n_clicks, selected_names, profiles_json):
         buf = io.BytesIO()
         with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
             for p in selected:
-                doc  = generate_roadmap_document(p)
+                values, scores, dimensions = build_template_values(
+                    p, org_name=org_name)
                 safe = p["participant_name"].replace(" ", "_")
-                # One person: files at zip root. Several: one folder each.
-                prefix = f"{safe}/" if len(selected) > 1 else ""
-                zf.writestr(f"{prefix}{safe}_Leadership_Roadmap.pdf",
-                            render_roadmap_pdf(doc))
-                zf.writestr(f"{prefix}{safe}_Leadership_Roadmap.docx",
-                            render_roadmap_docx(doc))
+                zf.writestr(f"{safe}_Leadership_Roadmap.docx",
+                            render_from_template(values, scores, dimensions))
         zip_bytes = buf.getvalue()
     except Exception as exc:
         return dash.no_update, f"Roadmap generation failed: {exc}"
@@ -2917,12 +2942,11 @@ def generate_roadmaps(n_clicks, selected_names, profiles_json):
     if len(selected) == 1:
         fname  = (selected[0]["participant_name"].replace(" ", "_")
                   + "_Leadership_Roadmap.zip")
-        status = (f"Generated roadmap for "
-                  f"{selected[0]['participant_name']} (PDF + Word).")
+        status = (f"Generated Word roadmap for "
+                  f"{selected[0]['participant_name']}.")
     else:
         fname  = "Leadership_Roadmaps.zip"
-        status = (f"Generated roadmaps for {len(selected)} people "
-                  f"(PDF + Word each).")
+        status = f"Generated Word roadmaps for {len(selected)} people."
 
     return (dcc.send_bytes(lambda b, data=zip_bytes: b.write(data), fname),
             status)

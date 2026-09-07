@@ -24,8 +24,9 @@ from reportlab.platypus import (
 )
 
 from utils.roadmap_content_model import (
-    PALETTE, PageBreak, HeaderBand, Paragraph, BulletList, CalloutBox,
-    DataTable, BlankWorksheetTable, ShadedGroup, Divider, RoadmapDocument,
+    PALETTE, DISC_COLORS, PageBreak, HeaderBand, Paragraph, BulletList,
+    CalloutBox, DataTable, BlankWorksheetTable, ShadedGroup, Divider,
+    ScoreStrip, BarChart, RoadmapDocument,
 )
 
 PAGE_W, PAGE_H = LETTER
@@ -224,7 +225,7 @@ def _data_table(block: DataTable):
 
     tbl = Table(data, colWidths=col_w, repeatRows=1 if block.header_row else 0)
     tbl.setStyle(TableStyle(style_cmds + [
-        ("GRID",          (0, 0), (-1, -1), 0.5, HexColor("#D8DEE6")),
+        ("GRID",          (0, 0), (-1, -1), 0.75, HexColor(PALETTE["table_grid"])),
         ("VALIGN",        (0, 0), (-1, -1), "TOP"),
         ("LEFTPADDING",   (0, 0), (-1, -1), 6),
         ("RIGHTPADDING",  (0, 0), (-1, -1), 6),
@@ -259,7 +260,7 @@ def _worksheet_table(block: BlankWorksheetTable):
 
     tbl = Table(data, colWidths=widths, rowHeights=row_heights)
     tbl.setStyle(TableStyle(style_cmds + [
-        ("GRID",          (0, 0), (-1, -1), 0.5, HexColor("#D8DEE6")),
+        ("GRID",          (0, 0), (-1, -1), 0.75, HexColor(PALETTE["table_grid"])),
         ("VALIGN",        (0, 0), (-1, -1), "TOP"),
         ("LEFTPADDING",   (0, 0), (-1, -1), 6),
         ("RIGHTPADDING",  (0, 0), (-1, -1), 6),
@@ -269,8 +270,110 @@ def _worksheet_table(block: BlankWorksheetTable):
     return [tbl, Spacer(0, 10)]
 
 
+def _score_strip(block):
+    """DISC D/I/S/C band: colored letter cells over a cream score row."""
+    def centered(text, size, color):
+        return RLParagraph(_esc(text),
+                           _pstyle("strip", _BODY_FONT_BOLD, size, color,
+                                   1.25, TA_CENTER))
+
+    letters, values, fills = [], [], []
+    for letter, score in block.scores:
+        color = DISC_COLORS.get(letter, PALETTE["slate_header"])
+        fills.append(color)
+        letters.append(centered(letter, 11, PALETTE["white"]))
+        values.append(centered(f"{score:+.2f}", 9, color))
+    n = len(block.scores) or 1
+    tbl = Table([letters, values], colWidths=[CONTENT_W / n] * n)
+    style = [
+        ("ALIGN",         (0, 0), (-1, -1), "CENTER"),
+        ("VALIGN",        (0, 0), (-1, -1), "MIDDLE"),
+        ("TOPPADDING",    (0, 0), (-1, -1), 4),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
+        ("BACKGROUND",    (0, 1), (-1, 1), HexColor(PALETTE["score_cell_fill"])),
+    ]
+    for i, fill in enumerate(fills):
+        style.append(("BACKGROUND", (i, 0), (i, 0), HexColor(fill)))
+    tbl.setStyle(TableStyle(style))
+
+    out = []
+    if block.caption:
+        out.append(RLParagraph(
+            block.caption.upper(),
+            ParagraphStyle("stripcap", fontName=_font_for("Arial", True),
+                           fontSize=7.5, textColor=HexColor(PALETTE["gold_accent"]),
+                           spaceBefore=8, spaceAfter=4, leading=10)))
+    out.extend([tbl, Spacer(1, 10)])
+    return out
+
+
+def _bar_chart(block):
+    """Horizontal score bars — label, filled track, value."""
+    label_w = CONTENT_W * 0.32
+    value_w = CONTENT_W * 0.10
+    track_w = CONTENT_W - label_w - value_w
+    rows, style = [], [
+        ("VALIGN",        (0, 0), (-1, -1), "MIDDLE"),
+        ("ALIGN",         (0, 0), (0, -1), "RIGHT"),
+        ("ALIGN",         (2, 0), (2, -1), "LEFT"),
+        ("TOPPADDING",    (0, 0), (-1, -1), 3),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 3),
+        ("LEFTPADDING",   (1, 0), (1, -1), 6),
+        ("RIGHTPADDING",  (1, 0), (1, -1), 6),
+    ]
+    for label, score in block.rows:
+        fill = max(0.02, min(1.0, score / block.scale))
+        bar = Table([[""], ], colWidths=[track_w - 12], rowHeights=[7])
+        bar.setStyle(TableStyle([
+            ("BACKGROUND", (0, 0), (0, 0), HexColor(block.track)),
+            ("LEFTPADDING", (0, 0), (-1, -1), 0),
+            ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+            ("TOPPADDING", (0, 0), (-1, -1), 0),
+            ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
+        ]))
+        filled = Table([[""], ], colWidths=[(track_w - 12) * fill],
+                       rowHeights=[7])
+        filled.setStyle(TableStyle([
+            ("BACKGROUND", (0, 0), (0, 0), HexColor(block.color)),
+            ("LEFTPADDING", (0, 0), (-1, -1), 0),
+            ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+            ("TOPPADDING", (0, 0), (-1, -1), 0),
+            ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
+        ]))
+        gauge = Table([[filled, ""]],
+                      colWidths=[(track_w - 12) * fill,
+                                 (track_w - 12) * (1 - fill)],
+                      rowHeights=[7])
+        gauge.setStyle(TableStyle([
+            ("BACKGROUND", (1, 0), (1, 0), HexColor(block.track)),
+            ("LEFTPADDING", (0, 0), (-1, -1), 0),
+            ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+            ("TOPPADDING", (0, 0), (-1, -1), 0),
+            ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
+        ]))
+        rows.append([
+            _cell_para(label, size=9.5, color="#444444"),
+            gauge,
+            _cell_para(str(score), size=9.5, bold=True, color=block.color),
+        ])
+    tbl = Table(rows, colWidths=[label_w, track_w, value_w])
+    tbl.setStyle(TableStyle(style))
+
+    out = []
+    if block.caption:
+        out.append(RLParagraph(
+            block.caption.upper(),
+            ParagraphStyle("barcap", fontName=_font_for("Arial", True),
+                           fontSize=7.5, textColor=HexColor(block.color),
+                           spaceBefore=8, spaceAfter=5, leading=10)))
+    out.extend([tbl, Spacer(1, 10)])
+    return out
+
+
 _RENDERERS = {
     HeaderBand:          _header_band,
+    ScoreStrip:          _score_strip,
+    BarChart:            _bar_chart,
     ShadedGroup:         _shaded_group,
     Divider:             _divider,
     Paragraph:           _paragraph,

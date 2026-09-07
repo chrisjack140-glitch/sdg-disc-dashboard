@@ -17,11 +17,15 @@ from typing import List, Optional
 # ─────────────────────────────────────────
 PALETTE = {
     "navy_header":     "#1B2A44",   # section header bands
-    "navy_cover":       "#101827",   # cover page band
+    # Cover band. The original #101827 was so dark it printed as flat black,
+    # so this is lifted into a blue that still reads as deep on paper.
+    "navy_cover":       "#1E3A5F",
     "white":            "#FFFFFF",
     "slate_header":     "#43546B",   # table header rows
     "body_text":        "#202631",
     "muted_text":       "#777777",
+    # Table gridlines. #D8DEE6 all but vanished in print — this holds up.
+    "table_grid":       "#94A3B4",
     "row_label_fill":   "#F7F9FB",   # alternating table row (label column)
     "row_value_fill":   "#FFFFFF",   # alternating table row (value column)
     "gold_accent":      "#C59B2D",   # cover accent stripe
@@ -33,6 +37,23 @@ PALETTE = {
     "tint_slate_1":     "#F6F8FA",   # worksheet intro callouts
     "tint_slate_2":     "#F8FAFC",   # neutral reflection callouts
     "tint_blue":        "#EAF2F8",   # Flywheel primary-strength box
+    # DISC factor colors for the Mirror / Pressure score strips, and the
+    # two EQ-i bar charts. Print tones, deliberately not the dashboard's
+    # screen palette.
+    "disc_d":           "#C0392B",
+    "disc_i":           "#C8A820",
+    "disc_s":           "#1A6B4A",
+    "disc_c":           "#1A5276",
+    "score_cell_fill":  "#F4F2EB",   # cream row under the DISC letters
+    "eq_strength":      "#1A6B4A",   # Core EQ-i Strengths bars
+    "eq_development":   "#C0392B",   # Key Development Areas bars
+}
+
+DISC_COLORS = {
+    "D": PALETTE["disc_d"],
+    "I": PALETTE["disc_i"],
+    "S": PALETTE["disc_s"],
+    "C": PALETTE["disc_c"],
 }
 
 FONT_HEADER = "Georgia"   # cover / section title font
@@ -115,6 +136,31 @@ class CalloutBox:
     body: str
     heading: str = ""
     tint: str = PALETTE["tint_slate_2"]
+
+
+@dataclass
+class ScoreStrip:
+    """The DISC D/I/S/C band: four colored cells over their scores.
+
+    Used twice on the DISC connection page — once for the Mirror graph and
+    once for the Pressure graph — under a small gold caption.
+    """
+    caption: str
+    scores: List[tuple]              # [("D", -2.43), ("I", -4.38), ...]
+
+
+@dataclass
+class BarChart:
+    """Horizontal score bars: label, filled track, value.
+
+    Both EQ-i charts use this. `rows` are (label, score) pairs and the fill
+    is score/`scale` of the track, matching the source booklet.
+    """
+    rows: List[tuple]
+    color: str
+    caption: str = ""
+    scale: int = 140
+    track: str = "#DDDDDD"
 
 
 @dataclass
