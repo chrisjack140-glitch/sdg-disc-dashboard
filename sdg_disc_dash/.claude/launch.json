@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "sdg-dashboard",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["app.py"],
+      "port": 8050
+    }
+  ]
+}

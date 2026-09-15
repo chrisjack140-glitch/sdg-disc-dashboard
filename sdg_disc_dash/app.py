@@ -1,10 +1,12 @@
 import base64
 import io
 import json
+import math
 import zipfile
 from collections import Counter
 from datetime import datetime
 from itertools import permutations
+from pathlib import Path
 from typing import Optional
 
 import dash
@@ -416,6 +418,32 @@ def build_disc_type_chart(profiles: list,
     return fig
 
 
+# Behaviour symbols placed around the radar, one per axis, taken from the
+# "Dashboard radar sample" deck. Label text and line breaks match the deck.
+# light/ holds the deck's original PNGs; dark/ is the same artwork recoloured
+# to THEME["dark"]["text"] so it stays visible on the dark surface.
+RADAR_AXIS_ICONS = [
+    ("DI", "DI_persuade_others",      "Persuade Others"),
+    ("I",  "I_verbalize_communicate", "Verbalize, Communicate"),
+    ("IS", "IS_build_relationships",  "Build<br>Relationships"),
+    ("S",  "S_keep_the_peace",        "Keep the Peace"),
+    ("SC", "SC_follow_a_process",     "Follow A Process"),
+    ("C",  "C_analyze_the_problem",   "Analyze the Problem"),
+    ("CD", "CD_design_a_solution",    "Design a<br>Solution"),
+    ("D",  "D_take_action_now",       "Take Action Now"),
+]
+_RADAR_ICON_DIR = Path(__file__).parent / "assets" / "radar_icons"
+# Embedded as data URIs so the figure never depends on asset-serving paths.
+_RADAR_ICON_SRC = {
+    t: {
+        stem: "data:image/png;base64," + base64.b64encode(
+            (_RADAR_ICON_DIR / t / f"{stem}.png").read_bytes()).decode()
+        for _, stem, _ in RADAR_AXIS_ICONS
+    }
+    for t in ("dark", "light")
+}
+
+
 def build_multi_radar_chart(selected_profiles: list,
                              graph_name: str,
                              theme: str = "dark",
@@ -423,6 +451,31 @@ def build_multi_radar_chart(selected_profiles: list,
     categories = ["DI", "I", "IS", "S", "SC", "C", "CD", "D"]
     c = _tc(theme)
     fig = go.Figure()
+
+    # The icons are laid out on a hidden, equal-aspect cartesian overlay whose
+    # unit circle coincides with the radar's outer ring: the polar domain is
+    # 1/XR of the width and 1/YR of the height, both centred.
+    XR, YR = 2.0, 1.75
+    fig.add_trace(go.Scatter(x=[None], y=[None], showlegend=False,
+                             hoverinfo="skip"))
+    images, annotations = [], []
+    icon_src = _RADAR_ICON_SRC["light" if theme == "light" else "dark"]
+    for k, (cat, stem, label) in enumerate(RADAR_AXIS_ICONS):
+        angle = math.radians(90 - 45 * k)            # clockwise from top
+        radius = 1.6 if k % 2 else 1.48              # diagonals sit wider
+        x, y = radius * math.cos(angle), radius * math.sin(angle)
+        images.append(dict(
+            source=icon_src[stem], xref="x", yref="y",
+            x=x, y=y + 0.09, sizex=0.24, sizey=0.24,
+            xanchor="center", yanchor="middle", sizing="contain",
+            layer="above",
+        ))
+        annotations.append(dict(
+            text=f"<b>{label}</b>", xref="x", yref="y",
+            x=x, y=y - 0.05, xanchor="center", yanchor="top",
+            showarrow=False, font=dict(color=c["text"], size=12),
+        ))
+
     for idx, profile in enumerate(selected_profiles):
         g    = profile["graphs"][graph_name]
         d, i, s, cv = g["D"], g["I"], g["S"], g["C"]
@@ -440,8 +493,17 @@ def build_multi_radar_chart(selected_profiles: list,
         ))
     fig.update_layout(**_base_layout(
         f"Radar Comparison — {graph_name.title()}",
-        height=520, theme=theme,
-        extra=dict(polar=dict(
+        height=700, theme=theme,
+        extra=dict(
+        images=images,
+        annotations=annotations,
+        xaxis=dict(visible=False, range=[-XR, XR], constrain="domain",
+                   fixedrange=True),
+        yaxis=dict(visible=False, range=[-YR, YR], constrain="domain",
+                   scaleanchor="x", scaleratio=1, fixedrange=True),
+        polar=dict(
+            domain=dict(x=[0.5 - 0.5 / XR, 0.5 + 0.5 / XR],
+                        y=[0.5 - 0.5 / YR, 0.5 + 0.5 / YR]),
             bgcolor=c["surface"],
             angularaxis=dict(
                 categoryorder="array", categoryarray=categories,
