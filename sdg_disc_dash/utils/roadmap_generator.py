@@ -212,7 +212,16 @@ _FACTOR_PLAN = {
         "creates": "clear direction, decisive action, momentum, and a "
                    "strong drive for results",
         "limit": "team alignment and shared ownership",
-        "trust": "clear direction and following through on my commitments",
+        "signature": {
+            "quality": ("Decisiveness",
+                        "You set clear priorities and explain the reasoning "
+                        "behind them."),
+            "stretch": ("Openness",
+                        "You invite input before deciding and let others own "
+                        "the next step."),
+            "trust": "clear direction",
+            "momentum": "decisive action",
+        },
         "focus": ("Alignment and Listening",
                   "Coaching Ownership Instead of Directing",
                   "Sustaining Shared Momentum"),
@@ -229,18 +238,21 @@ _FACTOR_PLAN = {
         "success": "Your pace remains strong, and staff increasingly bring "
                    "their own recommendations and own outcomes rather than "
                    "waiting for your direction.",
-        "elements": (("Decisive Direction",
-                      "You set clear priorities and explain the reasoning "
-                      "behind them."),
-                     ("Inclusive Momentum",
-                      "You invite input before deciding and let others own "
-                      "the next step.")),
     },
     "I": {
         "creates": "energy, engagement, optimism, and strong relational "
                    "influence",
         "limit": "follow-through and clear accountability",
-        "trust": "genuine connection and open communication",
+        "signature": {
+            "quality": ("Energy",
+                        "You build enthusiasm and connection around shared "
+                        "goals."),
+            "stretch": ("Follow-Through",
+                        "You turn ideas into clear owners, actions, and "
+                        "dates."),
+            "trust": "genuine connection",
+            "momentum": "shared enthusiasm",
+        },
         "focus": ("Clear Expectations and Follow-Through",
                   "Accountability Conversations",
                   "Sustaining Execution Rhythm"),
@@ -257,18 +269,21 @@ _FACTOR_PLAN = {
         "success": "Your energy remains a strength, and staff increasingly "
                    "follow through on clear commitments rather than relying "
                    "on your enthusiasm to carry momentum.",
-        "elements": (("Energizing Engagement",
-                      "You build enthusiasm and connection around shared "
-                      "goals."),
-                     ("Committed Follow-Through",
-                      "You turn ideas into clear owners, actions, and "
-                      "dates.")),
     },
     "S": {
         "creates": "stability, dependable follow-through, team cohesion, "
                    "and a calm, supportive presence",
         "limit": "visible direction and timely escalation",
-        "trust": "steady support and dependable follow-through",
+        "signature": {
+            "quality": ("Steadiness",
+                        "You stay calm and consistent so staff know what to "
+                        "expect from you."),
+            "stretch": ("Candor",
+                        "You name expectations and concerns early, and hold "
+                        "them with support."),
+            "trust": "steady support",
+            "momentum": "dependable follow-through",
+        },
         "focus": ("Voice and Visible Direction",
                   "Holding Standards with Care",
                   "Sustaining Accountability Rhythm"),
@@ -285,18 +300,21 @@ _FACTOR_PLAN = {
         "success": "Your steadiness remains a strength, and staff "
                    "increasingly hear clear expectations from you and meet "
                    "them rather than relying on you to absorb the pressure.",
-        "elements": (("Steady Presence",
-                      "You stay calm and consistent so staff know what to "
-                      "expect from you."),
-                     ("Direct Care",
-                      "You name expectations early and hold them with "
-                      "support.")),
     },
     "C": {
         "creates": "reliability, thoughtful preparation, operational "
                    "discipline, and strong quality control",
         "limit": "visible direction",
-        "trust": "consistent standards and authentic communication",
+        "signature": {
+            "quality": ("Precision",
+                        "You clarify expectations, standards, timelines, and "
+                        "follow-up."),
+            "stretch": ("Confidence",
+                        "You state what you see, why it matters, and what you "
+                        "recommend."),
+            "trust": "high standards",
+            "momentum": "disciplined execution",
+        },
         "focus": ("Visibility and Leadership Presence",
                   "Coaching Supervisors into Ownership",
                   "Sustaining Accountability Rhythm"),
@@ -314,12 +332,6 @@ _FACTOR_PLAN = {
                    "expected to own the work, apply feedback, and contribute "
                    "to execution rather than depending on you to carry the "
                    "quality burden.",
-        "elements": (("Precision",
-                      "You clarify expectations, standards, timelines, and "
-                      "follow-up."),
-                     ("Adaptive Accountability",
-                      "You maintain standards while asking questions that "
-                      "require ownership and learning.")),
     },
 }
 
@@ -588,18 +600,23 @@ def build_flywheel_section(profile: dict) -> dict:
 def build_leadership_signature(profile: dict, disc_text: dict,
                                flywheel: dict) -> dict:
     name = first_name(profile["participant_name"])
-    primary_q = flywheel["primary_q"]
-
-    # Anchor / value / influence / growth-edge → one statement
     anchor_words = disc_text["natural_strengths"].split(", supported by")[0]
     growth_edge = flywheel["activation_focus"].rstrip(".")
-    trust = _FACTOR_PLAN[disc_text["primary"]]["trust"]
+
+    # The pattern the client chose (the reference booklet's own signature):
+    # four qualities (natural DISC strength, the stretch it calls for, the
+    # EQ-i development area made visible, adaptive accountability), then
+    # trust, coaching and momentum. The observable table lists the same
+    # elements, so the statement and table always agree.
+    sig = _FACTOR_PLAN[disc_text["primary"]]["signature"]
+    observable = _observable_rows(profile, disc_text)
+    qualities = [el.lower() for el, _ in observable[:4]]
     statement = (
-        f"I lead with {anchor_words}. I build trust through {trust}, "
-        f"develop people through "
-        f"honest coaching, and create momentum by pairing "
-        f"{primary_q['label'].lower()} strength with {growth_edge[0].lower()}"
-        f"{growth_edge[1:]}."
+        f"I lead with {', '.join(qualities[:3])}, and {qualities[3]}. "
+        f"I build trust through {sig['trust']} and authentic communication, "
+        f"develop people through honest coaching, and create momentum by "
+        f"pairing {sig['momentum']} with visible support and clear "
+        f"direction."
     )
 
     # Observable-behavior table rows: signature element → behavior.
@@ -620,33 +637,26 @@ def build_leadership_signature(profile: dict, disc_text: dict,
          f"{name} is intentionally strengthening: {growth_edge}."),
     ]
     return {"statement": statement, "elements": elements,
-            "observable": _observable_rows(profile, disc_text)}
+            "observable": observable}
 
 
 def _observable_rows(profile, disc_text) -> list:
-    """The five rows of "Make the Signature Observable": two from the
-    primary factor, one from the secondary, one from the lowest EQ-i
-    development area, and the shared support/direction row."""
-    primary, secondary = disc_text["primary"], disc_text["secondary"]
-    rows = list(_FACTOR_PLAN[primary]["elements"])
-    if secondary and secondary != primary:
-        rows.append(_FACTOR_PLAN[secondary]["elements"][0])
-    else:
-        rows.append(("Confidence",
-                     "You state what you see, why it matters, and what you "
-                     "recommend."))
+    """The five rows of "Make the Signature Observable", in the order the
+    signature names them: the primary factor's natural quality, the stretch
+    it calls for, the lowest EQ-i development area, adaptive accountability,
+    and the shared support/direction row."""
+    sig = _FACTOR_PLAN[disc_text["primary"]]["signature"]
+    rows = [sig["quality"], sig["stretch"]]
     eqi = profile.get("eqi_scores") or {}
     _top, bottom = select_eqi_top_bottom(eqi, top_n=0, bottom_n=1) \
         if eqi else ([], [])
-    if bottom:
-        key = bottom[0][0]
-        rows.append((EQI_SUBSCALE_DISPLAY[key],
-                     _EQ_OBSERVABLE.get(key, "You practice this capacity "
-                                        "where staff can see it.")))
-    else:
-        rows.append(("Emotional Clarity",
-                     "You name appreciation, concern, urgency, support, and "
-                     "direction more visibly."))
+    key = bottom[0][0] if bottom else "emotional_expression"
+    rows.append((_EQ_QUALITY_NAME.get(key, "Emotional Clarity"),
+                 _EQ_OBSERVABLE.get(key, "You practice this capacity where "
+                                    "staff can see it.")))
+    rows.append(("Adaptive Accountability",
+                 "You maintain standards while asking questions that "
+                 "require ownership and learning."))
     rows.append(("Visible Support and Clear Direction",
                  "Staff know both what is expected and how you will support "
                  "their follow-through."))
@@ -685,6 +695,26 @@ _EQ_OBSERVABLE = {
     "stress_tolerance": "You stay composed and visible when pressure "
                         "builds.",
     "optimism": "You frame setbacks as solvable and keep the team moving.",
+}
+
+# The quality each EQ-i development area becomes in the signature: a leader
+# growing Emotional Expression leads with "emotional clarity".
+_EQ_QUALITY_NAME = {
+    "self_regard": "Self-Assurance",
+    "self_actualization": "Sense of Purpose",
+    "emotional_self_awareness": "Self-Awareness",
+    "emotional_expression": "Emotional Clarity",
+    "assertiveness": "Assertive Voice",
+    "independence": "Decision Ownership",
+    "interpersonal_relationships": "Relational Trust",
+    "empathy": "Empathy",
+    "social_responsibility": "Shared Purpose",
+    "problem_solving": "Deliberate Problem Solving",
+    "reality_testing": "Grounded Judgment",
+    "impulse_control": "Composure",
+    "flexibility": "Adaptability",
+    "stress_tolerance": "Calm Under Pressure",
+    "optimism": "Optimism",
 }
 
 
