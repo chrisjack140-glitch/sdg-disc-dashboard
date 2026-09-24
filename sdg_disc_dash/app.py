@@ -542,12 +542,12 @@ def build_multi_radar_chart(selected_profiles: list,
 
 # One person's three DISC graphs on a single radar. Colours come from the
 # radar palette but avoid the red/yellow/green/blue that already mean D/I/S/C;
-# dash patterns keep the lines distinguishable in print and for colour-blind
-# readers.
+# lines are solid, so distinct marker shapes keep them distinguishable in
+# print and for colour-blind readers.
 GRAPH_OVERLAY_STYLE = {
-    "public": {"label": "Public", "color": "#bc8cff", "dash": "solid"},
-    "stress": {"label": "Stress", "color": "#fb7185", "dash": "dash"},
-    "mirror": {"label": "Mirror", "color": "#22d3ee", "dash": "dot"},
+    "public": {"label": "Public", "color": "#bc8cff", "symbol": "circle"},
+    "stress": {"label": "Stress", "color": "#fb7185", "symbol": "diamond"},
+    "mirror": {"label": "Mirror", "color": "#22d3ee", "symbol": "square"},
 }
 
 
@@ -569,8 +569,8 @@ def build_graph_overlay_radar(profile: dict, graphs: list,
             fill="toself", fillcolor=f"rgba({r},{gr},{b},0.08)",
             name=st["label"],
             mode="lines+markers",
-            line=dict(color=st["color"], width=2.5, dash=st["dash"]),
-            marker=dict(size=6, color=st["color"]),
+            line=dict(color=st["color"], width=2.5),
+            marker=dict(size=7, color=st["color"], symbol=st["symbol"]),
             hovertemplate=(f"<b>{st['label']}</b><br>"
                            "%{theta}: %{r:.2f}<extra></extra>"),
         ))
@@ -2713,10 +2713,13 @@ def render_tab(active_tab, df_json, profiles_json, anchor_graph, theme, is_anon,
                             "fontSize": "13px"},
                 style={"marginBottom": "10px"},
             ),
-            _graph_card(
-                dcc.Graph(id="individual-radar",
-                          config={"displayModeBar": False}),
-                theme=theme,
+            html.Div(
+                _graph_card(
+                    dcc.Graph(id="individual-radar",
+                              config={"displayModeBar": False}),
+                    theme=theme,
+                ),
+                className="scroll-reveal",
             ),
         ], className="tab-fade-in")
 

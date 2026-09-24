@@ -866,7 +866,7 @@ body[data-theme="light"] #cohort-name-input {
 /* ════════════════════════════════════════════════════════
    FULL SCREEN GRAPH BUTTON
    Injected dynamically by fullscreen.js onto each graph card.
-   Fades in on card hover; always visible while in fullscreen.
+   Always faintly visible so it can be found; brightens on card hover.
    ════════════════════════════════════════════════════════ */
 .graph-fs-btn {
     position:        absolute;
@@ -886,7 +886,7 @@ body[data-theme="light"] #cohort-name-input {
     align-items:     center;
     justify-content: center;
     z-index:         20;
-    opacity:         0;
+    opacity:         0.45;
     transition:      opacity 0.18s ease, color 0.18s ease,
                      border-color 0.18s ease;
 }
@@ -913,6 +913,23 @@ body[data-theme="light"] #cohort-name-input {
     height:    34px;
     font-size: 16px;
 }
+
+/* Window-filling fallback (fullscreen.js .graph-expanded) */
+.graph-expanded {
+    position:         fixed      !important;
+    inset:            0          !important;
+    z-index:          10000      !important;
+    margin:           0          !important;
+    border-radius:    0          !important;
+    background-color: var(--bg)  !important;
+    padding:          24px       !important;
+    box-sizing:       border-box !important;
+    overflow:         hidden     !important;
+}
+.graph-expanded .graph-fs-btn {
+    opacity: 1; top: 16px; right: 16px; width: 34px; height: 34px;
+}
+body.graph-expanded-open { overflow: hidden; }
 
 /* Card background & layout when fullscreen */
 :fullscreen,
@@ -960,4 +977,25 @@ body[data-theme="light"] #cohort-name-input {
     display: block;
     /* Slight gold drop-shadow to make the mark glow */
     filter: drop-shadow(0 0 18px rgba(201, 165, 53, 0.45));
+}
+
+/* ════════════════════════════════════════════════════════
+   SCROLL REVEAL
+   Cards marked .scroll-reveal rise and fade in the first time they
+   scroll into view (radar_reveal.js adds .is-visible). Respects the
+   user's reduced-motion setting.
+   ════════════════════════════════════════════════════════ */
+.scroll-reveal {
+    opacity:    0;
+    transform:  translateY(24px);
+    transition: opacity 0.7s ease, transform 0.7s cubic-bezier(.2,.7,.2,1);
+}
+.scroll-reveal.is-visible {
+    opacity:   1;
+    transform: none;
+}
+@media (prefers-reduced-motion: reduce) {
+    .scroll-reveal, .scroll-reveal.is-visible {
+        opacity: 1; transform: none; transition: none;
+    }
 }
