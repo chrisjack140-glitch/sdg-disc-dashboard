@@ -194,6 +194,28 @@ def extract_style_type_from_page1(page1_text: str) -> Optional[str]:
     return None
 
 
+def extract_style_name_from_page1(page1_text: str) -> Optional[str]:
+    """
+    Parse Maxwell's style name from the Style: field on page 1 — the words
+    before the DISC letters. The Roadmap uses this name as printed on the
+    participant's own report.
+
+      "Style: Contemplator CSD"     ->  "Contemplator"
+      "Style: Logical Thinker C"    ->  "Logical Thinker"
+      "Style: DC"                   ->  None
+    """
+    m = _STYLE_LINE_RE.search(page1_text)
+    if not m:
+        return None
+    tokens = m.group(1).split()
+    disc_set = set("DISC")
+    code = tokens[-1].upper() if tokens else ""
+    if 1 <= len(code) <= 4 and all(c in disc_set for c in code):
+        tokens = tokens[:-1]
+    name = " ".join(tokens).strip()
+    return name or None
+
+
 _SCORE_RE = re.compile(
     r"D\s*=\s*([\-0-9]+(?:\.[0-9]+)?)\s*,?\s*"
     r"I\s*=\s*([\-0-9]+(?:\.[0-9]+)?)\s*,?\s*"
@@ -287,6 +309,7 @@ def process_uploaded_files(files_data: List[Dict], anchor_graph: str = "stress")
             style_type       = extract_style_type_from_page1(page1_text)
             profile          = build_profile(scores, anchor_graph=anchor_graph,
                                              style_type=style_type)
+            profile["style_name"]       = extract_style_name_from_page1(page1_text)
             profile["source_pdf"]       = file_dict["name"]
             profile["participant_name"] = participant_name
             profile["eqi_scores"]       = {}   # populated in pass 4

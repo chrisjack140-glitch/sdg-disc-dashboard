@@ -148,6 +148,9 @@ _FACTOR_LANGUAGE = {
                     "likely to take over rather than coach.",
         "adjustment": "Slow down to align, listen for impact, and coach "
                       "ownership instead of driving compliance.",
+        "foundation": ("direction", "decisiveness"),
+        "development": "channel that drive into shared ownership, so the "
+                       "team moves with you rather than behind you",
     },
     "I": {
         "strengths": "relational energy, engagement, optimism, and "
@@ -161,6 +164,9 @@ _FACTOR_LANGUAGE = {
         "adjustment": "Anchor enthusiasm in clear expectations, "
                       "follow-through, and direct accountability "
                       "language.",
+        "foundation": ("engagement", "influence"),
+        "development": "anchor that energy in clear expectations and "
+                       "visible follow-through",
     },
     "S": {
         "strengths": "steadiness, loyalty, patience, and dependable "
@@ -174,6 +180,9 @@ _FACTOR_LANGUAGE = {
                     "escalate performance concerns.",
         "adjustment": "Name expectations earlier, tolerate productive "
                       "tension, and hold standards visibly.",
+        "foundation": ("consistency", "follow-through"),
+        "development": "name expectations earlier and hold standards "
+                       "visibly, even when it creates tension",
     },
     "C": {
         "strengths": "precision, structure, quality standards, and "
@@ -188,6 +197,10 @@ _FACTOR_LANGUAGE = {
                     "standard personally.",
         "adjustment": "Name expectations earlier, use concise language, "
                       "ask ownership questions, and confirm follow-up.",
+        "foundation": ("structure", "standards"),
+        "development": "make those strengths more visible and coach others "
+                       "into ownership rather than carrying the standard "
+                       "alone",
     },
 }
 
@@ -260,8 +273,11 @@ def _mirror_scores_line(profile: dict) -> str:
 
 
 def _style_label(profile: dict) -> str:
+    """"CSD Contemplator": the code plus Maxwell's style name as printed on
+    the participant's report. Profiles parsed before the name was captured
+    fall back to the Flywheel reference name for the code."""
     code = (profile.get("style_type") or "").upper()
-    name = STYLE_NAMES.get(code)
+    name = profile.get("style_name") or STYLE_NAMES.get(code)
     if name is None:
         name = STYLE_NAMES.get(code[:1], "Balanced / Adaptive")
     return f"{code} {name}" if code else name
@@ -1221,6 +1237,31 @@ def _describe_pressure_shift(mirror, stress) -> str:
             f"than retreat.")
 
 
+def _disc_connection_intro(profile, disc) -> str:
+    """Opening paragraph of the DISC Leadership Roadmap Connection page.
+
+    Names the participant's own style code and builds the strengths from
+    their top two factors. This sentence used to be fixed text in the
+    template and carried the reference participant's "CS" into every
+    booklet.
+    """
+    code = (profile.get("style_type") or "").upper()
+    letters = [f for f in (disc["primary"], disc["secondary"]) if f]
+    words = [w for f in letters for w in _FACTOR_LANGUAGE[f]["foundation"]]
+    bold = [f"**{w}**" for w in words]
+    strengths = (", ".join(bold[:-1]) + ", and " + bold[-1]
+                 if len(bold) > 2 else " and ".join(bold))
+    development = _FACTOR_LANGUAGE[disc["primary"]]["development"]
+    return ("**DISC** helps you understand how your leadership behavior is "
+            "likely experienced by staff. How you communicate, decide, "
+            "respond, and follow through, and how those patterns may shift "
+            "under pressure. It creates awareness of the strengths others "
+            "can count on and the pivots needed when your natural style may "
+            f"not fully meet the moment. Your {code} pattern gives you a "
+            f"strong foundation in {strengths}. The development opportunity "
+            f"is to {development}.")
+
+
 def _summary_paragraphs(profile, disc, eqi, flywheel, summary) -> dict:
     """The four Integration Summary paragraphs, in the booklet's voice."""
     style = disc["style_label"]
@@ -1239,6 +1280,7 @@ def _summary_paragraphs(profile, disc, eqi, flywheel, summary) -> dict:
             "leadership behavior and how that behavior may shift under "
             f"pressure. Your {style} pattern gives you a strong foundation "
             f"in {disc['natural_strengths']}."),
+        "DISC_CONNECTION_INTRO": _disc_connection_intro(profile, disc),
         "FLYWHEEL_INTRO": (
             "Flywheel alignment shows how your DISC and EQ-i patterns "
             "translate into team momentum. "

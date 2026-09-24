@@ -41,6 +41,7 @@ PARAGRAPH_TOKENS = [
     ("The EQ development opportunity is to make that",  "{{SUMMARY_EQI_DEV}}"),
     ("The Flywheel analysis identifies Execution",      "{{SUMMARY_FLYWHEEL}}"),
     ("DISC helps you understand how staff experiences", "{{DISC_INTRO}}"),
+    ("DISC helps you understand how your leadership",   "{{DISC_CONNECTION_INTRO}}"),
     ("Flywheel alignment shows how your DISC and EQ-i", "{{FLYWHEEL_INTRO}}"),
     ("EQ-i helps you translate strong internal",        "{{EQI_INTRO}}"),
     ("Your profile shows exceptional",                  "{{EQI_STRENGTH_NOTE}}"),

@@ -444,11 +444,18 @@ _RADAR_ICON_SRC = {
 }
 
 
-def build_multi_radar_chart(selected_profiles: list,
-                             graph_name: str,
-                             theme: str = "dark",
-                             anon_map: dict = None) -> go.Figure:
-    categories = ["DI", "I", "IS", "S", "SC", "C", "CD", "D"]
+RADAR_CATEGORIES = ["DI", "I", "IS", "S", "SC", "C", "CD", "D"]
+
+
+def _radar_values(g: dict) -> list:
+    """D/I/S/C scores -> the eight radar axes (blends are pairwise means)."""
+    d, i, s, cv = g["D"], g["I"], g["S"], g["C"]
+    return [(d+i)/2, i, (i+s)/2, s, (s+cv)/2, cv, (cv+d)/2, d]
+
+
+def _radar_figure(traces: list, title: str, theme: str = "dark") -> go.Figure:
+    """The shared DISC radar: behaviour icons around a -8..8 polar grid."""
+    categories = RADAR_CATEGORIES
     c = _tc(theme)
     fig = go.Figure()
 
@@ -476,23 +483,10 @@ def build_multi_radar_chart(selected_profiles: list,
             showarrow=False, font=dict(color=c["text"], size=12),
         ))
 
-    for idx, profile in enumerate(selected_profiles):
-        g    = profile["graphs"][graph_name]
-        d, i, s, cv = g["D"], g["I"], g["S"], g["C"]
-        vals = [(d+i)/2, i, (i+s)/2, s, (s+cv)/2, cv, (cv+d)/2, d]
-        color = THEME["radar"][idx % len(THEME["radar"])]
-        fig.add_trace(go.Scatterpolar(
-            r=vals + [vals[0]],
-            theta=categories + [categories[0]],
-            fill="none",
-            name=(anon_map.get(profile["participant_name"], profile["participant_name"])
-                  if anon_map else profile["participant_name"]),
-            line=dict(color=color, width=2.5),
-            opacity=0.9,
-            hovertemplate="<b>%{fullData.name}</b><br>%{theta}: %{r:.2f}<extra></extra>",
-        ))
+    for trace in traces:
+        fig.add_trace(trace)
     fig.update_layout(**_base_layout(
-        f"Radar Comparison — {graph_name.title()}",
+        title,
         height=700, theme=theme,
         extra=dict(
         images=images,
@@ -522,6 +516,66 @@ def build_multi_radar_chart(selected_profiles: list,
         )),
     ))
     return fig
+
+
+def build_multi_radar_chart(selected_profiles: list,
+                             graph_name: str,
+                             theme: str = "dark",
+                             anon_map: dict = None) -> go.Figure:
+    traces = []
+    for idx, profile in enumerate(selected_profiles):
+        vals = _radar_values(profile["graphs"][graph_name])
+        color = THEME["radar"][idx % len(THEME["radar"])]
+        traces.append(go.Scatterpolar(
+            r=vals + [vals[0]],
+            theta=RADAR_CATEGORIES + [RADAR_CATEGORIES[0]],
+            fill="none",
+            name=(anon_map.get(profile["participant_name"], profile["participant_name"])
+                  if anon_map else profile["participant_name"]),
+            line=dict(color=color, width=2.5),
+            opacity=0.9,
+            hovertemplate="<b>%{fullData.name}</b><br>%{theta}: %{r:.2f}<extra></extra>",
+        ))
+    return _radar_figure(traces, f"Radar Comparison — {graph_name.title()}",
+                         theme)
+
+
+# One person's three DISC graphs on a single radar. Colours come from the
+# radar palette but avoid the red/yellow/green/blue that already mean D/I/S/C;
+# dash patterns keep the lines distinguishable in print and for colour-blind
+# readers.
+GRAPH_OVERLAY_STYLE = {
+    "public": {"label": "Public", "color": "#bc8cff", "dash": "solid"},
+    "stress": {"label": "Stress", "color": "#fb7185", "dash": "dash"},
+    "mirror": {"label": "Mirror", "color": "#22d3ee", "dash": "dot"},
+}
+
+
+def build_graph_overlay_radar(profile: dict, graphs: list,
+                              theme: str = "dark",
+                              display_name: str = None) -> go.Figure:
+    """Overlay a participant's Public, Stress and Mirror graphs so the
+    shifts between them read at a glance."""
+    traces = []
+    for g in ("public", "mirror", "stress"):      # stress drawn on top
+        if g not in graphs:
+            continue
+        st = GRAPH_OVERLAY_STYLE[g]
+        r, gr, b = (int(st["color"][k:k + 2], 16) for k in (1, 3, 5))
+        vals = _radar_values(profile["graphs"][g])
+        traces.append(go.Scatterpolar(
+            r=vals + [vals[0]],
+            theta=RADAR_CATEGORIES + [RADAR_CATEGORIES[0]],
+            fill="toself", fillcolor=f"rgba({r},{gr},{b},0.08)",
+            name=st["label"],
+            mode="lines+markers",
+            line=dict(color=st["color"], width=2.5, dash=st["dash"]),
+            marker=dict(size=6, color=st["color"]),
+            hovertemplate=(f"<b>{st['label']}</b><br>"
+                           "%{theta}: %{r:.2f}<extra></extra>"),
+        ))
+    name = display_name or profile["participant_name"]
+    return _radar_figure(traces, f"Graph Shifts — {name}", theme)
 
 
 def build_letter_mean_combo(df: pd.DataFrame, letter: str,
@@ -2633,6 +2687,37 @@ def render_tab(active_tab, df_json, profiles_json, anchor_graph, theme, is_anon,
                 ),
             ], width=4)], className="mb-4"),
             html.Div(id="participant-card-body"),
+            html.Hr(style={
+                "borderColor": THEME["dark"]["border"],
+                "margin": "24px 0",
+            }),
+            html.Div("Graph Shift Radar",
+                     className="section-title",
+                     style={"color": THEME["dark"]["text"],
+                            "fontWeight": 700, "fontSize": "14px",
+                            "marginBottom": "6px"}),
+            html.Div("Overlay the Public, Stress and Mirror graphs to see "
+                     "how behavior shifts between them.",
+                     style={"color": THEME["dark"]["muted"],
+                            "fontSize": "12px", "marginBottom": "10px"}),
+            dcc.Checklist(
+                id="individual-radar-graphs",
+                options=[{"label": f"  {v['label']}", "value": k}
+                         for k, v in GRAPH_OVERLAY_STYLE.items()],
+                value=list(GRAPH_OVERLAY_STYLE),
+                inline=True,
+                inputStyle={"marginRight": "6px",
+                            "accentColor": THEME["dark"]["accent"],
+                            "cursor": "pointer"},
+                labelStyle={"marginRight": "18px", "cursor": "pointer",
+                            "fontSize": "13px"},
+                style={"marginBottom": "10px"},
+            ),
+            _graph_card(
+                dcc.Graph(id="individual-radar",
+                          config={"displayModeBar": False}),
+                theme=theme,
+            ),
         ], className="tab-fade-in")
 
     # ── Comparisons ────────────────────────────────────────────
@@ -2866,6 +2951,27 @@ def update_participant_card(name, is_anon, profiles_json):
     anon_map     = make_anon_map(profiles) if is_anon else None
     display_name = anon_map.get(name, name) if anon_map else None
     return participant_card(profile_lookup[name], display_name=display_name)
+
+
+# 7b — Participant / graph toggles → one person's Public/Stress/Mirror radar
+@app.callback(
+    Output("individual-radar",       "figure"),
+    Input("selected-participant",    "value"),
+    Input("individual-radar-graphs", "value"),
+    Input("anon-store",              "data"),
+    State("profiles-store",          "data"),
+    State("theme-store",             "data"),
+)
+def update_individual_radar(name, graphs, is_anon, profiles_json, theme):
+    theme = theme or "dark"
+    profiles = json.loads(profiles_json) if profiles_json else []
+    profile_lookup = {p["participant_name"]: p for p in profiles}
+    if name not in profile_lookup:
+        return _radar_figure([], "Graph Shifts", theme)
+    anon_map = make_anon_map(profiles) if is_anon else None
+    display  = anon_map.get(name, name) if anon_map else None
+    return build_graph_overlay_radar(profile_lookup[name], graphs or [],
+                                     theme, display_name=display)
 
 
 # 8 — Radar participant/graph selection or theme → rebuild radar chart
