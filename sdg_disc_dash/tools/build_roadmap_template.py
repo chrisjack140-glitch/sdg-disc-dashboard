@@ -42,6 +42,11 @@ PARAGRAPH_TOKENS = [
     ("The Flywheel analysis identifies Execution",      "{{SUMMARY_FLYWHEEL}}"),
     ("DISC helps you understand how staff experiences", "{{DISC_INTRO}}"),
     ("DISC helps you understand how your leadership",   "{{DISC_CONNECTION_INTRO}}"),
+    # Reference-participant prose that used to pass through as fixed text
+    ("Your development focus is to",                    "{{ROADMAP_FOCUS}}"),
+    ("EQ is the capacity that helps you stay steady",   "{{EQ_PURPOSE_NOTE}}"),
+    ("The development risk is that",                    "{{FLY_DEV_RISK}}"),
+    ("You demonstrate visible, repeatable",             "{{SUCCESS_INDICATOR}}"),
     ("Flywheel alignment shows how your DISC and EQ-i", "{{FLYWHEEL_INTRO}}"),
     ("EQ-i helps you translate strong internal",        "{{EQI_INTRO}}"),
     ("Your profile shows exceptional",                  "{{EQI_STRENGTH_NOTE}}"),
@@ -118,6 +123,10 @@ CELL_TOKENS = {
         (2, 1): "{{FLY_CULTURE_NOW}}",    (2, 2): "{{FLY_CULTURE_NEXT}}",
         (3, 1): "{{FLY_LEARNING_NOW}}",   (3, 2): "{{FLY_LEARNING_NEXT}}",
         (4, 1): "{{FLY_EXECUTION_NOW}}",  (4, 2): "{{FLY_EXECUTION_NEXT}}",
+    },
+    ("Signature Element",): {
+        (r, c): "{{SIG_%s_%d}}" % ("EL" if c == 0 else "OBS", r)
+        for r in range(1, 6) for c in (0, 1)
     },
     ("Timeline",): {
         (1, 1): "{{PLAN_30_FOCUS}}", (1, 2): "{{PLAN_30_DISC}}",
@@ -545,9 +554,8 @@ def main(source: Path):
     # These are single-row tables; the Flywheel strengths pair sits in one
     # row of two cells, so every cell of a one-row table is considered.
     for heading, token in BOX_TOKENS:
-        if counts.get(token):
-            continue
-        done = False
+        # The signature appears in two boxes (Integration Summary and the
+        # Signature page); both must be tokenized, so every match is taken.
         for block in blocks(document):
             if not isinstance(block, Table) or len(block.rows) != 1:
                 continue
@@ -558,10 +566,6 @@ def main(source: Path):
                     continue
                 set_text(paras[-1], token)
                 counts[token] = counts.get(token, 0) + 1
-                done = True
-                break
-            if done:
-                break
 
     # 5. fixed-shape tables: only the value cells carry tokens
     for keys, cells in CELL_TOKENS.items():

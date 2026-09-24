@@ -138,9 +138,10 @@ def _extract_scores(
     subscales: Dict[str, int] = {}
 
     lines = [ln.strip() for ln in text.split("\n")]
-    # Subscale name without a trailing score (Leadership Report format):
-    # score appears alone on the very next non-empty line.
+    # Subscale or composite name without a trailing score (Leadership Report
+    # format): the score appears alone on the very next non-empty line.
     pending_subscale: Optional[str] = None
+    pending_composite: Optional[str] = None
 
     for line in lines:
         if not line:
@@ -157,6 +158,13 @@ def _extract_scores(
             # Next line wasn't a bare number — abandon the pending match
             pending_subscale = None
 
+        if pending_composite is not None:
+            m = re.match(r"^(\d{2,3})$", line)
+            pending, pending_composite = pending_composite, None
+            if m:
+                composites.setdefault(pending, int(m.group(1)))
+                continue
+
         # Total EI — handle both "Total EI 108" and "Total EI: 108"
         m = re.search(r"Total EI:?\s+(\d{2,3})", line, re.IGNORECASE)
         if m:
@@ -172,6 +180,10 @@ def _extract_scores(
                 score = _tail_int(line)
                 if score is not None:
                     composites[display_name] = score
+                else:
+                    # Score is on the next line (Leadership Report layout),
+                    # e.g. "Self-Perception Composite" / "107"
+                    pending_composite = display_name
                 composite_hit = True
                 break
         if composite_hit:

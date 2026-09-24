@@ -204,6 +204,162 @@ _FACTOR_LANGUAGE = {
     },
 }
 
+# What each factor needs from the rest of the booklet, keyed by the
+# primary factor unless noted. C carries the wording of the reference
+# booklet (a C-primary leader) so C/CS/CSD output is unchanged in meaning.
+_FACTOR_PLAN = {
+    "D": {
+        "creates": "clear direction, decisive action, momentum, and a "
+                   "strong drive for results",
+        "limit": "team alignment and shared ownership",
+        "trust": "clear direction and following through on my commitments",
+        "focus": ("Alignment and Listening",
+                  "Coaching Ownership Instead of Directing",
+                  "Sustaining Shared Momentum"),
+        "plan_60": "Move from driving the result to coaching others to own "
+                   "it. Ask before directing.",
+        "plan_90": "Keep the pace without taking over. Stay inclusive and "
+                   "coaching-oriented when urgency rises.",
+        "risk_response": "Pause before deciding, invite input, and let "
+                         "others own the next step.",
+        "coaching": ("Move from directing the answer to coaching "
+                     "supervisors to find it.",
+                     "Ask for their recommendation before giving yours, "
+                     "then hold them to it."),
+        "success": "Your pace remains strong, and staff increasingly bring "
+                   "their own recommendations and own outcomes rather than "
+                   "waiting for your direction.",
+        "elements": (("Decisive Direction",
+                      "You set clear priorities and explain the reasoning "
+                      "behind them."),
+                     ("Inclusive Momentum",
+                      "You invite input before deciding and let others own "
+                      "the next step.")),
+    },
+    "I": {
+        "creates": "energy, engagement, optimism, and strong relational "
+                   "influence",
+        "limit": "follow-through and clear accountability",
+        "trust": "genuine connection and open communication",
+        "focus": ("Clear Expectations and Follow-Through",
+                  "Accountability Conversations",
+                  "Sustaining Execution Rhythm"),
+        "plan_60": "Move from energizing the team to holding them to clear "
+                   "commitments. Confirm owner, action, and date.",
+        "plan_90": "Keep enthusiasm anchored in follow-through. Stay direct "
+                   "and specific when the pace increases.",
+        "risk_response": "Slow down, get specific, and have the direct "
+                         "conversation instead of smoothing it over.",
+        "coaching": ("Move from motivating to holding supervisors "
+                     "accountable for specific commitments.",
+                     "End every coaching conversation with owner, action, "
+                     "and date, then follow up."),
+        "success": "Your energy remains a strength, and staff increasingly "
+                   "follow through on clear commitments rather than relying "
+                   "on your enthusiasm to carry momentum.",
+        "elements": (("Energizing Engagement",
+                      "You build enthusiasm and connection around shared "
+                      "goals."),
+                     ("Committed Follow-Through",
+                      "You turn ideas into clear owners, actions, and "
+                      "dates.")),
+    },
+    "S": {
+        "creates": "stability, dependable follow-through, team cohesion, "
+                   "and a calm, supportive presence",
+        "limit": "visible direction and timely escalation",
+        "trust": "steady support and dependable follow-through",
+        "focus": ("Voice and Visible Direction",
+                  "Holding Standards with Care",
+                  "Sustaining Accountability Rhythm"),
+        "plan_60": "Move from absorbing tension to naming expectations "
+                   "early. Hold the standard kindly and visibly.",
+        "plan_90": "Stay steady and direct under pressure. Raise concerns "
+                   "early instead of carrying them quietly.",
+        "risk_response": "Name the concern early, state the expectation, "
+                         "and follow up visibly.",
+        "coaching": ("Move from supporting quietly to coaching supervisors "
+                     "with clear, direct expectations.",
+                     "State the standard plainly and ask the supervisor how "
+                     "they will meet it."),
+        "success": "Your steadiness remains a strength, and staff "
+                   "increasingly hear clear expectations from you and meet "
+                   "them rather than relying on you to absorb the pressure.",
+        "elements": (("Steady Presence",
+                      "You stay calm and consistent so staff know what to "
+                      "expect from you."),
+                     ("Direct Care",
+                      "You name expectations early and hold them with "
+                      "support.")),
+    },
+    "C": {
+        "creates": "reliability, thoughtful preparation, operational "
+                   "discipline, and strong quality control",
+        "limit": "visible direction",
+        "trust": "consistent standards and authentic communication",
+        "focus": ("Visibility and Leadership Presence",
+                  "Coaching Supervisors into Ownership",
+                  "Sustaining Accountability Rhythm"),
+        "plan_60": "Move from carrying the standard personally to coaching "
+                   "ownership. Ask before solving.",
+        "plan_90": "Maintain consistency under pressure. Stay visible, "
+                   "direct, and coaching-oriented when the pace increases.",
+        "risk_response": "Pause, name the pattern, coach ownership, and "
+                         "confirm the follow-up.",
+        "coaching": ("Move from correcting or carrying to coaching "
+                     "supervisors into ownership.",
+                     "Ask before solving and require the supervisor to "
+                     "identify the next step."),
+        "success": "Your standards remain high, and staff are increasingly "
+                   "expected to own the work, apply feedback, and contribute "
+                   "to execution rather than depending on you to carry the "
+                   "quality burden.",
+        "elements": (("Precision",
+                      "You clarify expectations, standards, timelines, and "
+                      "follow-up."),
+                     ("Adaptive Accountability",
+                      "You maintain standards while asking questions that "
+                      "require ownership and learning.")),
+    },
+}
+
+# The secondary factor's contribution to a blended style. Appended to the
+# primary factor's wording so, e.g., CS and CD read differently.
+_SECONDARY_BLEND = {
+    "D": {"undertone": "an undercurrent of urgency",
+          "pressure": "A secondary drive for results may add impatience.",
+          "blind": "Pace may outrun the team's buy-in.",
+          "adjust": "Let urgency show when the moment needs it."},
+    "I": {"undertone": "added warmth and approachability",
+          "pressure": "A secondary need for connection may add "
+                      "over-explaining.",
+          "blind": "Optimism may soften a message that needs to be firm.",
+          "adjust": "Add warmth so feedback lands."},
+    "S": {"undertone": "a steady, patient undertone",
+          "pressure": "A secondary need for stability may add quiet "
+                      "accommodation.",
+          "blind": "Loyalty may delay a hard conversation.",
+          "adjust": "Hold the standard even when it creates tension."},
+    "C": {"undertone": "a careful eye for accuracy",
+          "pressure": "A secondary need for accuracy may add over-checking.",
+          "blind": "High standards may slow a decision that needs to move.",
+          "adjust": "Check the detail without slowing the decision."},
+}
+
+
+def _article(label: str) -> str:
+    """'a' or 'an' by how the label is read aloud: I and S codes are spoken
+    "eye", "ess", so "an SC Peacemaker" but "a CSD Contemplator"."""
+    return "an" if label[:1].upper() in "IS" or \
+        label[:1].lower() in "aeiou" else "a"
+
+
+def _arrow_to_prose(shift: str) -> str:
+    """'Move from X → Y.' -> 'move from X to Y'."""
+    text = " ".join((shift or "").replace("→", " to ").split()).rstrip(".")
+    return text[:1].lower() + text[1:]
+
+
 _QUADRANT_ORDER = ["direction", "culture", "learning", "execution"]
 
 # Deterministic secondary-quadrant rule: highest-priority quadrant that is
@@ -303,16 +459,25 @@ def build_disc_lens_text(profile: dict) -> dict:
     style_entry = get_flywheel_style_entry(code)
     keywords = ", ".join(style_entry["behavioral_keywords"][:6])
 
+    experience, blind, pressure, adjust = (
+        p["experience"], p["blind_spot"], p["pressure"], p["adjustment"])
+    if secondary and secondary != primary:
+        b = _SECONDARY_BLEND[secondary]
+        experience = f"{experience}, with {b['undertone']}"
+        blind = f"{blind} {b['blind']}"
+        pressure = f"{pressure} {b['pressure']}"
+        adjust = f"{adjust} {b['adjust']}"
+
     return {
         "primary": primary,
         "secondary": secondary,
         "style_label": _style_label(profile),
         "keywords": keywords,
         "natural_strengths": strengths,
-        "supervisor_experience": p["experience"],
-        "blind_spot": p["blind_spot"],
-        "pressure_risk": p["pressure"],
-        "coaching_adjustment": p["adjustment"],
+        "supervisor_experience": experience,
+        "blind_spot": blind,
+        "pressure_risk": pressure,
+        "coaching_adjustment": adjust,
         "mirror_line": _mirror_scores_line(profile),
     }
 
@@ -428,9 +593,10 @@ def build_leadership_signature(profile: dict, disc_text: dict,
     # Anchor / value / influence / growth-edge → one statement
     anchor_words = disc_text["natural_strengths"].split(", supported by")[0]
     growth_edge = flywheel["activation_focus"].rstrip(".")
+    trust = _FACTOR_PLAN[disc_text["primary"]]["trust"]
     statement = (
-        f"I lead with {anchor_words}. I build trust through consistent "
-        f"standards and authentic communication, develop people through "
+        f"I lead with {anchor_words}. I build trust through {trust}, "
+        f"develop people through "
         f"honest coaching, and create momentum by pairing "
         f"{primary_q['label'].lower()} strength with {growth_edge[0].lower()}"
         f"{growth_edge[1:]}."
@@ -453,7 +619,73 @@ def build_leadership_signature(profile: dict, disc_text: dict,
         ("Growth Edge",
          f"{name} is intentionally strengthening: {growth_edge}."),
     ]
-    return {"statement": statement, "elements": elements}
+    return {"statement": statement, "elements": elements,
+            "observable": _observable_rows(profile, disc_text)}
+
+
+def _observable_rows(profile, disc_text) -> list:
+    """The five rows of "Make the Signature Observable": two from the
+    primary factor, one from the secondary, one from the lowest EQ-i
+    development area, and the shared support/direction row."""
+    primary, secondary = disc_text["primary"], disc_text["secondary"]
+    rows = list(_FACTOR_PLAN[primary]["elements"])
+    if secondary and secondary != primary:
+        rows.append(_FACTOR_PLAN[secondary]["elements"][0])
+    else:
+        rows.append(("Confidence",
+                     "You state what you see, why it matters, and what you "
+                     "recommend."))
+    eqi = profile.get("eqi_scores") or {}
+    _top, bottom = select_eqi_top_bottom(eqi, top_n=0, bottom_n=1) \
+        if eqi else ([], [])
+    if bottom:
+        key = bottom[0][0]
+        rows.append((EQI_SUBSCALE_DISPLAY[key],
+                     _EQ_OBSERVABLE.get(key, "You practice this capacity "
+                                        "where staff can see it.")))
+    else:
+        rows.append(("Emotional Clarity",
+                     "You name appreciation, concern, urgency, support, and "
+                     "direction more visibly."))
+    rows.append(("Visible Support and Clear Direction",
+                 "Staff know both what is expected and how you will support "
+                 "their follow-through."))
+    return rows
+
+
+# How each EQ-i development area shows up as an observable signature
+# behaviour, in second person.
+_EQ_OBSERVABLE = {
+    "self_regard": "You state your view with confidence and own your "
+                   "decisions.",
+    "self_actualization": "You connect daily work to purpose and growth for "
+                          "yourself and the team.",
+    "emotional_self_awareness": "You notice your own reactions and name "
+                                "them before they shape the conversation.",
+    "emotional_expression": "You name appreciation, concern, urgency, "
+                            "support, and direction more visibly.",
+    "assertiveness": "You say what you need and hold your position "
+                     "respectfully.",
+    "independence": "You make the call when the moment needs it instead of "
+                    "waiting for consensus.",
+    "interpersonal_relationships": "You invest in relationships so trust is "
+                                   "in place before pressure arrives.",
+    "empathy": "You check how decisions land for people and show that you "
+               "understand.",
+    "social_responsibility": "You connect your team's work to the wider "
+                             "organization's needs.",
+    "problem_solving": "You slow down to work the problem before committing "
+                       "to a response.",
+    "reality_testing": "You check assumptions against evidence before "
+                       "acting.",
+    "impulse_control": "You pause before reacting so responses stay "
+                       "proportionate.",
+    "flexibility": "You adjust plans when conditions change and explain "
+                   "why.",
+    "stress_tolerance": "You stay composed and visible when pressure "
+                        "builds.",
+    "optimism": "You frame setbacks as solvable and keep the team moving.",
+}
 
 
 # ─────────────────────────────────────────
@@ -542,13 +774,9 @@ def build_roadmap_snapshot_rows(profile, disc_text, eqi_text,
                   flywheel["secondary_q"]["shift"]]),
         TableRow(["Leadership Risk Under Pressure",
                   disc_text["pressure_risk"],
-                  "Pause, name the pattern, coach ownership, and confirm "
-                  "the follow-up."]),
+                  _FACTOR_PLAN[disc_text["primary"]]["risk_response"]]),
         TableRow(["Coaching Opportunity",
-                  "Move from correcting or carrying to coaching "
-                  "supervisors into ownership.",
-                  "Ask before solving and require the supervisor to "
-                  "identify the next step."]),
+                  *_FACTOR_PLAN[disc_text["primary"]]["coaching"]]),
     ]
 
 
@@ -558,18 +786,27 @@ def build_roadmap_snapshot_rows(profile, disc_text, eqi_text,
 def build_coaching_plan(profile, disc_text, eqi_text, flywheel) -> dict:
     name = first_name(profile["participant_name"])
     style = disc_text["style_label"]
+    plan = _FACTOR_PLAN[disc_text["primary"]]
+    focus_30, focus_60, focus_90 = plan["focus"]
 
+    eq_90 = ("Sustain visible expression, relational trust, and coaching "
+             "presence as repeatable habits.")
     if eqi_text:
-        dev_labels = " and ".join(d["label"] for d in eqi_text["development"])
-        eq_30 = (f"Strengthen {dev_labels} by naming appreciation, concern, "
-                 "urgency, and confidence more clearly." if dev_labels
+        dev = eqi_text["development"]
+        dev_labels = " and ".join(d["label"] for d in dev)
+        eq_30 = (f"Strengthen {dev_labels}. {dev[0]['meaning']}" if dev
                  else "Keep expressing appreciation, concern, urgency, and "
                       "confidence where staff can see and hear it.")
         anchor = (eqi_text["strengths"][0]["label"]
                   if eqi_text["strengths"] else "your strongest EQ anchor")
-        eq_60 = (f"Use {anchor} with Flexibility. Balance direct "
+        stretch = dev[-1]["label"] if dev else "Flexibility"
+        eq_60 = (f"Use {anchor} to support {stretch}. Balance direct "
                  "expectations with curiosity, support, and coaching "
                  "questions.")
+        if dev:
+            eq_90 = (f"Sustain progress in {dev_labels} so it holds under "
+                     "pressure, alongside relational trust and coaching "
+                     "presence.")
     else:
         eq_30 = ("Complete the EQ-i 2.0 assessment; meanwhile, practice "
                  "naming appreciation, concern, urgency, and confidence "
@@ -579,26 +816,22 @@ def build_coaching_plan(profile, disc_text, eqi_text, flywheel) -> dict:
 
     phases = [
         TableRow(["30 Days",
-                  "Visibility and Leadership Presence",
+                  focus_30,
                   f"Recognize the {style} pattern and where it may limit "
-                  "visible direction.",
+                  f"{plan['limit']}.",
                   eq_30,
                   f"{flywheel['secondary_q']['label']}; "
                   f"{flywheel['primary_q']['label']}."]),
         TableRow(["60 Days",
-                  "Coaching Supervisors into Ownership",
-                  "Move from carrying the standard personally to coaching "
-                  "ownership. Ask before solving.",
+                  focus_60,
+                  plan["plan_60"],
                   eq_60,
                   f"{flywheel['primary_q']['label']}; Learning, Feedback "
                   "& Adaptation."]),
         TableRow(["90 Days",
-                  "Sustaining Accountability Rhythm",
-                  "Maintain consistency under pressure. Stay visible, "
-                  "direct, and coaching-oriented when the pace "
-                  "increases.",
-                  "Sustain visible expression, relational trust, and "
-                  "coaching presence as repeatable habits.",
+                  focus_90,
+                  plan["plan_90"],
+                  eq_90,
                   "Full Flywheel integration across all four "
                   "quadrants."]),
     ]
@@ -650,13 +883,8 @@ def build_coaching_plan(profile, disc_text, eqi_text, flywheel) -> dict:
                   "Identify momentum gained, drag remaining, and the next "
                   "leadership behavior that must become consistent."]),
     ]
-    success = (
-        f"{name} demonstrates visible, repeatable, momentum-building "
-        f"leadership. Standards remain high, and supervisors are "
-        f"increasingly expected to own the work, apply feedback, and "
-        f"contribute to execution rather than depending on {name} to "
-        f"carry the burden."
-    )
+    success = ("You demonstrate visible, repeatable, momentum-building "
+               f"leadership. {plan['success']}")
     return {"phases": phases, "d30": d30, "d60": d60, "d90": d90,
             "success": success}
 
@@ -1185,6 +1413,11 @@ def build_template_values(profile: dict, org_name: str = ""):
                 narrated,
             ))
 
+    values["SUCCESS_INDICATOR"] = plan["success"]
+    for n, (element, behavior) in enumerate(signature["observable"], 1):
+        values[f"SIG_EL_{n}"] = element
+        values[f"SIG_OBS_{n}"] = behavior
+
     # Narrative paragraphs
     summary = build_executive_summary(profile, disc, eqi, flywheel, signature)
     values.update(_summary_paragraphs(profile, disc, eqi, flywheel, summary))
@@ -1200,22 +1433,29 @@ def _assert_second_person(values: dict, dimension_rows, full_name: str):
     in through a phrase bank edit. Catching it here beats shipping a
     booklet that switches between "you" and the person's name mid-page.
     """
-    parts = [p for p in (full_name or "").split() if len(p) > 2]
+    # Only the full name, or the first name used as a name ("Ariel," /
+    # "Ariel's" / "Ariel demonstrates"), counts. A bare word match would
+    # stop the booklet for anyone whose name is also an ordinary word —
+    # "Test assumptions…" for a Test, "Grace under pressure…" for a Grace.
+    parts = (full_name or "").split()
     if not parts:
         return
+    first = parts[0]
+    patterns = [re.escape(" ".join(parts))]
+    if len(first) > 2:
+        patterns.append(rf"\b{re.escape(first)}(?:,|'s\b|\s+(?:is|has|"
+                        r"demonstrates|shows|brings|states|asks|names)\b)")
+    found = re.compile("|".join(patterns))
     strays = []
     for key, text in values.items():
         if key == "NAME" or not isinstance(text, str):
             continue
-        for part in parts:
-            if re.search(rf"\b{re.escape(part)}\b", text):
-                strays.append((key, part))
+        if found.search(text):
+            strays.append((key, first))
     for row in dimension_rows or []:
         for cell in row:
-            for part in parts:
-                if isinstance(cell, str) and re.search(
-                        rf"\b{re.escape(part)}\b", cell):
-                    strays.append((row[0], part))
+            if isinstance(cell, str) and found.search(cell):
+                strays.append((row[0], first))
     if strays:
         raise ValueError(
             "Roadmap prose must be second person outside the title page; "
@@ -1267,10 +1507,9 @@ def _summary_paragraphs(profile, disc, eqi, flywheel, summary) -> dict:
     style = disc["style_label"]
     out = {
         "SUMMARY_DISC": (
-            f"DISC identifies you as a {style}: {disc['keywords']}. In a "
-            "leadership role, this creates reliability, thoughtful "
-            "preparation, operational discipline, and strong quality "
-            "control."),
+            f"**DISC** identifies you as {_article(style)} {style}: "
+            f"{disc['keywords']}. In a leadership role, this creates "
+            f"{_FACTOR_PLAN[disc['primary']]['creates']}."),
         "SUMMARY_FLYWHEEL": (
             f"The **Flywheel** analysis identifies "
             f"{flywheel.get('primary_label', '')} as your primary strength. "
@@ -1286,6 +1525,30 @@ def _summary_paragraphs(profile, disc, eqi, flywheel, summary) -> dict:
             "translate into team momentum. "
             f"{_sentence(flywheel.get('activation_focus'))}"),
     }
+    plan = _FACTOR_PLAN[disc["primary"]]
+    risk = flywheel["primary_q"]["risk"]
+    out["FLY_DEV_RISK"] = (
+        "The development risk is that, under pressure, you "
+        f"{risk[:1].lower()}{risk[1:].rstrip('.')}. Your Flywheel work is to "
+        f"{_arrow_to_prose(flywheel['primary_q']['shift'])}.")
+    focus = (f"Your development focus is to "
+             f"{_arrow_to_prose(flywheel['primary_q']['shift'])}")
+    if eqi and eqi["development"]:
+        focus += (", while strengthening "
+                  + " and ".join(d["label"] for d in eqi["development"]))
+    out["ROADMAP_FOCUS"] = (
+        f"{focus}. The Leadership Roadmap helps you summarize what you have "
+        "learned and confirm what is most true for your leadership "
+        "practice.")
+    purpose = ("EQ is the capacity that helps you stay steady, clear, and "
+               "fair when coaching staff through pressure.")
+    if eqi:
+        strong = " and ".join(s["label"] for s in eqi["strengths"][:2])
+        dev = " and ".join(d["label"] for d in eqi["development"])
+        purpose += (f" For you, EQ bridges {strong or 'your existing strengths'}"
+                    + (f" with more visible {dev}." if dev else
+                       " with visible leadership presence."))
+    out["EQ_PURPOSE_NOTE"] = purpose
     if eqi:
         out["SUMMARY_EQI"] = (
             "Your **EQ-i** profile adds an important leadership dimension "
