@@ -202,243 +202,32 @@ _EQ_SUSTAIN = {
     "optimism": "forward-looking optimism",
 }
 
-# DISC factor → leadership-language phrase bank (per the Roadmap
-# methodology: never say "High C" in prose; translate to behavior).
-_FACTOR_LANGUAGE = {
-    "D": {
-        "strengths": "decisiveness, directness, urgency, and "
-                     "results-focused drive",
-        "experience": "direct, confident, decisive, and focused on "
-                      "outcomes",
-        "blind_spot": "May move faster than team trust or alignment can "
-                      "support, and may under-invest in relational "
-                      "connection.",
-        "pressure": "May become more forceful, more impatient, or more "
-                    "likely to take over rather than coach.",
-        "adjustment": "Slow down to align, listen for impact, and coach "
-                      "ownership instead of driving compliance.",
-        "foundation": ("direction", "decisiveness"),
-        "natural": "decisiveness",
-        "development": "channel that drive into shared ownership, so the "
-                       "team moves with you rather than behind you",
-    },
-    "I": {
-        "strengths": "relational energy, engagement, optimism, and "
-                     "visible influence",
-        "experience": "warm, energizing, encouraging, and "
-                      "relationship-forward",
-        "blind_spot": "May rely on relational energy and soften "
-                      "accountability to preserve harmony.",
-        "pressure": "May over-explain, become scattered, or avoid the "
-                    "direct conversation that accountability requires.",
-        "adjustment": "Anchor enthusiasm in clear expectations, "
-                      "follow-through, and direct accountability "
-                      "language.",
-        "foundation": ("engagement", "influence"),
-        "natural": "energy",
-        "development": "anchor that energy in clear expectations and "
-                       "visible follow-through",
-    },
-    "S": {
-        "strengths": "steadiness, loyalty, patience, and dependable "
-                     "follow-through",
-        "experience": "calm, supportive, consistent, and committed to the "
-                      "team",
-        "blind_spot": "May absorb tension rather than addressing it, and "
-                      "may delay difficult conversations to preserve "
-                      "harmony.",
-        "pressure": "May become quieter, more accommodating, or slower to "
-                    "escalate performance concerns.",
-        "adjustment": "Name expectations earlier, tolerate productive "
-                      "tension, and hold standards visibly.",
-        "foundation": ("consistency", "follow-through"),
-        "natural": "steadiness",
-        "development": "name expectations earlier and hold standards "
-                       "visibly, even when it creates tension",
-    },
-    "C": {
-        "strengths": "precision, structure, quality standards, and "
-                     "disciplined analysis",
-        "experience": "calm, thoughtful, prepared, fair, structured, and "
-                      "committed to getting the work right",
-        "blind_spot": "May let the quality of the work speak for itself "
-                      "rather than making leadership perspective "
-                      "visible.",
-        "pressure": "May become more internal, more precise, slower to "
-                    "express concern, or more likely to carry the "
-                    "standard personally.",
-        "adjustment": "Name expectations earlier, use concise language, "
-                      "ask ownership questions, and confirm follow-up.",
-        "foundation": ("structure", "standards"),
-        "natural": "precision",
-        "development": "make those strengths more visible and coach others "
-                       "into ownership rather than carrying the standard "
-                       "alone",
-    },
-}
+# Every DISC-driven passage in the booklet, per Maxwell style code — so a C,
+# a CS and a CSD read differently. CSD carries the reference booklet's own
+# wording. See the file's "about" note for where each field appears.
+_STYLE_LANGUAGE = json.loads(
+    (Path(__file__).parent / "roadmap_style_language.json")
+    .read_text(encoding="utf-8"))["styles"]
 
-# What each factor needs from the rest of the booklet, keyed by the
-# primary factor unless noted. C carries the wording of the reference
-# booklet (a C-primary leader) so C/CS/CSD output is unchanged in meaning.
-_FACTOR_PLAN = {
-    "D": {
-        "creates": "clear direction, decisive action, momentum, and a "
-                   "strong drive for results",
-        "limit": "team alignment and shared ownership",
-        "signature": {
-            "quality": ("Decisiveness",
-                        "You set clear priorities and explain the reasoning "
-                        "behind them."),
-            "stretch": ("Openness",
-                        "You invite input before deciding and let others own "
-                        "the next step."),
-            "trust": "clear direction",
-            "momentum": "decisive action",
-        },
-        "focus": ("Alignment and Listening",
-                  "Coaching Ownership Instead of Directing",
-                  "Sustaining Shared Momentum"),
-        "plan_60": "Move from driving the result to coaching others to own "
-                   "it. Ask before directing.",
-        "plan_90": "Keep the pace without taking over. Stay inclusive and "
-                   "coaching-oriented when urgency rises.",
-        "risk_response": "Pause before deciding, invite input, and let "
-                         "others own the next step.",
-        "coaching": ("Move from directing the answer to coaching "
-                     "supervisors to find it.",
-                     "Ask for their recommendation before giving yours, "
-                     "then hold them to it."),
-        "success": "Your pace remains strong, and staff increasingly bring "
-                   "their own recommendations and own outcomes rather than "
-                   "waiting for your direction.",
-        "fly_risk": "speed and decisiveness can outrun the team's ownership "
-                    "if you direct more than you coach. Your Flywheel work "
-                    "is to ensure momentum is shared, not just driven.",
-        "fly_ground": "decisive direction, results focus, and a strong "
-                      "sense of urgency",
-        "focus_move": ("driving results personally",
-                       "aligned, inclusive direction",
-                       "coaching others to own the outcome"),
-    },
-    "I": {
-        "creates": "energy, engagement, optimism, and strong relational "
-                   "influence",
-        "limit": "follow-through and clear accountability",
-        "signature": {
-            "quality": ("Energy",
-                        "You build enthusiasm and connection around shared "
-                        "goals."),
-            "stretch": ("Follow-Through",
-                        "You turn ideas into clear owners, actions, and "
-                        "dates."),
-            "trust": "genuine connection",
-            "momentum": "shared enthusiasm",
-        },
-        "focus": ("Clear Expectations and Follow-Through",
-                  "Accountability Conversations",
-                  "Sustaining Execution Rhythm"),
-        "plan_60": "Move from energizing the team to holding them to clear "
-                   "commitments. Confirm owner, action, and date.",
-        "plan_90": "Keep enthusiasm anchored in follow-through. Stay direct "
-                   "and specific when the pace increases.",
-        "risk_response": "Slow down, get specific, and have the direct "
-                         "conversation instead of smoothing it over.",
-        "coaching": ("Move from motivating to holding supervisors "
-                     "accountable for specific commitments.",
-                     "End every coaching conversation with owner, action, "
-                     "and date, then follow up."),
-        "success": "Your energy remains a strength, and staff increasingly "
-                   "follow through on clear commitments rather than relying "
-                   "on your enthusiasm to carry momentum.",
-        "fly_risk": "energy and enthusiasm can stand in for follow-through "
-                    "if commitments are not made explicit. Your Flywheel "
-                    "work is to ensure engagement becomes accountable "
-                    "execution, not just goodwill.",
-        "fly_ground": "relational energy, engagement, and visible influence",
-        "focus_move": ("energizing the room",
-                       "clear, accountable follow-through",
-                       "coaching for committed ownership"),
-    },
-    "S": {
-        "creates": "stability, dependable follow-through, team cohesion, "
-                   "and a calm, supportive presence",
-        "limit": "visible direction and timely escalation",
-        "signature": {
-            "quality": ("Steadiness",
-                        "You stay calm and consistent so staff know what to "
-                        "expect from you."),
-            "stretch": ("Candor",
-                        "You name expectations and concerns early, and hold "
-                        "them with support."),
-            "trust": "steady support",
-            "momentum": "dependable follow-through",
-        },
-        "focus": ("Voice and Visible Direction",
-                  "Holding Standards with Care",
-                  "Sustaining Accountability Rhythm"),
-        "plan_60": "Move from absorbing tension to naming expectations "
-                   "early. Hold the standard kindly and visibly.",
-        "plan_90": "Stay steady and direct under pressure. Raise concerns "
-                   "early instead of carrying them quietly.",
-        "risk_response": "Name the concern early, state the expectation, "
-                         "and follow up visibly.",
-        "coaching": ("Move from supporting quietly to coaching supervisors "
-                     "with clear, direct expectations.",
-                     "State the standard plainly and ask the supervisor how "
-                     "they will meet it."),
-        "success": "Your steadiness remains a strength, and staff "
-                   "increasingly hear clear expectations from you and meet "
-                   "them rather than relying on you to absorb the pressure.",
-        "fly_risk": "steady support can absorb problems the team should own "
-                    "if expectations stay unspoken. Your Flywheel work is to "
-                    "ensure standards are named and held, not just modeled.",
-        "fly_ground": "steady support, dependable follow-through, and team "
-                      "cohesion",
-        "focus_move": ("quiet support",
-                       "visible direction and candor",
-                       "coaching through clear expectations"),
-    },
-    "C": {
-        "creates": "reliability, thoughtful preparation, operational "
-                   "discipline, and strong quality control",
-        "limit": "visible direction",
-        "signature": {
-            "quality": ("Precision",
-                        "You clarify expectations, standards, timelines, and "
-                        "follow-up."),
-            "stretch": ("Confidence",
-                        "You state what you see, why it matters, and what you "
-                        "recommend."),
-            "trust": "high standards",
-            "momentum": "disciplined execution",
-        },
-        "focus": ("Visibility and Leadership Presence",
-                  "Coaching Supervisors into Ownership",
-                  "Sustaining Accountability Rhythm"),
-        "plan_60": "Move from carrying the standard personally to coaching "
-                   "ownership. Ask before solving.",
-        "plan_90": "Maintain consistency under pressure. Stay visible, "
-                   "direct, and coaching-oriented when the pace increases.",
-        "risk_response": "Pause, name the pattern, coach ownership, and "
-                         "confirm the follow-up.",
-        "coaching": ("Move from correcting or carrying to coaching "
-                     "supervisors into ownership.",
-                     "Ask before solving and require the supervisor to "
-                     "identify the next step."),
-        "success": "Your standards remain high, and staff are increasingly "
-                   "expected to own the work, apply feedback, and contribute "
-                   "to execution rather than depending on you to carry the "
-                   "quality burden.",
-        "fly_risk": "strong personal execution can become a dependency if "
-                    "you don't coach others into ownership. Your Flywheel "
-                    "work is to ensure standards are transferred, not just "
-                    "protected.",
-        "fly_ground": "operational precision, analytical discipline, and "
-                      "reliable follow-through",
-        "focus_move": ("quiet competence",
-                       "visible leadership presence",
-                       "coaching for shared ownership"),
-    },
+
+def style_language(code: str) -> dict:
+    """The wording for a style code: exact, else its first two letters,
+    else its first letter, else the balanced DISC entry."""
+    code = (code or "").upper().strip()
+    for key in (code, code[:2], code[:1]):
+        if key in _STYLE_LANGUAGE:
+            return _STYLE_LANGUAGE[key]
+    return _STYLE_LANGUAGE["DISC"]
+
+
+# One word per factor for the Flywheel paragraph's "using your natural
+# steadiness and precision" (methodology: never say "High C" in prose;
+# translate to behavior).
+_FACTOR_LANGUAGE = {
+    "D": {"natural": "decisiveness"},
+    "I": {"natural": "energy"},
+    "S": {"natural": "steadiness"},
+    "C": {"natural": "precision"},
 }
 
 def _series(items: list) -> str:
@@ -545,40 +334,27 @@ def _style_label(profile: dict) -> str:
 # DISC lens
 # ─────────────────────────────────────────
 def build_disc_lens_text(profile: dict) -> dict:
-    """Translate the style blend into leadership language. The primary
-    factor drives the narrative; the secondary adds the "supported by"
-    strengths."""
+    """Translate the style into leadership language, from the style's own
+    entry in roadmap_style_language.json."""
     code = (profile.get("style_type") or "").upper()
     letters = [c for c in code if c in "DISC"] or \
               profile["summary"]["top_two"]
     primary, secondary = letters[0], (letters[1] if len(letters) > 1 else None)
-    p = _FACTOR_LANGUAGE[primary]
-
-    strengths = p["strengths"]
-    if secondary:
-        strengths = f"{strengths}, supported by " \
-                    f"{_FACTOR_LANGUAGE[secondary]['strengths']}"
-
+    lang = style_language(code or primary)
     style_entry = get_flywheel_style_entry(code)
     keywords = ", ".join(style_entry["behavioral_keywords"][:6])
-
-    # The secondary factor shows in the natural-strengths line ("supported
-    # by ..."), the style label and the Flywheel reference; the experience,
-    # blind-spot, pressure and adjustment cells follow the primary factor,
-    # as in the reference booklet.
-    experience, blind, pressure, adjust = (
-        p["experience"], p["blind_spot"], p["pressure"], p["adjustment"])
 
     return {
         "primary": primary,
         "secondary": secondary,
         "style_label": _style_label(profile),
         "keywords": keywords,
-        "natural_strengths": strengths,
-        "supervisor_experience": experience,
-        "blind_spot": blind,
-        "pressure_risk": pressure,
-        "coaching_adjustment": adjust,
+        "lang": lang,
+        "natural_strengths": lang["natural_strengths"],
+        "supervisor_experience": lang["experience"],
+        "blind_spot": lang["blind_spot"],
+        "pressure_risk": lang["pressure_risk"],
+        "coaching_adjustment": lang["coaching_adjustment"],
         "mirror_line": _mirror_scores_line(profile),
     }
 
@@ -708,7 +484,7 @@ def build_leadership_signature(profile: dict, disc_text: dict,
     # EQ-i development area made visible, adaptive accountability), then
     # trust, coaching and momentum. The observable table lists the same
     # elements, so the statement and table always agree.
-    sig = _FACTOR_PLAN[disc_text["primary"]]["signature"]
+    sig = disc_text["lang"]["signature"]
     observable = _observable_rows(profile, disc_text)
     qualities = [el.lower() for el, _ in observable[:4]]
     statement = (
@@ -742,11 +518,11 @@ def build_leadership_signature(profile: dict, disc_text: dict,
 
 def _observable_rows(profile, disc_text) -> list:
     """The five rows of "Make the Signature Observable", in the order the
-    signature names them: the primary factor's natural quality, the stretch
-    it calls for, the lowest EQ-i development area, adaptive accountability,
+    signature names them: the style's natural quality, the stretch it
+    calls for, the lowest EQ-i development area, adaptive accountability,
     and the shared support/direction row."""
-    sig = _FACTOR_PLAN[disc_text["primary"]]["signature"]
-    rows = [sig["quality"], sig["stretch"]]
+    sig = disc_text["lang"]["signature"]
+    rows = [tuple(sig["quality"]), tuple(sig["stretch"])]
     eqi = profile.get("eqi_scores") or {}
     _top, bottom = select_eqi_top_bottom(eqi, top_n=0, bottom_n=1) \
         if eqi else ([], [])
@@ -904,9 +680,9 @@ def build_roadmap_snapshot_rows(profile, disc_text, eqi_text,
                   flywheel["secondary_q"]["shift"]]),
         TableRow(["Leadership Risk Under Pressure",
                   disc_text["pressure_risk"],
-                  _FACTOR_PLAN[disc_text["primary"]]["risk_response"]]),
+                  disc_text["lang"]["risk_response"]]),
         TableRow(["Coaching Opportunity",
-                  *_FACTOR_PLAN[disc_text["primary"]]["coaching"]]),
+                  *disc_text["lang"]["coaching"]]),
     ]
 
 
@@ -916,8 +692,8 @@ def build_roadmap_snapshot_rows(profile, disc_text, eqi_text,
 def build_coaching_plan(profile, disc_text, eqi_text, flywheel) -> dict:
     name = first_name(profile["participant_name"])
     style = disc_text["style_label"]
-    plan = _FACTOR_PLAN[disc_text["primary"]]
-    focus_30, focus_60, focus_90 = plan["focus"]
+    plan = disc_text["lang"]
+    focus_30, focus_60, focus_90 = plan["plan_focus"]
 
     eq_90 = ("Sustain visible expression, relational trust, and coaching "
              "presence as repeatable habits.")
@@ -1638,18 +1414,17 @@ def _describe_pressure_shift(mirror, stress) -> str:
 def _disc_connection_intro(profile, disc) -> str:
     """Opening paragraph of the DISC Leadership Roadmap Connection page.
 
-    Names the participant's own style code and builds the strengths from
-    their top two factors. This sentence used to be fixed text in the
-    template and carried the reference participant's "CS" into every
-    booklet.
+    Names the participant's own style code, with the style's four
+    foundation words and development clause. This sentence used to be fixed
+    text in the template and carried the reference participant's "CS" into
+    every booklet.
     """
     code = (profile.get("style_type") or "").upper()
-    letters = [f for f in (disc["primary"], disc["secondary"]) if f]
-    words = [w for f in letters for w in _FACTOR_LANGUAGE[f]["foundation"]]
+    words = list(disc["lang"]["foundation"])
     bold = [f"**{w}**" for w in words]
     strengths = (", ".join(bold[:-1]) + ", and " + bold[-1]
                  if len(bold) > 2 else " and ".join(bold))
-    development = _FACTOR_LANGUAGE[disc["primary"]]["development"]
+    development = disc["lang"]["development"]
     return ("**DISC** helps you understand how your leadership behavior is "
             "likely experienced by staff. How you communicate, decide, "
             "respond, and follow through, and how those patterns may shift "
@@ -1663,7 +1438,7 @@ def _disc_connection_intro(profile, disc) -> str:
 def _summary_paragraphs(profile, disc, eqi, flywheel, summary) -> dict:
     """The narrative paragraphs, in the reference booklet's voice."""
     style = disc["style_label"]
-    plan = _FACTOR_PLAN[disc["primary"]]
+    plan = disc["lang"]
     out = {
         "SUMMARY_DISC": (
             f"**DISC** identifies you as {_article(style)} {style}: "
@@ -1740,7 +1515,7 @@ def _summary_paragraphs(profile, disc, eqi, flywheel, summary) -> dict:
 def _flywheel_for_you(disc, flywheel) -> str:
     """The Flywheel page's personal paragraph.
 
-    Grounded in the primary factor's pattern; the growth is the lead phrase
+    Grounded in the style's own pattern; the growth is the lead phrase
     of the style's Flywheel activation focus ("Directional confidence and
     performance urgency beneath ..."); the natural strengths are the top two
     factors, secondary first ("your natural steadiness and precision").
@@ -1753,7 +1528,7 @@ def _flywheel_for_you(disc, flywheel) -> str:
              for f in (disc["secondary"], disc["primary"]) if f]
     return (
         "For you, the Flywheel highlights a leadership pattern grounded in "
-        f"**{_FACTOR_PLAN[disc['primary']]['fly_ground']}**. Your next level "
+        f"**{disc['lang']['fly_ground']}**. Your next level "
         f"of impact is strengthened by increasing **{growth}** using your "
         "natural "
         f"{' and '.join(words)} not only to support the system, but to help "
