@@ -24,8 +24,11 @@ from utils.insights import (
     SUBSCALE_DISPLAY, STYLE_NAMES,
     SUBSCALE_DISC_MAP, COMPOSITE_SUBSCALE_ORDER,
 )
-from utils.roadmap_generator import build_template_values
+from utils.roadmap_generator import (build_template_images,
+                                     build_template_values)
 from utils.roadmap_template import render_from_template
+from utils.radar_geometry import (GRAPH_OVERLAY_STYLE, RADAR_AXIS_ICONS,
+                                  RADAR_CATEGORIES, radar_values)
 
 # ─────────────────────────────────────────
 # Loading overlay — SDG diamond mark as a base64 data URI.
@@ -418,20 +421,12 @@ def build_disc_type_chart(profiles: list,
     return fig
 
 
-# Behaviour symbols placed around the radar, one per axis, taken from the
-# "Dashboard radar sample" deck. Label text and line breaks match the deck.
+# Behaviour symbols placed around the radar, one per axis (RADAR_AXIS_ICONS
+# in utils/radar_geometry.py, shared with the Roadmap's print radar), taken
+# from the "Dashboard radar sample" deck. Label text and line breaks match
+# the deck.
 # light/ holds the deck's original PNGs; dark/ is the same artwork recoloured
 # to THEME["dark"]["text"] so it stays visible on the dark surface.
-RADAR_AXIS_ICONS = [
-    ("DI", "DI_persuade_others",      "Persuade Others"),
-    ("I",  "I_verbalize_communicate", "Verbalize, Communicate"),
-    ("IS", "IS_build_relationships",  "Build<br>Relationships"),
-    ("S",  "S_keep_the_peace",        "Keep the Peace"),
-    ("SC", "SC_follow_a_process",     "Follow A Process"),
-    ("C",  "C_analyze_the_problem",   "Analyze the Problem"),
-    ("CD", "CD_design_a_solution",    "Design a<br>Solution"),
-    ("D",  "D_take_action_now",       "Take Action Now"),
-]
 _RADAR_ICON_DIR = Path(__file__).parent / "assets" / "radar_icons"
 # Embedded as data URIs so the figure never depends on asset-serving paths.
 _RADAR_ICON_SRC = {
@@ -442,15 +437,6 @@ _RADAR_ICON_SRC = {
     }
     for t in ("dark", "light")
 }
-
-
-RADAR_CATEGORIES = ["DI", "I", "IS", "S", "SC", "C", "CD", "D"]
-
-
-def _radar_values(g: dict) -> list:
-    """D/I/S/C scores -> the eight radar axes (blends are pairwise means)."""
-    d, i, s, cv = g["D"], g["I"], g["S"], g["C"]
-    return [(d+i)/2, i, (i+s)/2, s, (s+cv)/2, cv, (cv+d)/2, d]
 
 
 def _radar_figure(traces: list, title: str, theme: str = "dark") -> go.Figure:
@@ -524,7 +510,7 @@ def build_multi_radar_chart(selected_profiles: list,
                              anon_map: dict = None) -> go.Figure:
     traces = []
     for idx, profile in enumerate(selected_profiles):
-        vals = _radar_values(profile["graphs"][graph_name])
+        vals = radar_values(profile["graphs"][graph_name])
         color = THEME["radar"][idx % len(THEME["radar"])]
         traces.append(go.Scatterpolar(
             r=vals + [vals[0]],
@@ -538,17 +524,6 @@ def build_multi_radar_chart(selected_profiles: list,
         ))
     return _radar_figure(traces, f"Radar Comparison — {graph_name.title()}",
                          theme)
-
-
-# One person's three DISC graphs on a single radar. Colours come from the
-# radar palette but avoid the red/yellow/green/blue that already mean D/I/S/C;
-# lines are solid, so distinct marker shapes keep them distinguishable in
-# print and for colour-blind readers.
-GRAPH_OVERLAY_STYLE = {
-    "public": {"label": "Public", "color": "#bc8cff", "symbol": "circle"},
-    "stress": {"label": "Stress", "color": "#fb7185", "symbol": "diamond"},
-    "mirror": {"label": "Mirror", "color": "#22d3ee", "symbol": "square"},
-}
 
 
 def build_graph_overlay_radar(profile: dict, graphs: list,
@@ -566,7 +541,7 @@ def build_graph_overlay_radar(profile: dict, graphs: list,
     for g in ("public", "mirror", "stress"):      # stress drawn on top
         st = GRAPH_OVERLAY_STYLE[g]
         r, gr, b = (int(st["color"][k:k + 2], 16) for k in (1, 3, 5))
-        vals = _radar_values(profile["graphs"][g])
+        vals = radar_values(profile["graphs"][g])
         traces.append(go.Scatterpolar(
             r=vals + [vals[0]],
             theta=RADAR_CATEGORIES + [RADAR_CATEGORIES[0]],
@@ -3133,7 +3108,9 @@ def generate_roadmaps(n_clicks, selected_names, org_name, profiles_json):
                     p, org_name=org_name)
                 safe = p["participant_name"].replace(" ", "_")
                 zf.writestr(f"{safe}_Leadership_Roadmap.docx",
-                            render_from_template(values, scores, dimensions))
+                            render_from_template(
+                                values, scores, dimensions,
+                                images=build_template_images(p)))
         zip_bytes = buf.getvalue()
     except Exception as exc:
         return dash.no_update, f"Roadmap generation failed: {exc}"

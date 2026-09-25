@@ -7,10 +7,14 @@ booklet with one participant's data swapped for {{TOKENS}} (see
 tools/build_roadmap_template.py), so output is identical to the reference
 in every respect except the person's own content.
 
-Two things cannot be expressed as a token because their row count varies
-per person — the Core EQ-i Strengths and Key Development Areas bar charts.
-Those tables are marked in the template and rebuilt here by cloning their
-first row, which keeps their styling without hard-coding it.
+Some content cannot be expressed as a text token:
+- the Core EQ-i Strengths and Leadership Capacities bar charts and the EQ
+  Dimension table, whose row count varies per person — marked in the
+  template and rebuilt here by cloning their first row, which keeps their
+  styling without hard-coding it;
+- the Leadership Derailment Risk chart — four fixed rows whose bars and
+  scores are set here, cranberry under 100 and gold at 100 or above;
+- the RADAR SHIFTS picture, whose image is swapped for the person's own.
 """
 import copy
 import io
@@ -61,7 +65,9 @@ def _set_paragraph_text(paragraph, text):
     """Replace a paragraph's text, keeping the first run's formatting.
 
     ``**bold**`` in the text becomes a bold run, so generated prose can
-    carry the same inline emphasis the reference booklet uses.
+    carry the same inline emphasis the reference booklet uses. A bold run
+    left empty in the template (see tools/build_roadmap_template.py) gives
+    the exact formatting for those words — e.g. the lead "DISC" a size up.
     """
     runs = paragraph.runs
     if not runs:
@@ -69,6 +75,15 @@ def _set_paragraph_text(paragraph, text):
         return
     template_run = runs[0]
     base = copy.deepcopy(template_run._r.find(qn("w:rPr")))
+    bold_model = None
+    for r in runs[1:]:
+        rpr = r._r.find(qn("w:rPr"))
+        style = rpr.find(qn("w:rStyle")) if rpr is not None else None
+        if not (r.text or "") and rpr is not None and (
+                rpr.find(qn("w:b")) is not None
+                or (style is not None and style.get(qn("w:val")) == "Strong")):
+            bold_model = copy.deepcopy(rpr)
+            break
     for run in runs[1:]:
         run._r.getparent().remove(run._r)
 
@@ -89,10 +104,16 @@ def _set_paragraph_text(paragraph, text):
             new_r.insert(0, rPr)
         else:
             rPr = None
-        if i % 2 == 1:                     # this part was wrapped in ** **
+        if i % 2 == 1 and bold_model is not None:
+            if rPr is not None:
+                new_r.remove(rPr)
+            rPr = copy.deepcopy(bold_model)
+            new_r.insert(0, rPr)
+        elif i % 2 == 1:                   # this part was wrapped in ** **
             if rPr is None:
-                rPr = copy.deepcopy(base) if base is not None else None
-            if rPr is not None and rPr.find(qn("w:b")) is None:
+                rPr = docx.oxml.OxmlElement("w:rPr")
+                new_r.insert(0, rPr)
+            if rPr.find(qn("w:b")) is None:
                 rPr.append(docx.oxml.OxmlElement("w:b"))
         t = docx.oxml.OxmlElement("w:t")
         t.set(qn("xml:space"), "preserve")
@@ -142,10 +163,88 @@ def _bar_track_width(row):
     return sum(int(g.get(qn("w:w"))) for g in grid.findall(qn("w:gridCol")))
 
 
+# Leadership Derailment Risk: the four subscales the EQ-i report flags for
+# derailment under pressure. Below the mid-range of 100 the bar is
+# cranberry; at or above it, gold.
+DERAILERS_CAPTION = "LEADERSHIP DERAILMENT RISK"
+DERAILER_KEYS = {
+    "Impulse Control": "impulse_control",
+    "Stress Tolerance": "stress_tolerance",
+    "Problem Solving": "problem_solving",
+    "Independence": "independence",
+}
+DERAILER_LOW, DERAILER_OK = "9B1B30", "C59B2D"
+
+
+def _fill_derailers(document, eqi_scores):
+    """Point the derailers chart at this person's four scores.
+
+    The chart's rows and labels are fixed; each row's bar length, bar
+    colour and score colour are set from the score. Without EQ-i scores the
+    chart and its caption are removed rather than printed empty.
+    """
+    body = document.element.body
+    caption = next((el for el in body.iterchildren()
+                    if el.tag == qn("w:p") and " ".join("".join(
+                        t.text or "" for t in el.iter(qn("w:t"))).split()
+                    ).upper() == DERAILERS_CAPTION), None)
+    if caption is None:
+        return
+    table_el = caption.getnext()
+    while table_el is not None and table_el.tag != qn("w:tbl"):
+        table_el = table_el.getnext()
+    if table_el is None:
+        return
+    table = Table(table_el, document)
+    scores = {label: (eqi_scores or {}).get(key)
+              for label, key in DERAILER_KEYS.items()}
+    if not any(isinstance(v, (int, float)) for v in scores.values()):
+        body.remove(table_el)
+        body.remove(caption)
+        return
+    for row in table.rows:
+        label = " ".join(row.cells[0].text.split())
+        score = scores.get(label)
+        if not isinstance(score, (int, float)):
+            continue
+        score = int(score)
+        colour = DERAILER_LOW if score < ABOVE_AVERAGE else DERAILER_OK
+        _fill_bar_row(row, label, score, _bar_track_width(row),
+                      fill_color=colour)
+        for c in row.cells[2]._tc.iter(qn("w:color")):
+            c.set(qn("w:val"), colour)
+
+
+def _swap_images(document, images, name=""):
+    """Replace marked pictures with this person's images.
+
+    A picture is marked by its alt text ("{{IMAGE:RADAR}}"); its image part
+    is swapped in place, so size and placement stay the template's. The alt
+    text is then set to a description of the new image.
+    """
+    descriptions = {
+        "RADAR": f"Radar chart overlaying {name}'s Stress and Mirror DISC "
+                 "graphs" if name else "Radar chart of Stress and Mirror "
+                 "DISC graphs",
+    }
+    wp = "{http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing}"
+    a = "{http://schemas.openxmlformats.org/drawingml/2006/main}"
+    for doc_pr in document.element.body.iter(wp + "docPr"):
+        match = re.fullmatch(r"\{\{IMAGE:([A-Z_]+)\}\}", doc_pr.get("descr") or "")
+        if not match:
+            continue
+        key = match.group(1)
+        blip = next(doc_pr.getparent().iter(a + "blip"), None)
+        if key in (images or {}) and blip is not None:
+            part = document.part.related_parts[blip.get(qn("r:embed"))]
+            part._blob = images[key]
+        doc_pr.set("descr", descriptions.get(key, ""))
+
+
 # In the Leadership Capacities chart a score can sit below its leadership
 # bar while still being at or above the population average of 100. Those
-# read as range to extend rather than shortfalls, so their bar is drawn in
-# the strengths green. The subscale stays where it is — only the bar colour
+# read as range to extend rather than shortfalls, so their bar and score
+# are drawn in the strengths green. The subscale stays where it is — only the bar colour
 # changes.
 ABOVE_AVERAGE = 100
 ABOVE_AVERAGE_FILL = "1A6B4A"     # the Core EQ-i Strengths green
@@ -270,9 +369,12 @@ def _rebuild_bar_table(table, entries, caption_prefix=None,
         table._tbl.append(tr)
         row = table.rows[-1]
         colour = (ABOVE_AVERAGE_FILL
-                  if recolour_above_average and score > ABOVE_AVERAGE
+                  if recolour_above_average and score >= ABOVE_AVERAGE
                   else None)
         _fill_bar_row(row, label, score, track, fill_color=colour)
+        if colour:                          # the score number matches
+            for c in row.cells[2]._tc.iter(qn("w:color")):
+                c.set(qn("w:val"), colour)
         if tighten:
             _tighten_bar_row(row)
 
@@ -282,13 +384,15 @@ def _rebuild_text_table(table, entries, header_label=None):
 
     Used for the EQ Dimension table, whose row count follows the number
     of strengths. The header row is kept as-is and the first body row is
-    the prototype.
+    the prototype; a closing "Development Areas" row uses the template's
+    last row, which is laid out for a long score list.
     """
     rows = table._tbl.tr_lst
     if len(rows) < 2:
         return
     header = copy.deepcopy(rows[0])
     prototype = copy.deepcopy(rows[1])
+    closing = copy.deepcopy(rows[-1]) if len(rows) > 2 else prototype
 
     for tr in list(table._tbl.tr_lst):
         table._tbl.remove(tr)
@@ -303,7 +407,8 @@ def _rebuild_text_table(table, entries, header_label=None):
         return
 
     for cells in entries:
-        tr = copy.deepcopy(prototype)
+        tr = copy.deepcopy(closing if cells and cells[0] == "Development Areas"
+                           else prototype)
         table._tbl.append(tr)
         row = table.rows[-1]
         for i, text in enumerate(cells):
@@ -315,15 +420,17 @@ def _rebuild_text_table(table, entries, header_label=None):
 # Public API
 # ─────────────────────────────────────────
 def render_from_template(values: dict, eqi_scores: dict,
-                         dimension_rows=None,
+                         dimension_rows=None, images: dict = None,
                          template_path: Path = TEMPLATE_PATH) -> bytes:
     """Fill the reference booklet with one participant's content.
 
     ``values`` maps token names (without braces) to replacement text and
     ``eqi_scores`` drives the two bar charts. ``dimension_rows`` supplies
     the EQ Dimension table as (label, score, meaning) triples, since its
-    row count follows the number of strengths. Tokens with no value are
-    left blank rather than printed, so a partial profile degrades quietly.
+    row count follows the number of strengths. ``images`` maps picture
+    markers to PNG bytes ({"RADAR": ...}, from build_template_images). Tokens
+    with no value are left blank rather than printed, so a partial profile
+    degrades quietly.
     """
     document = docx.Document(str(template_path))
 
@@ -363,12 +470,18 @@ def render_from_template(values: dict, eqi_scores: dict,
             rows, label = text_tables[marker]
             _rebuild_text_table(table, rows, header_label=label)
 
+    _fill_derailers(document, eqi_scores)
+    _swap_images(document, images, values.get("NAME", ""))
+
     # then every remaining token
+    blanked = []
     for paragraph in _iter_paragraphs(document):
         token = _paragraph_token(paragraph)
         if token:
             key = token.strip("{}")
             _set_paragraph_text(paragraph, values.get(key, ""))
+            if not values.get(key):
+                blanked.append(paragraph._p)
             continue
         # tokens embedded mid-sentence
         full = "".join(r.text or "" for r in paragraph.runs)
@@ -379,49 +492,24 @@ def render_from_template(values: dict, eqi_scores: dict,
         if replaced != full:
             _set_paragraph_text(paragraph, replaced)
 
-    _collapse_empty_runs(document)
+    _drop_blanked(document, blanked)
 
     buf = io.BytesIO()
     document.save(buf)
     return buf.getvalue()
 
 
-def _collapse_empty_runs(document, keep=1):
-    """Drop stray whitespace left behind by filling.
+def _drop_blanked(document, blanked):
+    """Remove body paragraphs that a blank token left empty.
 
-    Blanked-out tokens and removed charts leave empty paragraphs, and a
-    long enough run of them prints as a blank page. Consecutive page
-    breaks are collapsed for the same reason.
+    The template's own empty paragraphs are layout (spacers, the cover's
+    page break, divider pages) and stay as they are; only a paragraph that
+    held a token with no value for this person — e.g. the EQ-i sentences
+    for someone without an EQ-i report — is taken out, so it cannot leave
+    a gap. Paragraphs inside table cells stay, since a cell needs one.
     """
     body = document.element.body
-
-    def is_break(el):
-        return el.tag == qn("w:p") and el.find(
-            ".//" + qn("w:br") + '[@{%s}type="page"]'
-            % "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
-        ) is not None
-
-    def is_empty(el):
-        return (el.tag == qn("w:p")
-                and not "".join(t.text or "" for t in el.iter(qn("w:t"))).strip()
-                and not is_break(el))
-
-    run = []
-    for child in list(body.iterchildren()) + [None]:
-        if child is not None and is_empty(child):
-            run.append(child)
-            continue
-        for extra in run[keep:]:
-            body.remove(extra)
-        run = []
-
-    # a page break immediately followed by another produces an empty page
-    previous_break = False
-    for child in list(body.iterchildren()):
-        if child.tag == qn("w:p") and is_break(child):
-            if previous_break:
-                body.remove(child)
-                continue
-            previous_break = True
-        elif child.tag in (qn("w:p"), qn("w:tbl")):
-            previous_break = False
+    for p in blanked:
+        if p.getparent() is body and not "".join(
+                t.text or "" for t in p.iter(qn("w:t"))).strip():
+            body.remove(p)
