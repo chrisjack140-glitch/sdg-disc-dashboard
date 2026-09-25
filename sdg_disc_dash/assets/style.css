@@ -994,6 +994,11 @@ body.graph-expanded-open { overflow: hidden; }
     opacity:   1;
     transform: none;
 }
+/* The radar lines grow by scaling their layer (radar_reveal.js); keep the
+   outlines at full weight while they do. */
+.scroll-reveal .scatterlayer path {
+    vector-effect: non-scaling-stroke;
+}
 @media (prefers-reduced-motion: reduce) {
     .scroll-reveal, .scroll-reveal.is-visible {
         opacity: 1; transform: none; transition: none;

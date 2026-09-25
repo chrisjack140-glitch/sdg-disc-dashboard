@@ -555,11 +555,15 @@ def build_graph_overlay_radar(profile: dict, graphs: list,
                               theme: str = "dark",
                               display_name: str = None) -> go.Figure:
     """Overlay a participant's Public, Stress and Mirror graphs so the
-    shifts between them read at a glance."""
+    shifts between them read at a glance.
+
+    All three traces are always built; ``graphs`` only sets which are
+    visible. Each trace's ``uid`` is its graph key, so the Individual tab's
+    checklist can show/hide lines in the browser without rebuilding the
+    figure (see the clientside callback after ``update_individual_radar``).
+    """
     traces = []
     for g in ("public", "mirror", "stress"):      # stress drawn on top
-        if g not in graphs:
-            continue
         st = GRAPH_OVERLAY_STYLE[g]
         r, gr, b = (int(st["color"][k:k + 2], 16) for k in (1, 3, 5))
         vals = _radar_values(profile["graphs"][g])
@@ -567,7 +571,7 @@ def build_graph_overlay_radar(profile: dict, graphs: list,
             r=vals + [vals[0]],
             theta=RADAR_CATEGORIES + [RADAR_CATEGORIES[0]],
             fill="toself", fillcolor=f"rgba({r},{gr},{b},0.08)",
-            name=st["label"],
+            name=st["label"], uid=g, visible=g in graphs,
             mode="lines+markers",
             line=dict(color=st["color"], width=2.5),
             marker=dict(size=7, color=st["color"], symbol=st["symbol"]),
@@ -2956,16 +2960,19 @@ def update_participant_card(name, is_anon, profiles_json):
     return participant_card(profile_lookup[name], display_name=display_name)
 
 
-# 7b — Participant / graph toggles → one person's Public/Stress/Mirror radar
+# 7b — Participant → one person's Public/Stress/Mirror radar. The graph
+#      checklist is only State here: toggling it is handled in the browser
+#      below, so a click never re-sends the profiles store or rebuilds the
+#      figure (and never replays the entrance animation).
 @app.callback(
     Output("individual-radar",       "figure"),
     Input("selected-participant",    "value"),
-    Input("individual-radar-graphs", "value"),
     Input("anon-store",              "data"),
+    State("individual-radar-graphs", "value"),
     State("profiles-store",          "data"),
     State("theme-store",             "data"),
 )
-def update_individual_radar(name, graphs, is_anon, profiles_json, theme):
+def update_individual_radar(name, is_anon, graphs, profiles_json, theme):
     theme = theme or "dark"
     profiles = json.loads(profiles_json) if profiles_json else []
     profile_lookup = {p["participant_name"]: p for p in profiles}
@@ -2975,6 +2982,27 @@ def update_individual_radar(name, graphs, is_anon, profiles_json, theme):
     display  = anon_map.get(name, name) if anon_map else None
     return build_graph_overlay_radar(profile_lookup[name], graphs or [],
                                      theme, display_name=display)
+
+
+# 7c — Graph checklist → show/hide the matching radar lines, in the browser.
+#      Traces carry their graph key as ``uid`` (build_graph_overlay_radar).
+app.clientside_callback(
+    """
+    function(graphs, fig) {
+        if (!fig || !fig.data || !fig.data.some(function (t) { return t.uid; }))
+            return window.dash_clientside.no_update;
+        graphs = graphs || [];
+        return Object.assign({}, fig, {data: fig.data.map(function (t) {
+            return t.uid ? Object.assign({}, t, {
+                visible: graphs.indexOf(t.uid) !== -1}) : t;
+        })});
+    }
+    """,
+    Output("individual-radar",       "figure", allow_duplicate=True),
+    Input("individual-radar-graphs", "value"),
+    State("individual-radar",        "figure"),
+    prevent_initial_call=True,
+)
 
 
 # 8 — Radar participant/graph selection or theme → rebuild radar chart
