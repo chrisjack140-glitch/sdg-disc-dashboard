@@ -15,6 +15,11 @@ Some content cannot be expressed as a text token:
 - the Leadership Derailment Risk chart — four fixed rows whose bars and
   scores are set here, cranberry under 100 and gold at 100 or above;
 - the RADAR SHIFTS picture, whose image is swapped for the person's own.
+
+Every booklet keeps the reference's page layout, so the table of contents'
+stored page numbers are always right: pages the reference left to the flow
+of the text get real page breaks, and the variable-length charts and the EQ
+Dimension table are sized to fit their pages (see Pagination below).
 """
 import copy
 import io
@@ -308,12 +313,17 @@ def _drop_caption_above(table_el, caption_prefix):
         node = node.getprevious()
 
 
-# A bar row is ~0.545in at the reference spacing, and the strengths chart
-# has ~7.5in of page beneath its banner and intro — so about 13 bars fit
-# before spilling onto a second page. Past that the rows are tightened
-# instead, which is invisible on a normal-length chart because it only
-# applies when one would otherwise overflow.
-TIGHTEN_ABOVE = 12
+# How many bars each chart holds at the reference spacing before it would
+# run off its page; past that its rows are tightened, which is invisible on
+# a normal-length chart because it only applies when one would otherwise
+# overflow. Strength bars are ~43pt apart and start ~3.8in down page 16
+# under the banner and note; capacity bars are ~36pt apart and share page
+# 17 with the note above them and two paragraphs below. When there is no
+# strengths chart the capacities chart opens its page and has room for all
+# fifteen.
+STRENGTH_BARS_FIT = 10
+DEVELOPMENT_BARS_FIT = 11
+DEVELOPMENT_BARS_FIT_ALONE = 15
 
 
 def _tighten_bar_row(row):
@@ -343,12 +353,13 @@ def _tighten_bar_row(row):
 
 
 def _rebuild_bar_table(table, entries, caption_prefix=None,
-                       recolour_above_average=False):
+                       recolour_above_average=False, fit=STRENGTH_BARS_FIT):
     """Re-point a marked bar table at this person's subscales.
 
     The first row is the prototype: it is cloned for each entry so the
     chart inherits the reference booklet's styling rather than restating
-    it here. An empty list removes the table and its caption.
+    it here. An empty list removes the table and its caption. More than
+    ``fit`` entries tightens the rows so the chart stays on its page.
     """
     prototype = copy.deepcopy(table.rows[0]._tr)
     track = _bar_track_width(table.rows[0])
@@ -363,7 +374,7 @@ def _rebuild_bar_table(table, entries, caption_prefix=None,
         table_el.getparent().remove(table_el)
         return
 
-    tighten = len(entries) > TIGHTEN_ABOVE
+    tighten = len(entries) > fit
     for label, score in entries:
         tr = copy.deepcopy(prototype)
         table._tbl.append(tr)
@@ -379,13 +390,126 @@ def _rebuild_bar_table(table, entries, caption_prefix=None,
             _tighten_bar_row(row)
 
 
+# The EQ Dimension table and the EQ Practice box share page 19. At the
+# reference spacing its header is ~63pt and each strength row ~63pt (a
+# spare empty paragraph above and below the text), so four strengths and a
+# long development list fill the page. Past that the strength rows lose
+# their spare paragraphs, go to single line spacing, and share out the room
+# that is left in proportion to their text; if even that is too tall the
+# row text drops to 10pt. The development row keeps the reference layout;
+# its height is estimated from its text (one line per score, or the
+# meaning column's wrapped sentences, whichever is longer).
+DIMENSION_TABLE_BUDGET = 575      # pt for the table, leaving the EQ Practice box room
+DIMENSION_HEADER = 70             # pt
+DIMENSION_HEADER_TIGHT = 36       # pt, one line of heading plus margins
+DIMENSION_ROW = 63                # pt, reference strength row
+DIMENSION_LINE = 14               # pt per line at the reference spacing
+DIMENSION_COMPACT_LINE = 14.2     # pt per line at single spacing, 12pt
+DIMENSION_SMALL_LINE = 12.5       # pt per line at single spacing, 10pt
+DIMENSION_CELL_MARGIN = 7         # pt of top + bottom cell margin, which
+                                  # Word adds on top of the row height
+DIMENSION_ROW_PAD = 9             # pt of margin and border in a row
+# Wrapping is estimated on the short side of the true width, so a row is
+# never given less height than its text takes.
+DIMENSION_LABEL_CHARS = 17        # characters per line, EQ Dimension (bold)
+DIMENSION_SCORE_CHARS = 22        # characters per line, Score / Theme
+DIMENSION_MEANING_CHARS = 44      # characters per line, Leadership Meaning
+
+
+def _lines(text, width):
+    """Wrapped line count for text in a column ``width`` characters wide."""
+    count = 0
+    for part in str(text).split("\n"):
+        count += max(1, -(-len(part) // width))
+    return count
+
+
+def _dimension_layout(entries):
+    """How to fit the EQ Dimension table on its page.
+
+    Returns None when the reference spacing already fits, else a dict:
+    ``rows`` (a height in points for each strength row, in order), ``font``
+    (the row text size, None to keep the template's), and ``header`` /
+    ``closing`` (heights for the header and Development Areas rows, None
+    to leave them as they are — only set when nothing else is enough).
+    """
+    strengths = [e for e in entries if e and e[0] != "Development Areas"]
+    if not strengths:
+        return None
+    closing = next((e for e in entries if e and e[0] == "Development Areas"),
+                   None)
+
+    def closing_height(line, scale, pad):
+        _label, scores, meaning = (list(closing) + ["", ""])[:3]
+        return line * max(_lines(scores, int(DIMENSION_SCORE_CHARS * scale)),
+                          _lines(meaning, int(DIMENSION_MEANING_CHARS * scale))
+                          ) + pad
+
+    def needed(line, scale):
+        return [line * max(_lines(e[0], int(DIMENSION_LABEL_CHARS * scale)),
+                           _lines(e[2] if len(e) > 2 else "",
+                                  int(DIMENSION_MEANING_CHARS * scale)))
+                + DIMENSION_ROW_PAD for e in strengths]
+
+    # the Development Areas row is at least a reference row tall
+    closing_now = (max(DIMENSION_ROW, closing_height(DIMENSION_LINE, 1.0, 20))
+                   if closing else 0)
+    room = DIMENSION_TABLE_BUDGET - DIMENSION_HEADER - closing_now
+    if DIMENSION_ROW * len(strengths) <= room:
+        return None
+
+    layout = {"font": None, "header": None, "closing": None}
+    heights = needed(DIMENSION_COMPACT_LINE, 1.0)
+    if sum(heights) > room:
+        layout["font"] = 10
+        heights = needed(DIMENSION_SMALL_LINE, 1.2)
+    if sum(heights) > room:
+        # last resort: tighten the header and the Development Areas row too
+        layout["header"] = DIMENSION_HEADER_TIGHT
+        if closing:
+            layout["closing"] = closing_height(DIMENSION_SMALL_LINE, 1.2,
+                                               DIMENSION_ROW_PAD)
+        room = (DIMENSION_TABLE_BUDGET - DIMENSION_HEADER_TIGHT
+                - (layout["closing"] or 0))
+    spare = max(0.0, room - sum(heights)) / len(strengths)
+    layout["rows"] = [min(DIMENSION_ROW, h + spare) for h in heights]
+    return layout
+
+
+def _compact_text_row(row, height_pt, font_pt=None):
+    """Drop a row's spare empty paragraphs, single-space its text and set
+    its height, so a long table still fits its page. The text stays
+    centred in the shorter row."""
+    for cell in row.cells:
+        for p in list(cell.paragraphs):
+            if len(cell.paragraphs) > 1 and not p.text.strip() \
+                    and p._p.find(qn("w:tbl")) is None:
+                p._p.getparent().remove(p._p)
+        for p in cell.paragraphs:
+            fmt = p.paragraph_format
+            fmt.space_before = Pt(0)
+            fmt.space_after = Pt(0)
+            fmt.line_spacing = 1.0
+            if font_pt:
+                for run in p.runs:
+                    run.font.size = Pt(font_pt)
+    trPr = row._tr.get_or_add_trPr()
+    height = trPr.find(qn("w:trHeight"))
+    if height is None:
+        height = docx.oxml.OxmlElement("w:trHeight")
+        trPr.append(height)
+    inner = max(1.0, height_pt - DIMENSION_CELL_MARGIN)
+    height.set(qn("w:val"), str(int(inner * 20)))
+
+
 def _rebuild_text_table(table, entries, header_label=None):
     """Rebuild a plain text table, cloning a body row per entry.
 
     Used for the EQ Dimension table, whose row count follows the number
     of strengths. The header row is kept as-is and the first body row is
     the prototype; a closing "Development Areas" row uses the template's
-    last row, which is laid out for a long score list.
+    last row, which is laid out for a long score list. Strength rows are
+    compacted when the table would otherwise run off its page.
     """
     rows = table._tbl.tr_lst
     if len(rows) < 2:
@@ -406,14 +530,172 @@ def _rebuild_text_table(table, entries, header_label=None):
         table._tbl.getparent().remove(table._tbl)
         return
 
+    layout = _dimension_layout(entries) or {}
+    heights = iter(layout.get("rows") or [])
+    if layout.get("header"):
+        _compact_text_row(table.rows[0], layout["header"])
     for cells in entries:
-        tr = copy.deepcopy(closing if cells and cells[0] == "Development Areas"
-                           else prototype)
+        is_closing = bool(cells) and cells[0] == "Development Areas"
+        tr = copy.deepcopy(closing if is_closing else prototype)
         table._tbl.append(tr)
         row = table.rows[-1]
         for i, text in enumerate(cells):
             if i < len(row.cells):
                 _set_paragraph_text(_content_paragraph(row.cells[i]), str(text))
+        if is_closing and layout.get("closing"):
+            _compact_text_row(row, layout["closing"], layout["font"])
+        elif layout and not is_closing:
+            _compact_text_row(row, next(heights), layout["font"])
+
+
+# ─────────────────────────────────────────
+# Pagination
+# ─────────────────────────────────────────
+# The reference booklet opens several pages by letting a run of empty
+# paragraphs push the next page's content down: the two EQ-i chart pages,
+# the Flywheel grid, "Make the Signature Observable" and the 30-60-90 grid.
+# That only lands right for the reference participant's chart lengths and
+# wording. A longer chart pushes the run onto a page of its own, a shorter
+# one pulls the next page's content up beside it, and every later page
+# moves, so the table of contents points at the wrong pages. Each of those
+# pages gets a real page break at the element that opens it in the
+# reference, and the spacer run in front of it is dropped. With the charts
+# and the EQ Dimension table sized to their pages, every booklet has the
+# reference's page count and its contents page is right as stored.
+_KEEP_TAGS = ("w:drawing", "w:pict", "w:br", "w:sectPr", "w:bookmarkStart",
+              "w:fldChar")
+
+
+def _text_of(el):
+    return " ".join("".join(t.text or "" for t in el.iter(qn("w:t"))).split())
+
+
+def _is_spacer(el):
+    """An empty body paragraph whose only job is to take up space."""
+    if el is None or el.tag != qn("w:p") or _text_of(el):
+        return False
+    return not any(True for tag in _KEEP_TAGS for _ in el.iter(qn(tag)))
+
+
+def _is_break_only(el):
+    """An empty body paragraph holding nothing but a page break. When the
+    page above is full it lands on the next page and breaks again, leaving
+    a blank page; a page break before the next page's content cannot."""
+    if el is None or el.tag != qn("w:p") or _text_of(el):
+        return False
+    breaks = [br for br in el.iter(qn("w:br")) if br.get(qn("w:type")) == "page"]
+    others = [tag for tag in _KEEP_TAGS if tag != "w:br"
+              for _ in el.iter(qn(tag))]
+    return bool(breaks) and not others
+
+
+def _drop_spacers_before(el, keep=0):
+    """Remove the run of spacer paragraphs directly above ``el``, except
+    the last ``keep`` (which the reference shows at the top of the page).
+    A page-break paragraph in the run goes too, since the caller puts a
+    page break at ``el``. Returns the kept paragraphs in document order."""
+    run = []
+    prev = el.getprevious()
+    while _is_spacer(prev) or _is_break_only(prev):
+        run.append(prev)
+        prev = prev.getprevious()
+    run.reverse()
+    # only true spacers after the last break can open the new page
+    tail = len(run)
+    while tail and not _is_break_only(run[tail - 1]):
+        tail -= 1
+    keep = min(keep, len(run) - tail)
+    kept = run[len(run) - keep:] if keep else []
+    for p in run[:len(run) - len(kept)]:
+        p.getparent().remove(p)
+    return kept
+
+
+def _open_page(document, el, keep=0):
+    """Start a page at ``el`` (or at the ``keep`` spacers above it)."""
+    kept = _drop_spacers_before(el, keep)
+    first = kept[0] if kept else el
+    Paragraph(first, document).paragraph_format.page_break_before = True
+
+
+def _open_page_at_table(document, table_el):
+    """Start a page with a floating table.
+
+    A floating table sits at a fixed offset on the page where it falls in
+    the text, so the break goes on an empty paragraph just in front of it;
+    the table's own position on that page is unchanged.
+    """
+    opener = docx.oxml.OxmlElement("w:p")
+    table_el.addprevious(opener)
+    _drop_spacers_before(opener)
+    Paragraph(opener, document).paragraph_format.page_break_before = True
+
+
+def _body_paragraph(document, prefix):
+    prefix = prefix.upper()
+    for el in document.element.body.iterchildren(qn("w:p")):
+        if _text_of(el).upper().startswith(prefix):
+            return el
+    return None
+
+
+def _body_table(document, *headers):
+    for el in document.element.body.iterchildren(qn("w:tbl")):
+        table = Table(el, document)
+        if not table.rows:
+            continue
+        cells = [" ".join(c.text.split()) for c in table.rows[0].cells]
+        if all(h in cells for h in headers):
+            return el
+    return None
+
+
+def _paginate(document, has_strengths, has_development):
+    """Give each flow-dependent page of the reference a real page break."""
+    # Page 17: the note on the two kinds of score and the capacities chart.
+    # With no strengths chart, page 16 has room for the note, and the
+    # capacities chart opens page 17 instead.
+    note = _body_paragraph(document, "Two types of scores appear on this page")
+    caption = _body_paragraph(document, "LEADERSHIP CAPACITIES TO STRENGTHEN")
+    if note is not None:
+        if not has_strengths and has_development and caption is not None:
+            _drop_spacers_before(note)
+            _open_page(document, caption, keep=1)
+        else:
+            _open_page(document, note)
+
+    # Page 18: the derailment risk explanation, two blank lines down
+    derailment = _body_paragraph(document, "If scores appear in this section")
+    if derailment is not None:
+        _open_page(document, derailment, keep=2)
+
+    # Page 19: the EQ Dimension table (in place of a page-break paragraph)
+    dimensions = _body_table(document, "EQ Dimension", "Leadership Meaning")
+    if dimensions is not None:
+        _open_page_at_table(document, dimensions)
+
+    # Page 25: the Flywheel quadrant grid
+    grid = _body_table(document, "Flywheel Quadrant", "Development Stretch")
+    if grid is not None:
+        _open_page_at_table(document, grid)
+
+    # Page 26: derailment indicators and the Flywheel, two blank lines down
+    # (in place of the reference's page-break paragraph, which a full page
+    # 25 pushed onto a blank page of its own)
+    flywheel_risk = _body_paragraph(
+        document, "When leadership derailment indicators are present")
+    if flywheel_risk is not None:
+        _open_page(document, flywheel_risk, keep=2)
+
+    # Page 32: "Make the Signature Observable", three blank lines down
+    observable = _body_paragraph(document, "Make the Signature Observable")
+    if observable is not None:
+        _open_page(document, observable, keep=3)
+
+    # Page 38: the 30-60-90 grid
+    plan = _body_table(document, "Timeline", "Primary Coaching Focus")
+    if plan is not None:
+        _open_page_at_table(document, plan)
 
 
 # ─────────────────────────────────────────
@@ -462,10 +744,15 @@ def render_from_template(values: dict, eqi_scores: dict,
                        if m in cell_text), None)
         if marker in bar_tables:
             rows, caption = bar_tables[marker]
-            _rebuild_bar_table(
-                table, rows, caption_prefix=caption,
-                recolour_above_average=(marker
-                                        == "{{TABLE:EQ_DEVELOPMENT_BARS}}"))
+            development = marker == "{{TABLE:EQ_DEVELOPMENT_BARS}}"
+            if not development:
+                fit = STRENGTH_BARS_FIT
+            elif strengths:
+                fit = DEVELOPMENT_BARS_FIT
+            else:
+                fit = DEVELOPMENT_BARS_FIT_ALONE
+            _rebuild_bar_table(table, rows, caption_prefix=caption,
+                               recolour_above_average=development, fit=fit)
         elif marker in text_tables:
             rows, label = text_tables[marker]
             _rebuild_text_table(table, rows, header_label=label)
@@ -493,6 +780,8 @@ def render_from_template(values: dict, eqi_scores: dict,
             _set_paragraph_text(paragraph, replaced)
 
     _drop_blanked(document, blanked)
+    _paginate(document, has_strengths=bool(strengths),
+              has_development=bool(development))
 
     buf = io.BytesIO()
     document.save(buf)

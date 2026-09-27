@@ -343,8 +343,9 @@ def refresh_fields_on_open(document):
     """Have Word refresh the table of contents when a booklet is opened.
 
     Its page numbers are PAGEREF fields holding the reference booklet's
-    pages; a person with more or fewer EQ-i rows can shift the later
-    sections, so Word recomputes them on open (it asks first).
+    pages. The filler keeps every booklet on the reference's pagination
+    (utils/roadmap_template.py, Pagination), so the stored numbers are
+    right as they stand; the refresh is a safety net (Word asks first).
     """
     settings = document.settings.element
     if settings.find(qn("w:updateFields")) is not None:
