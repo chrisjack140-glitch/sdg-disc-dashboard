@@ -13,7 +13,7 @@ import json
 import re
 from pathlib import Path
 
-from utils.eqi_benchmarks import split_subscales
+from utils.eqi_benchmarks import LEADERSHIP_BAR, split_subscales
 from utils.roadmap_content_model import (
     ScoreStrip, BarChart,
     RoadmapDocument, HeaderBand, Paragraph, BulletList, CalloutBox,
@@ -479,20 +479,19 @@ def build_leadership_signature(profile: dict, disc_text: dict,
     anchor_words = disc_text["natural_strengths"].split(", supported by")[0]
     growth_edge = flywheel["activation_focus"].rstrip(".")
 
-    # The pattern the client chose (the reference booklet's own signature):
-    # four qualities (natural DISC strength, the stretch it calls for, the
-    # EQ-i development area made visible, adaptive accountability), then
-    # trust, coaching and momentum. The observable table lists the same
-    # elements, so the statement and table always agree.
+    # The pattern the client chose (the reference booklet's own signature),
+    # with DISC and EQ-i growth filling it — see _signature_parts(). The
+    # observable table lists the four qualities and the momentum element,
+    # so the statement and table always agree.
     sig = disc_text["lang"]["signature"]
-    observable = _observable_rows(profile, disc_text)
+    parts = _signature_parts(profile, disc_text)
+    observable = parts["observable"]
     qualities = [el.lower() for el, _ in observable[:4]]
     statement = (
         f"I lead with {', '.join(qualities[:3])}, and {qualities[3]}. "
-        f"I build trust through {sig['trust']} and authentic communication, "
-        f"develop people through honest coaching, and create momentum by "
-        f"pairing {sig['momentum']} with visible support and clear "
-        f"direction."
+        f"I build trust through {sig['trust']} and {parts['trust']}, "
+        f"develop people through {parts['coaching']}, and create momentum "
+        f"by pairing {sig['momentum']} with {parts['momentum']}."
     )
 
     # Observable-behavior table rows: signature element → behavior.
@@ -516,27 +515,177 @@ def build_leadership_signature(profile: dict, disc_text: dict,
             "observable": observable}
 
 
-def _observable_rows(profile, disc_text) -> list:
-    """The five rows of "Make the Signature Observable", in the order the
-    signature names them: the style's natural quality, the stretch it
-    calls for, the lowest EQ-i development area, adaptive accountability,
-    and the shared support/direction row."""
-    sig = disc_text["lang"]["signature"]
-    rows = [tuple(sig["quality"]), tuple(sig["stretch"])]
+# ── Leadership Signature: DISC + EQ-i growth ──────────────────────────────
+# The client-approved pattern:
+#   "I lead with <natural quality>, <stretch>, <growth quality>, and
+#    <accountability>. I build trust through <DISC trust> and <trust>,
+#    develop people through <coaching>, and create momentum by pairing
+#    <DISC momentum> with <momentum>."
+# Following the SDG Leadership Signature methodology, DISC gives the natural
+# contribution and the stretch its overuse calls for (plus the trust and
+# momentum the style naturally brings), and the EQ-i report gives the growth
+# edge — the capacity the leader must strengthen to sustain that stretch
+# under pressure. The growth comes from the key growth areas: the three
+# lowest subscales beneath their leadership bar, the same three the
+# 30-60-90 plan works on (someone with none uses the three closest to their
+# bar). The lowest becomes the growth quality. Each of the other two
+# reshapes the clause of the EQ-i leadership competency it belongs to, per
+# the MHS Leadership Potential page: Authenticity -> trust, Coaching ->
+# developing people, Insight -> momentum and direction, Innovation ->
+# accountability. Impulse Control and Stress Tolerance feed no competency
+# (they are derailers) and sit with trust and momentum respectively. A
+# clause no key growth area reaches keeps the reference wording, so a
+# leader growing Emotional Expression, Problem Solving and Flexibility
+# reads exactly as the reference booklet does.
+KEY_GROWTH_AREAS = 3
+
+_SIGNATURE_TRUST = "authentic communication"
+_SIGNATURE_COACHING = "honest coaching"
+_SIGNATURE_MOMENTUM = (
+    "visible support and clear direction",
+    "Visible Support and Clear Direction",
+    "Staff know both what is expected and how you will support their "
+    "follow-through.")
+_SIGNATURE_ACCOUNTABILITY = (
+    "Adaptive Accountability",
+    "You maintain standards while asking questions that require ownership "
+    "and learning.")
+
+# Authenticity: "I build trust through <DISC trust> and ___"
+_TRUST_GROWTH = {
+    "self_regard": "confident, transparent communication",
+    "emotional_self_awareness": "self-aware, authentic communication",
+    "reality_testing": "grounded, transparent communication",
+    "impulse_control": "calm, measured communication",
+}
+# Coaching: "develop people through ___"
+_COACHING_GROWTH = {
+    "empathy": "empathetic, honest coaching",
+    "interpersonal_relationships": "strong relationships and honest coaching",
+    "assertiveness": "direct, honest coaching",
+}
+# Insight: "create momentum by pairing <DISC momentum> with ___", plus the
+# matching row of "Make the Signature Observable"
+_MOMENTUM_GROWTH = {
+    "emotional_expression": _SIGNATURE_MOMENTUM,
+    "optimism": (
+        "a hopeful vision and clear direction",
+        "Hopeful Vision and Clear Direction",
+        "You describe where the team is headed and why it can get there, "
+        "especially after a setback."),
+    "self_actualization": (
+        "purpose and clear direction",
+        "Purpose and Clear Direction",
+        "You explain why the work matters and where it is heading, so staff "
+        "can connect their effort to it."),
+    "social_responsibility": (
+        "shared purpose and clear direction",
+        "Shared Purpose and Clear Direction",
+        "You connect each priority to the wider team and the people it "
+        "serves."),
+    "stress_tolerance": (
+        "steady support and clear direction",
+        "Steady Support and Clear Direction",
+        "You stay composed and keep direction clear when pressure builds, so "
+        "staff know what to expect."),
+}
+# Innovation: the fourth quality and its observable row
+_ACCOUNTABILITY_GROWTH = {
+    "problem_solving": _SIGNATURE_ACCOUNTABILITY,
+    "flexibility": (
+        "Agile Accountability",
+        "You hold the goal steady and adjust the plan when conditions "
+        "change, and explain why."),
+    "independence": (
+        "Decisive Accountability",
+        "You make the call when the moment needs it and hold people to the "
+        "commitments that follow."),
+}
+
+
+def _stems(*texts) -> set:
+    """Five-letter word stems, to catch 'decisive' beside 'Decisiveness'."""
+    words = re.findall(r"[a-z]+", " ".join(texts).lower())
+    return {w[:5] for w in words if len(w) > 3 and w not in ("with", "and")}
+
+
+def _lead_word(phrase: str) -> str:
+    """The word a growth phrase is heard by: 'a hopeful vision and ...' ->
+    'hopeful'."""
+    words = [w for w in re.findall(r"[a-z-]+", phrase.lower())
+             if w not in ("a", "an", "the")]
+    return words[0] if words else ""
+
+
+def _growth_areas(profile) -> list:
+    """The key growth areas, lowest first: the development areas beneath
+    their leadership bar, or — for someone who clears every bar — the
+    subscales closest to theirs."""
     eqi = profile.get("eqi_scores") or {}
-    _top, bottom = select_eqi_top_bottom(eqi, top_n=0, bottom_n=1) \
-        if eqi else ([], [])
-    key = bottom[0][0] if bottom else "emotional_expression"
-    rows.append((_EQ_QUALITY_NAME.get(key, "Emotional Clarity"),
-                 _EQ_OBSERVABLE.get(key, "You practice this capacity where "
-                                    "staff can see it.")))
-    rows.append(("Adaptive Accountability",
-                 "You maintain standards while asking questions that "
-                 "require ownership and learning."))
-    rows.append(("Visible Support and Clear Direction",
-                 "Staff know both what is expected and how you will support "
-                 "their follow-through."))
-    return rows
+    _top, development = select_eqi_top_bottom(
+        eqi, top_n=0, bottom_n=len(EQI_SUBSCALE_DISPLAY))
+    keys = [k for k, _score in development]
+    if not keys:
+        scored = [(k, eqi[k] - bar) for k, bar in LEADERSHIP_BAR.items()
+                  if isinstance(eqi.get(k), (int, float))]
+        keys = [k for k, _margin in sorted(scored, key=lambda kv: kv[1])]
+    return keys[:KEY_GROWTH_AREAS]
+
+
+def _signature_parts(profile, disc_text) -> dict:
+    """The Leadership Signature's DISC and EQ-i wording.
+
+    Returns the trust, coaching and momentum clauses, and the five rows of
+    "Make the Signature Observable" in the order the signature names them:
+    the style's natural quality, its stretch, the growth quality, the
+    accountability quality, and the momentum element. A growth phrase whose
+    lead word repeats one already in the signature (a "Decisive Action"
+    stretch beside "decisive accountability") is passed over.
+    """
+    sig = disc_text["lang"]["signature"]
+    growth = _growth_areas(profile)
+    taken = _stems(sig["quality"][0], sig["stretch"][0], sig["trust"],
+                   sig["momentum"])
+
+    # the growth quality: the lowest key growth area that reads cleanly
+    quality_key = next((k for k in growth
+                        if not _stems(_EQ_QUALITY_NAME[k]) & taken),
+                       growth[0] if growth else None)
+    quality = (_EQ_QUALITY_NAME[quality_key], _EQ_OBSERVABLE[quality_key]) \
+        if quality_key else ("Emotional Clarity",
+                             _EQ_OBSERVABLE["emotional_expression"])
+    taken |= _stems(quality[0])
+
+    parts = {"trust": _SIGNATURE_TRUST, "coaching": _SIGNATURE_COACHING,
+             "momentum": _SIGNATURE_MOMENTUM,
+             "accountability": _SIGNATURE_ACCOUNTABILITY}
+    banks = {"trust": _TRUST_GROWTH, "coaching": _COACHING_GROWTH,
+             "momentum": _MOMENTUM_GROWTH,
+             "accountability": _ACCOUNTABILITY_GROWTH}
+    shaped = set()
+    for key in growth:
+        if key == quality_key:
+            continue
+        slot = next((s for s, bank in banks.items() if key in bank), None)
+        if slot is None or slot in shaped:
+            continue
+        value = banks[slot][key]
+        phrase = value if isinstance(value, str) else value[0]
+        if _stems(_lead_word(phrase)) & taken:
+            continue
+        parts[slot] = value
+        shaped.add(slot)
+        taken |= _stems(_lead_word(phrase))
+
+    momentum_phrase, momentum_element, momentum_behavior = parts["momentum"]
+    return {
+        "trust": parts["trust"],
+        "coaching": parts["coaching"],
+        "momentum": momentum_phrase,
+        "observable": [tuple(sig["quality"]), tuple(sig["stretch"]), quality,
+                       parts["accountability"],
+                       (momentum_element, momentum_behavior)],
+    }
 
 
 # How each EQ-i development area shows up as an observable signature
@@ -588,7 +737,8 @@ _EQ_QUALITY_NAME = {
     "problem_solving": "Deliberate Problem Solving",
     "reality_testing": "Grounded Judgment",
     "impulse_control": "Composure",
-    "flexibility": "Adaptability",
+    # not "Adaptability", which would echo "adaptive accountability"
+    "flexibility": "Flexibility",
     "stress_tolerance": "Calm Under Pressure",
     "optimism": "Optimism",
 }
