@@ -137,6 +137,7 @@ The header is sticky and contains:
 ### Tab 3 — Comparison
 - Side-by-side operator cards
 - Radar comparison chart (moved from Team Dashboard)
+- Radar Slides for PowerPoint — downloads a build-up deck, one slide per picked person (Mirror / Public / Stress); see `utils/radar_deck.py`
 - Gap analysis section
 
 ### Download Buttons

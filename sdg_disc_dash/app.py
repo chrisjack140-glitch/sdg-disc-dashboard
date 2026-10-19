@@ -29,6 +29,7 @@ from utils.roadmap_generator import (build_template_images,
 from utils.roadmap_template import render_from_template
 from utils.radar_geometry import (GRAPH_OVERLAY_STYLE, RADAR_AXIS_ICONS,
                                   RADAR_CATEGORIES, radar_values)
+from utils.radar_deck import DECK_GRAPHS, build_radar_deck
 
 # ─────────────────────────────────────────
 # Loading overlay — SDG diamond mark as a base64 data URI.
@@ -1588,6 +1589,7 @@ app.layout = html.Div(
         dcc.Download(id="download-csv"),
         dcc.Download(id="download-json"),
         dcc.Download(id="download-roadmap"),
+        dcc.Download(id="download-radar-deck"),
 
         # ── PDF loading overlay (full-screen, shown during processing) ──
         html.Div(
@@ -2740,6 +2742,101 @@ def render_tab(active_tab, df_json, profiles_json, anchor_graph, theme, is_anon,
                 "borderColor": THEME["dark"]["border"],
                 "margin": "24px 0",
             }),
+            html.Div("Radar Slides for PowerPoint",
+                     className="section-title",
+                     style={"color": THEME["dark"]["text"],
+                            "fontWeight": 700, "fontSize": "14px",
+                            "marginBottom": "6px"}),
+            html.Div(
+                "One slide per person, in the order you pick them. Slide 1 "
+                "shows the first person's radar with their name in the key; "
+                "each slide after it adds the next person, so the last slide "
+                "overlays everyone.",
+                style={"color": THEME["dark"]["muted"], "fontSize": "12px",
+                       "marginBottom": "14px", "maxWidth": "640px"},
+            ),
+            dbc.Row([
+                dbc.Col([
+                    html.Label("Graph", style=LABEL_STYLE),
+                    dcc.RadioItems(
+                        id="radar-deck-graph",
+                        options=[{"label": f"  {label}", "value": g}
+                                 for g, label in DECK_GRAPHS.items()],
+                        value="mirror",
+                        inline=True,
+                        inputStyle={"marginRight": "6px",
+                                    "accentColor": THEME["dark"]["accent"],
+                                    "cursor": "pointer"},
+                        labelStyle={"marginRight": "18px",
+                                    "cursor": "pointer",
+                                    "fontSize": "13px"},
+                        style={"paddingTop": "6px"},
+                    ),
+                ], width=4),
+                dbc.Col([
+                    html.Label("People, in Slide Order", style=LABEL_STYLE),
+                    dcc.Dropdown(
+                        id="radar-deck-participants",
+                        options=name_opts,
+                        value=[], multi=True,
+                        placeholder="Pick people in the order their "
+                                    "slides should appear…",
+                        style=DROPDOWN_STYLE(),
+                    ),
+                    html.Div([
+                        html.Button("Add All", id="btn-radar-deck-all",
+                                    n_clicks=0, style={
+                            "backgroundColor": THEME["dark"]["accent"],
+                            "color":           THEME["dark"]["bg"],
+                            "border":          "none",
+                            "borderRadius":    "6px",
+                            "padding":         "4px 12px",
+                            "fontSize":        "11px",
+                            "fontWeight":      700,
+                            "cursor":          "pointer",
+                        }),
+                        html.Button("Clear", id="btn-radar-deck-clear",
+                                    n_clicks=0, style={
+                            "backgroundColor": "transparent",
+                            "color":           THEME["dark"]["muted"],
+                            "border":    f"1px solid {THEME['dark']['border']}",
+                            "borderRadius":    "6px",
+                            "padding":         "4px 12px",
+                            "fontSize":        "11px",
+                            "fontWeight":      600,
+                            "cursor":          "pointer",
+                        }),
+                        html.Span(id="radar-deck-summary", style={
+                            "color": THEME["dark"]["muted"],
+                            "fontSize": "12px", "marginLeft": "6px",
+                        }),
+                    ], style={"display": "flex", "alignItems": "center",
+                              "gap": "8px", "marginTop": "8px"}),
+                ], width=6),
+            ], className="mb-3"),
+            html.Button(
+                "⬇  Download Radar Slides (.pptx)",
+                id="btn-radar-deck", n_clicks=0,
+                style={
+                    "backgroundColor": THEME["dark"]["accent"],
+                    "color":           THEME["dark"]["bg"],
+                    "border":          "none",
+                    "borderRadius":    "8px",
+                    "padding":         "10px 22px",
+                    "fontSize":        "12px",
+                    "fontWeight":      700,
+                    "cursor":          "pointer",
+                    "letterSpacing":   "0.04em",
+                },
+            ),
+            html.Div(id="radar-deck-status", style={
+                "color": THEME["dark"]["muted"], "fontSize": "12px",
+                "marginTop": "12px",
+            }),
+            html.Hr(style={
+                "borderColor": THEME["dark"]["border"],
+                "margin": "24px 0",
+            }),
             html.Div("Side-by-Side Operator Cards",
                      className="section-title",
                      style={"color": THEME["dark"]["text"],
@@ -3005,6 +3102,89 @@ def update_radar(selected_names, graph_choice, is_anon, profiles_json, theme):
                       for n in selected_names if n in profile_lookup]
     return (build_multi_radar_chart(selected, graph_choice, theme, anon_map=anon_map)
             if selected else go.Figure())
+
+
+# 8b — Radar Slides "Add All" / "Clear" → people picker (in the browser).
+#      Add All keeps the people already picked first, in their order.
+app.clientside_callback(
+    """
+    function(n_all, n_clear, options, current) {
+        var ctx = window.dash_clientside.callback_context;
+        var trig = (ctx.triggered && ctx.triggered.length)
+            ? ctx.triggered[0] : null;
+        if (!trig || !trig.value) return window.dash_clientside.no_update;
+        if (trig.prop_id.indexOf('btn-radar-deck-clear') === 0) return [];
+        var chosen = (current || []).slice();
+        (options || []).forEach(function (o) {
+            if (chosen.indexOf(o.value) === -1) chosen.push(o.value);
+        });
+        return chosen;
+    }
+    """,
+    Output("radar-deck-participants", "value"),
+    Input("btn-radar-deck-all",       "n_clicks"),
+    Input("btn-radar-deck-clear",     "n_clicks"),
+    State("radar-deck-participants",  "options"),
+    State("radar-deck-participants",  "value"),
+    prevent_initial_call=True,
+)
+
+# 8c — Radar Slides people picker → "N people → N slides" (in the browser)
+app.clientside_callback(
+    """
+    function(names) {
+        var n = (names || []).length;
+        if (!n) return 'No one picked yet.';
+        return n === 1 ? '1 person → 1 slide'
+                       : n + ' people → ' + n + ' slides';
+    }
+    """,
+    Output("radar-deck-summary",     "children"),
+    Input("radar-deck-participants", "value"),
+)
+
+
+# 8d — Radar Slides button → PowerPoint deck: slide k overlays the first k
+#      people picked, on the chosen graph (utils/radar_deck.py)
+@app.callback(
+    Output("download-radar-deck",    "data"),
+    Output("radar-deck-status",      "children"),
+    Input("btn-radar-deck",          "n_clicks"),
+    State("radar-deck-participants", "value"),
+    State("radar-deck-graph",        "value"),
+    State("anon-store",              "data"),
+    State("profiles-store",          "data"),
+    prevent_initial_call=True,
+)
+def download_radar_deck(n_clicks, selected_names, graph, is_anon,
+                        profiles_json):
+    if not n_clicks:
+        return dash.no_update, dash.no_update
+    if not profiles_json:
+        return dash.no_update, "Upload PDFs first."
+    if not selected_names:
+        return dash.no_update, "Pick at least one person first."
+
+    profiles       = json.loads(profiles_json)
+    profile_lookup = {p["participant_name"]: p for p in profiles}
+    selected       = [profile_lookup[n]
+                      for n in selected_names if n in profile_lookup]
+    if not selected:
+        return dash.no_update, "No matching profiles found for the selection."
+    anon_map = make_anon_map(profiles) if is_anon else {}
+    names    = [anon_map.get(p["participant_name"], p["participant_name"])
+                for p in selected]
+    graph    = graph if graph in DECK_GRAPHS else "mirror"
+
+    try:
+        deck = build_radar_deck(selected, graph, names)
+    except Exception as exc:
+        return dash.no_update, f"Radar slides failed: {exc}"
+
+    label, n = DECK_GRAPHS[graph], len(selected)
+    return (dcc.send_bytes(lambda b, data=deck: b.write(data),
+                           f"DISC_Radar_Slides_{label}.pptx"),
+            f"Built {n} slide{'s' if n != 1 else ''} on the {label} graph.")
 
 
 # 9 — Comparison participant dropdown → rebuild side-by-side cards
