@@ -55,7 +55,8 @@ def is_eqi_pdf(page1_text: str) -> bool:
     return sum(1 for s in _EQI_SIGNALS if s in lower) >= 1
 
 
-def parse_eqi_bytes(file_bytes: bytes) -> Optional[Dict]:
+def parse_eqi_bytes(file_bytes: bytes,
+                    filename: Optional[str] = None) -> Optional[Dict]:
     """
     Parse an EQ-i 2.0 PDF (Workplace or Leadership Report) from raw bytes.
     Returns None if the file cannot be identified or parsed.
@@ -64,6 +65,11 @@ def parse_eqi_bytes(file_bytes: bytes) -> Optional[Dict]:
     for scores, selecting whichever page yields the most complete subscale set.
     - Workplace Report: full scores are on page 3 (index 2)
     - Leadership Report: full scores are on page 6 (index 5)
+
+    Some reports are issued under an ID instead of a name (page 1 reads
+    "User ID: 006"), which could never pair with a DISC report. For those
+    the name is taken from ``filename`` when given — "Roshannon_Jackson_
+    (006)_client.pdf" -> "Roshannon Jackson".
 
     Returned dict structure:
       name        str   participant name
@@ -90,6 +96,8 @@ def parse_eqi_bytes(file_bytes: bytes) -> Optional[Dict]:
         return None
 
     name = _extract_name(page1_text)
+    if filename and _is_placeholder_name(name):
+        name = name_from_filename(filename) or name
 
     # Pick the candidate page that yields the most complete subscale data
     best_total: Optional[int] = None
@@ -128,6 +136,36 @@ def _extract_name(text: str) -> str:
         if re.match(r"^[A-Z][a-z]+([\s\-'][A-Z][a-z]+){1,4}$", line):
             return line
     return lines[0] if lines else "Unknown"
+
+
+def _is_placeholder_name(name: str) -> bool:
+    """True when page 1 gave an ID or nothing usable instead of a name
+    ("User ID: 006", "ID 1234", "Unknown")."""
+    text = (name or "").strip()
+    return (not re.search(r"[A-Za-z]{2}", text)
+            or bool(re.search(r"\d", text))
+            or bool(re.match(r"(user\s*)?id\b", text, re.I))
+            or text.lower() == "unknown")
+
+
+# Words in EQ-i file names that are not part of the person's name
+_FILENAME_NOISE = {"client", "eq", "eqi", "eq-i", "report", "leadership",
+                   "workplace", "copy"}
+
+
+def name_from_filename(filename: str) -> str:
+    """A person's name from an EQ-i file name, or "" if none is left.
+
+    Drops the extension, bracketed parts ("(006)", "(1)"), numbers and
+    report words: "Roshannon_Jackson_(006)_client.pdf" -> "Roshannon Jackson",
+    "Maureen_Castano_client EQ.pdf" -> "Maureen Castano".
+    """
+    stem = re.sub(r"\.pdf$", "", filename or "", flags=re.I)
+    stem = re.sub(r"[\(\[][^\)\]]*[\)\]]", " ", stem)
+    words = [w for w in re.split(r"[\s_]+", stem)
+             if w and not re.search(r"\d", w)
+             and w.lower() not in _FILENAME_NOISE]
+    return " ".join(words)
 
 
 def _extract_scores(

@@ -337,7 +337,9 @@ def process_uploaded_files(files_data: List[Dict], anchor_graph: str = "stress")
     # ── Pass 3: parse EQI files ────────────────────────────────────────────
     for file_dict in eqi_files:
         try:
-            result = parse_eqi_bytes(file_dict["content"])
+            # the file name stands in when the report shows only a User ID
+            result = parse_eqi_bytes(file_dict["content"],
+                                     filename=file_dict["name"])
             if result:
                 eqi_results.append(result)
         except Exception as exc:
